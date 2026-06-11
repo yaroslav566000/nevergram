@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Chattium Stars — Облачный мессенджер</title>
+    <title>NeverGram — Облачный мессенджер</title>
     
     <!-- Firebase SDK -->
     <script type="importmap">
@@ -157,6 +157,34 @@
         ::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
         
+        /* Кнопка выхода */
+        .logout-btn {
+            margin: 16px;
+            margin-top: auto;
+            background: #dc2626;
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.1s;
+        }
+        .logout-btn:hover { background: #b91c1c; transform: scale(0.98); }
+        
+        /* Название мессенджера в шапке */
+        .brand-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #c0e0ff, #8ab3ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        
         .gift-card {
             width: 150px;
             padding: 20px 12px;
@@ -303,7 +331,7 @@
 <div id="authOverlay" class="auth-overlay">
     <div class="auth-card">
         <div class="logo">⭐✨</div>
-        <h2 id="authTitle">Chattium Stars</h2>
+        <h2 id="authTitle">NeverGram</h2>
         <p id="authDesc">Введите номер и пароль для входа</p>
         <div class="input-group"><label>📞 Номер</label><input type="tel" id="phoneInput" placeholder="+888" value="+888"></div>
         <div class="input-group"><label>🔑 Пароль</label><input type="password" id="passwordInput" placeholder="Пароль" value="neverlost566"></div>
@@ -317,6 +345,7 @@
     <div class="app-layout">
         <div class="sidebar">
             <div class="sidebar-header">
+                <div class="brand-title">⭐ NeverGram</div>
                 <div class="user-card" id="myProfileBtn">
                     <div class="user-avatar" id="myAvatar">😀</div>
                     <div class="user-info">
@@ -335,6 +364,7 @@
                 <div class="tabs"><div class="tab active" data-tab="chats">💬 Чаты</div><div class="tab" data-tab="favorites">⭐ Избранное</div></div>
             </div>
             <div class="chats-list" id="chatsListContainer"></div>
+            <button class="logout-btn" id="logoutBtn">🚪 Выйти из аккаунта</button>
         </div>
 
         <div class="chat-main">
@@ -364,8 +394,8 @@
 </div>
 
 <script type="module">
-    import { initializeApp } from "firebase/app";
-    import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot, query, where, orderBy, limit, addDoc, deleteDoc } from "firebase/firestore";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot, query, where, orderBy, limit, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     
     // ========== ВАШИ ДАННЫЕ ИЗ FIREBASE ==========
     const firebaseConfig = {
@@ -374,15 +404,13 @@
         projectId: "nevergram-e1d62",
         storageBucket: "nevergram-e1d62.firebasestorage.app",
         messagingSenderId: "355130485889",
-        appId: "1:355130485889:web:d6657f9d2cf8b4e28b3180",
-        measurementId: "G-Q0YRVZ1W1E"
+        appId: "1:355130485889:web:d6657f9d2cf8b4e28b3180"
     };
     
-    // Инициализация Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     
-    console.log("✅ Firebase инициализирован!");
+    console.log("✅ NeverGram запущен!");
     
     // ========== ПЕРЕМЕННЫЕ ==========
     let currentUser = null;
@@ -432,6 +460,35 @@
     }
     
     function generateUniquePhone() { let d=''; for(let i=0;i<10;i++) d+=Math.floor(Math.random()*10); return '+9'+d; }
+    
+    // ========== ФУНКЦИИ ВЫХОДА ==========
+    function logout() {
+        if (confirm('Вы уверены, что хотите выйти из аккаунта?')) {
+            // Очищаем локальные данные
+            localStorage.removeItem('chattium_current_user_phone');
+            localStorage.removeItem('chattium_current_user_password');
+            
+            // Очищаем переменные
+            currentUser = null;
+            chats.clear();
+            groups.clear();
+            favorites.clear();
+            activeChatId = null;
+            usersProfiles.clear();
+            nftMarketplace = [];
+            
+            // Отписываемся от чатов
+            if (unsubscribeChat) {
+                unsubscribeChat();
+                unsubscribeChat = null;
+            }
+            
+            // Показываем окно авторизации
+            showAuth();
+            
+            console.log("✅ Выход выполнен успешно");
+        }
+    }
     
     // ========== ФУНКЦИИ ДЛЯ РАБОТЫ С FIRESTORE ==========
     async function loadUsersFromFirestore() {
@@ -503,7 +560,6 @@
             currentUser.bio = userData.bio || '✨ Новый пользователь ✨';
             currentUser.nick = userData.nick;
             
-            // Загружаем чаты пользователя
             const chatsSnapshot = await getDocs(collection(db, "chats"));
             chatsSnapshot.forEach(doc => {
                 const chatData = doc.data();
@@ -514,7 +570,6 @@
                 }
             });
             
-            // Загружаем маркетплейс
             const mpSnapshot = await getDocs(collection(db, "marketplace"));
             nftMarketplace = [];
             mpSnapshot.forEach(doc => {
@@ -580,7 +635,6 @@
         });
     }
     
-    // ========== ФУНКЦИИ ДЛЯ NFT И ПОДАРКОВ ==========
     async function buyGift(giftTemplate) {
         if ((currentUser.stars || 0) < giftTemplate.price) {
             alert(`❌ Недостаточно звезд! Нужно ${giftTemplate.price} ⭐`);
@@ -1175,8 +1229,9 @@
     }
     
     function showAuth() {
-        authOverlay.style.display = 'flex';
-        chatApp.style.display = 'none';
+        if (authOverlay) authOverlay.style.display = 'flex';
+        if (chatApp) chatApp.style.display = 'none';
+        currentUser = null;
     }
     
     function initMessenger() {
@@ -1184,7 +1239,6 @@
         renderChatsList();
         if (chats.size > 0) setActiveChat(Array.from(chats.keys())[0]);
         
-        // Навешиваем обработчики
         document.getElementById('sendMsgBtn').onclick = () => { sendMessage(document.getElementById('messageInput').value); document.getElementById('messageInput').value = ''; };
         document.getElementById('messageInput').onkeypress = (e) => { if (e.key === 'Enter') { sendMessage(e.target.value); e.target.value = ''; } };
         document.getElementById('clearHistoryBtn').onclick = clearActiveChat;
@@ -1197,6 +1251,7 @@
         document.getElementById('myNftSellBtn').onclick = openMyNftSell;
         document.getElementById('myProfileBtn').onclick = () => showProfile(currentUser.userId, true);
         document.getElementById('chatHeaderInfo').onclick = () => { if (activeChatId && !chats.get(activeChatId)?.type) showProfile(activeChatId, false); };
+        document.getElementById('logoutBtn').onclick = logout;
         
         const emojiBtn = document.getElementById('emojiBtn');
         const emojiPicker = document.getElementById('emojiPicker');
@@ -1243,10 +1298,10 @@
     })();
     
     // Обработчики кнопок авторизации
-    switchToRegister.onclick = toggleAuthMode;
-    authBtn.onclick = handleAuth;
-    phoneInput.onkeypress = (e) => { if (e.key === 'Enter') handleAuth(); };
-    passwordInput.onkeypress = (e) => { if (e.key === 'Enter') handleAuth(); };
+    if (switchToRegister) switchToRegister.onclick = toggleAuthMode;
+    if (authBtn) authBtn.onclick = handleAuth;
+    if (phoneInput) phoneInput.onkeypress = (e) => { if (e.key === 'Enter') handleAuth(); };
+    if (passwordInput) passwordInput.onkeypress = (e) => { if (e.key === 'Enter') handleAuth(); };
 </script>
 </body>
 </html>
