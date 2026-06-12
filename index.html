@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Chattium Stars — NFT с узорами</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -277,10 +281,24 @@
             color: #64748b;
             font-weight: bold;
         }
+        
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e293b;
+            padding: 20px 40px;
+            border-radius: 60px;
+            color: white;
+            z-index: 9999;
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
 <div class="chat-bg"></div>
+<div id="loading" class="loading" style="display: none;">⏳ Загрузка...</div>
 
 <div id="authOverlay" class="auth-overlay">
     <div class="auth-card">
@@ -347,6 +365,24 @@
 </div>
 
 <script>
+    // ========== FIREBASE КОНФИГУРАЦИЯ ==========
+    const firebaseConfig = {
+        apiKey: "AIzaSyDjM1lRbEKtCsaYe9e48pEPReh0AMe910U",
+        authDomain: "nevergram-e1d62.firebaseapp.com",
+        projectId: "nevergram-e1d62",
+        storageBucket: "nevergram-e1d62.firebasestorage.app",
+        messagingSenderId: "355130485889",
+        appId: "1:355130485889:web:d6657f9d2cf8b4e28b3180",
+        measurementId: "G-Q0YRVZ1W1E"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const analytics = firebase.analytics(app);
+    const db = firebase.database(app);
+    
+    console.log("Firebase инициализирован!");
+    
     // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
     let currentUser = null;
     let chats = new Map();
@@ -354,7 +390,9 @@
     let favorites = new Set();
     let activeChatId = null;
     let currentTab = 'chats';
-    let usersMap = new Map(); // phone -> userData
+    let usersMap = new Map();
+    let nftMarketplace = [];
+    let nextNFTNumber = 1;
     
     const MASTER_PHONE = "+888";
     const MASTER_PASSWORD = "neverlost566";
@@ -382,9 +420,6 @@
         ]
     };
     
-    let nftMarketplace = [];
-    let nextNFTNumber = 1;
-    
     function randomPattern() { return PATTERNS[Math.floor(Math.random() * PATTERNS.length)]; }
     function randomGradient() {
         const r = Math.floor(Math.random() * 200 + 55), g = Math.floor(Math.random() * 200 + 55), b = Math.floor(Math.random() * 200 + 55);
@@ -395,54 +430,158 @@
     function generateUniquePhone() { let d=''; for(let i=0;i<10;i++) d+=Math.floor(Math.random()*10); return '+9'+d; }
     function escapeHtml(str){ return String(str||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
     
-    // ========== ХРАНЕНИЕ В LOCALSTORAGE ==========
-    function loadAllData() {
-        const usersRaw = localStorage.getItem('chattium_all_users');
-        if(usersRaw) {
-            try {
-                const obj = JSON.parse(usersRaw);
+    function showLoading(show) {
+        document.getElementById('loading').style.display = show ? 'flex' : 'none';
+    }
+    
+    // ========== FIREBASE ФУНКЦИИ ==========
+    async function loadAllDataFromFirebase() {
+        showLoading(true);
+        try {
+            // Загрузка пользователей
+            const usersSnapshot = await db.ref('users').once('value');
+            if(usersSnapshot.exists()) {
+                const usersData = usersSnapshot.val();
                 usersMap.clear();
-                for(let phone in obj) {
-                    usersMap.set(phone, obj[phone]);
+                for(let phone in usersData) {
+                    usersMap.set(phone, usersData[phone]);
                 }
-            } catch(e) { console.error(e); }
+            }
+            
+            // Создаем мастера если нет
+            if(!usersMap.has(MASTER_PHONE)) {
+                const master = { 
+                    userId: 'master_' + Date.now(), 
+                    nick: 'Admin', 
+                    phone: MASTER_PHONE, 
+                    password: MASTER_PASSWORD, 
+                    avatarType: 'emoji', 
+                    avatarData: '👑', 
+                    bio: '✨ Владелец ✨', 
+                    stars: 9999999, 
+                    gifts: [], 
+                    nfts: [], 
+                    isMaster: true 
+                };
+                usersMap.set(MASTER_PHONE, master);
+                await db.ref('users/' + MASTER_PHONE).set(master);
+            }
+            
+            // Загрузка NFT маркетплейса
+            const mpSnapshot = await db.ref('nftMarketplace').once('value');
+            if(mpSnapshot.exists()) {
+                nftMarketplace = Object.values(mpSnapshot.val());
+            } else {
+                nftMarketplace = [];
+            }
+            
+            // Загрузка счетчика NFT
+            const counterSnapshot = await db.ref('nftCounter').once('value');
+            if(counterSnapshot.exists()) {
+                nextNFTNumber = counterSnapshot.val() + 1;
+            } else {
+                nextNFTNumber = 1;
+                await db.ref('nftCounter').set(0);
+            }
+            
+            return true;
+        } catch (error) {
+            console.error("Ошибка загрузки из Firebase:", error);
+            return false;
+        } finally {
+            showLoading(false);
         }
-        
-        if(!usersMap.has(MASTER_PHONE)) {
-            const master = { 
-                userId: 'master_' + Date.now(), 
-                nick: 'Admin', 
-                phone: MASTER_PHONE, 
-                password: MASTER_PASSWORD, 
-                avatarType: 'emoji', 
-                avatarData: '👑', 
-                bio: '✨ Владелец ✨', 
-                stars: 9999999, 
-                gifts: [], 
-                nfts: [], 
-                isMaster: true 
-            };
-            usersMap.set(MASTER_PHONE, master);
-            saveAllUsers();
-        }
-        
-        const mpRaw = localStorage.getItem('chattium_nft_marketplace');
-        if(mpRaw) { try { nftMarketplace = JSON.parse(mpRaw); } catch(e){} }
-        
-        const nftCounterRaw = localStorage.getItem('chattium_nft_counter');
-        if(nftCounterRaw) { nextNFTNumber = parseInt(nftCounterRaw) + 1; }
-        else { nextNFTNumber = 1; }
     }
     
-    function saveAllUsers() {
-        const obj = {};
-        for(let [p,u] of usersMap) obj[p] = u;
-        localStorage.setItem('chattium_all_users', JSON.stringify(obj));
+    async function saveUserToFirebase(user) {
+        try {
+            await db.ref('users/' + user.phone).set({
+                userId: user.userId,
+                nick: user.nick,
+                phone: user.phone,
+                password: user.password,
+                avatarType: user.avatarType,
+                avatarData: user.avatarData,
+                bio: user.bio,
+                stars: user.stars,
+                gifts: user.gifts || [],
+                nfts: user.nfts || [],
+                isMaster: user.isMaster || false
+            });
+        } catch (error) {
+            console.error("Ошибка сохранения пользователя:", error);
+        }
     }
     
-    function saveMarketplace() { localStorage.setItem('chattium_nft_marketplace', JSON.stringify(nftMarketplace)); }
-    function saveNFTCounter() { localStorage.setItem('chattium_nft_counter', nextNFTNumber - 1); }
+    async function saveMarketplaceToFirebase() {
+        try {
+            const marketplaceObj = {};
+            nftMarketplace.forEach((item, idx) => {
+                marketplaceObj[item.nftId || idx] = item;
+            });
+            await db.ref('nftMarketplace').set(marketplaceObj);
+        } catch (error) {
+            console.error("Ошибка сохранения маркетплейса:", error);
+        }
+    }
     
+    async function saveNFTCounterToFirebase() {
+        try {
+            await db.ref('nftCounter').set(nextNFTNumber - 1);
+        } catch (error) {
+            console.error("Ошибка сохранения счетчика NFT:", error);
+        }
+    }
+    
+    async function loadUserChatsFromFirebase() {
+        if(!currentUser) return;
+        try {
+            const chatsSnapshot = await db.ref('chats/' + currentUser.userId).once('value');
+            if(chatsSnapshot.exists()) {
+                const chatsData = chatsSnapshot.val();
+                chats.clear();
+                for(let id in chatsData) {
+                    chats.set(id, chatsData[id]);
+                }
+            }
+            
+            const favSnapshot = await db.ref('favorites/' + currentUser.userId).once('value');
+            if(favSnapshot.exists()) {
+                favorites = new Set(favSnapshot.val());
+            }
+        } catch (error) {
+            console.error("Ошибка загрузки чатов:", error);
+        }
+    }
+    
+    async function saveChatToFirebase(chatId, chatData) {
+        if(!currentUser) return;
+        try {
+            await db.ref('chats/' + currentUser.userId + '/' + chatId).set(chatData);
+        } catch (error) {
+            console.error("Ошибка сохранения чата:", error);
+        }
+    }
+    
+    async function saveFavoritesToFirebase() {
+        if(!currentUser) return;
+        try {
+            await db.ref('favorites/' + currentUser.userId).set(Array.from(favorites));
+        } catch (error) {
+            console.error("Ошибка сохранения избранного:", error);
+        }
+    }
+    
+    async function deleteChatFromFirebase(chatId) {
+        if(!currentUser) return;
+        try {
+            await db.ref('chats/' + currentUser.userId + '/' + chatId).remove();
+        } catch (error) {
+            console.error("Ошибка удаления чата:", error);
+        }
+    }
+    
+    // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
     function registerUser(phone, password, nick) {
         if(usersMap.has(phone)) return null;
         const user = { 
@@ -457,7 +596,7 @@
             nfts: [] 
         };
         usersMap.set(phone, user);
-        saveAllUsers();
+        saveUserToFirebase(user);
         return user;
     }
     
@@ -475,42 +614,6 @@
         return null;
     }
     
-    // ========== ВЫХОД ИЗ АККАУНТА ==========
-    function logout() {
-        if(confirm('Вы уверены, что хотите выйти из аккаунта?')) {
-            // Очищаем сохраненную сессию
-            localStorage.removeItem('chattium_current_user_phone');
-            localStorage.removeItem('chattium_current_user_password');
-            
-            // Очищаем данные текущего пользователя
-            currentUser = null;
-            chats.clear();
-            groups.clear();
-            favorites.clear();
-            activeChatId = null;
-            
-            // Показываем окно авторизации, скрываем чат
-            document.getElementById('authOverlay').style.display = 'flex';
-            document.getElementById('chatApp').style.display = 'none';
-            
-            // Очищаем поля ввода
-            document.getElementById('phoneInput').value = '+888';
-            document.getElementById('passwordInput').value = 'neverlost566';
-            document.getElementById('authMessage').style.display = 'none';
-            
-            // Сбрасываем режим на вход
-            if(window.isRegisterMode) {
-                window.isRegisterMode = false;
-                document.getElementById('authTitle').textContent = 'Вход';
-                document.getElementById('authDesc').textContent = 'Введите номер и пароль';
-                document.getElementById('authBtn').textContent = 'Войти';
-                document.getElementById('switchToRegister').textContent = 'Нет аккаунта? Зарегистрироваться';
-                document.getElementById('phoneInput').readOnly = false;
-            }
-        }
-    }
-    
-    // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
     function renderAvatar(container, user) {
         if(!container) return;
         container.innerHTML = '';
@@ -551,7 +654,7 @@
         input.click();
     }
     
-    function buyGift(giftTemplate) {
+    async function buyGift(giftTemplate) {
         if((currentUser.stars||0) < giftTemplate.price) {
             alert(`❌ Недостаточно звезд! Нужно ${giftTemplate.price} ⭐`);
             return false;
@@ -560,13 +663,13 @@
         const gift = { ...giftTemplate, purchasedAt: Date.now(), expiresAt: Date.now() + (giftTemplate.resaleDays * 24 * 60 * 60 * 1000) };
         if(!currentUser.gifts) currentUser.gifts = [];
         currentUser.gifts.push(gift);
-        saveAllUsers();
+        await saveUserToFirebase(currentUser);
         updateUIProfile();
         alert(`✅ Вы купили ${giftTemplate.name}!`);
         return true;
     }
     
-    function buyNFT(nftTemplate, price = null) {
+    async function buyNFT(nftTemplate, price = null) {
         const actualPrice = price || nftTemplate.basePrice;
         if((currentUser.stars||0) < actualPrice) {
             alert(`❌ Недостаточно звезд! Нужно ${actualPrice} ⭐`);
@@ -586,14 +689,14 @@
         };
         if(!currentUser.nfts) currentUser.nfts = [];
         currentUser.nfts.push(nft);
-        saveAllUsers();
-        saveNFTCounter();
+        await saveUserToFirebase(currentUser);
+        await saveNFTCounterToFirebase();
         updateUIProfile();
         alert(`✅ Вы купили ${nftTemplate.name} #${nft.number} с узором "${nft.patternName}"!`);
         return true;
     }
     
-    function listNFTForSale(nft) {
+    async function listNFTForSale(nft) {
         const price = prompt(`Цена продажи для ${nft.name} #${nft.number} (мин ${Math.floor(nft.originalPrice * 0.5)} ⭐):`, nft.originalPrice);
         if(!price) return;
         const sellPrice = parseInt(price);
@@ -603,7 +706,7 @@
         }
         const index = currentUser.nfts.findIndex(n => n.id === nft.id && n.number === nft.number);
         if(index !== -1) currentUser.nfts.splice(index,1);
-        saveAllUsers();
+        await saveUserToFirebase(currentUser);
         nftMarketplace.push({
             nftId: nft.id + '_' + nft.number,
             originalNFT: nft,
@@ -612,25 +715,25 @@
             price: sellPrice,
             listedAt: Date.now()
         });
-        saveMarketplace();
+        await saveMarketplaceToFirebase();
         alert(`✅ NFT ${nft.name} #${nft.number} выставлен на продажу за ${sellPrice} ⭐`);
         updateUIProfile();
     }
     
-    function removeFromMarketplace(item) {
+    async function removeFromMarketplace(item) {
         if(confirm(`Снять ${item.originalNFT.name} #${item.originalNFT.number} с продажи?`)) {
             const nft = {...item.originalNFT};
             currentUser.nfts.push(nft);
-            saveAllUsers();
+            await saveUserToFirebase(currentUser);
             const mpIndex = nftMarketplace.findIndex(i => i.nftId === item.nftId);
             if(mpIndex !== -1) nftMarketplace.splice(mpIndex,1);
-            saveMarketplace();
+            await saveMarketplaceToFirebase();
             updateUIProfile();
             alert(`✅ NFT ${nft.name} #${nft.number} возвращён в профиль.`);
         }
     }
     
-    function buyNFTFromMarketplace(item) {
+    async function buyNFTFromMarketplace(item) {
         if(currentUser.userId === item.ownerId) {
             alert("Нельзя купить свой NFT");
             return;
@@ -643,79 +746,54 @@
         const boughtNFT = {...item.originalNFT, boughtAt: Date.now()};
         if(!currentUser.nfts) currentUser.nfts = [];
         currentUser.nfts.push(boughtNFT);
-        saveAllUsers();
+        await saveUserToFirebase(currentUser);
         
         const seller = getUserById(item.ownerId);
         if(seller) {
             seller.stars = (seller.stars||0) + item.price;
-            saveAllUsers();
+            await saveUserToFirebase(seller);
         }
         
         const mpIndex = nftMarketplace.findIndex(i => i.nftId === item.nftId);
         if(mpIndex !== -1) nftMarketplace.splice(mpIndex,1);
-        saveMarketplace();
+        await saveMarketplaceToFirebase();
         updateUIProfile();
         alert(`✅ Вы купили ${item.originalNFT.name} #${item.originalNFT.number} за ${item.price} ⭐!`);
     }
     
-    function resellGift(gift, index) {
+    async function resellGift(gift, index) {
         const refund = Math.floor(gift.price * gift.resalePercent / 100);
         currentUser.stars += refund;
         currentUser.gifts.splice(index,1);
-        saveAllUsers();
+        await saveUserToFirebase(currentUser);
         updateUIProfile();
         alert(`✅ Вы продали ${gift.name} за ${refund} ⭐`);
     }
     
     // Функции чатов
-    function loadUserChats() {
-        const key = `chattium_chats_${currentUser.userId}`;
-        const raw = localStorage.getItem(key);
-        if(raw) {
-            try {
-                const obj = JSON.parse(raw);
-                chats.clear();
-                for(let id in obj) chats.set(id, obj[id]);
-            } catch(e) {}
-        }
-        const favKey = `chattium_favorites_${currentUser.userId}`;
-        const favRaw = localStorage.getItem(favKey);
-        if(favRaw) {
-            try { favorites = new Set(JSON.parse(favRaw)); } catch(e) {}
-        }
-    }
-    
-    function saveUserChats() {
-        const key = `chattium_chats_${currentUser.userId}`;
-        const chatsObj = {};
-        for(let [id,chat] of chats) chatsObj[id] = {...chat, messages: chat.messages || []};
-        localStorage.setItem(key, JSON.stringify(chatsObj));
-        localStorage.setItem(`chattium_favorites_${currentUser.userId}`, JSON.stringify([...favorites]));
-    }
-    
-    function createGroup() {
+    async function createGroup() {
         const name = prompt('Название группы:');
         if(!name) return;
         const id = 'group_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
         groups.set(id, {id,name,avatar:'👥',members:[currentUser.userId],admins:[currentUser.userId],creatorId:currentUser.userId,messages:[],type:'group'});
         chats.set(id, {id,name,avatar:'👥',type:'group',messages:[],pinned:false});
-        saveUserChats();
+        await saveChatToFirebase(id, chats.get(id));
         renderChatsList();
         setActiveChat(id);
     }
     
-    function createChannel() {
+    async function createChannel() {
         const name = prompt('Название канала:');
         if(!name) return;
         const id = 'channel_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
         groups.set(id, {id,name,avatar:'📢',members:[currentUser.userId],admins:[currentUser.userId],creatorId:currentUser.userId,messages:[],type:'channel'});
         chats.set(id, {id,name,avatar:'📢',type:'channel',messages:[],pinned:false});
-        saveUserChats();
+        await saveChatToFirebase(id, chats.get(id));
         renderChatsList();
         setActiveChat(id);
     }
     
-    function deleteChat(chatId) {
+    async function deleteChat(chatId) {
         if(!chatId) return;
         if(confirm('Удалить чат навсегда?')) {
             chats.delete(chatId);
@@ -729,17 +807,17 @@
                 const ma = document.getElementById('messagesArea');
                 if(ma) ma.innerHTML = '<div class="system-message">Выберите чат</div>';
             }
-            saveUserChats();
+            await deleteChatFromFirebase(chatId);
             renderChatsList();
         }
     }
     
-    function sendMessage(text, image=null) {
+    async function sendMessage(text, image=null) {
         if(!activeChatId || (!text.trim() && !image)) return;
         const msg = {id:Date.now()+'_'+Math.random(), text:text.trim(), image:image, timestamp:Date.now(), senderId:currentUser.userId, senderNick:currentUser.nick, reactions:[], edited:false, deleted:false};
         if(chats.has(activeChatId)) {
             chats.get(activeChatId).messages.push(msg);
-            saveUserChats();
+            await saveChatToFirebase(activeChatId, chats.get(activeChatId));
             renderMessages();
             renderChatsList();
         }
@@ -747,40 +825,40 @@
         if(mi) mi.value = '';
     }
     
-    function editMessage(chatId, msgId, newText) {
+    async function editMessage(chatId, msgId, newText) {
         const msg = chats.get(chatId)?.messages?.find(m => m.id === msgId);
         if(msg && msg.senderId === currentUser.userId) {
             msg.text = newText;
             msg.edited = true;
-            saveUserChats();
+            await saveChatToFirebase(chatId, chats.get(chatId));
             if(activeChatId === chatId) renderMessages();
         }
     }
     
-    function deleteMessage(chatId, msgId) {
+    async function deleteMessage(chatId, msgId) {
         const msg = chats.get(chatId)?.messages?.find(m => m.id === msgId);
         if(msg && msg.senderId === currentUser.userId) {
             msg.deleted = true;
             msg.text = '🗑️ Удалено';
-            saveUserChats();
+            await saveChatToFirebase(chatId, chats.get(chatId));
             if(activeChatId === chatId) renderMessages();
         }
     }
     
-    function addReaction(chatId, msgId, emoji) {
+    async function addReaction(chatId, msgId, emoji) {
         const msg = chats.get(chatId)?.messages?.find(m => m.id === msgId);
         if(msg) {
             if(!msg.reactions) msg.reactions = [];
             if(!msg.reactions.includes(emoji)) msg.reactions.push(emoji);
-            saveUserChats();
+            await saveChatToFirebase(chatId, chats.get(chatId));
             if(activeChatId === chatId) renderMessages();
         }
     }
     
-    function toggleFavorite(msgId) {
+    async function toggleFavorite(msgId) {
         if(favorites.has(msgId)) favorites.delete(msgId);
         else favorites.add(msgId);
-        saveUserChats();
+        await saveFavoritesToFirebase();
         if(activeChatId) renderMessages();
         if(currentTab === 'favorites') renderChatsList();
     }
@@ -896,16 +974,16 @@
         if(found) {
             if(!chats.has(found.userId)) {
                 chats.set(found.userId, { id:found.userId, name:found.nick, avatar:found.avatarData || '👤', type:'user', messages:[], pinned:false });
-                saveUserChats();
+                saveChatToFirebase(found.userId, chats.get(found.userId));
             }
             setActiveChat(found.userId);
         } else alert('❌ Пользователь не найден');
     }
     
-    function clearActiveChat() {
+    async function clearActiveChat() {
         if(activeChatId && chats.has(activeChatId) && confirm('Очистить историю?')) {
             chats.get(activeChatId).messages = [];
-            saveUserChats();
+            await saveChatToFirebase(activeChatId, chats.get(activeChatId));
             renderMessages();
             renderChatsList();
         }
@@ -970,20 +1048,20 @@
         
         if(isSelf) {
             document.getElementById('uploadAvatarBtn')?.addEventListener('click', () => {
-                uploadAvatar(base64 => {
+                uploadAvatar(async base64 => {
                     currentUser.avatarType = 'image';
                     currentUser.avatarData = base64;
-                    saveAllUsers();
+                    await saveUserToFirebase(currentUser);
                     updateUIProfile();
                     modal.remove();
                     showProfile(currentUser, true);
                 });
             });
-            document.getElementById('saveProfileBtn')?.addEventListener('click', () => {
+            document.getElementById('saveProfileBtn')?.addEventListener('click', async () => {
                 currentUser.bio = document.getElementById('profileBio')?.value || '';
                 const newNick = document.getElementById('profileNick')?.value || '';
                 if(newNick.trim()) currentUser.nick = newNick.trim().substring(0,30);
-                saveAllUsers();
+                await saveUserToFirebase(currentUser);
                 updateUIProfile();
                 modal.remove();
                 renderChatsList();
@@ -991,10 +1069,10 @@
                 showProfile(currentUser, true);
             });
             document.querySelectorAll('[data-sell-gift]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
+                btn.addEventListener('click', async (e) => {
                     e.stopPropagation();
                     const idx = parseInt(btn.dataset.sellGift);
-                    if(currentUser.gifts[idx]) resellGift(currentUser.gifts[idx], idx);
+                    if(currentUser.gifts[idx]) await resellGift(currentUser.gifts[idx], idx);
                     modal.remove();
                     showProfile(currentUser, true);
                 });
@@ -1024,11 +1102,11 @@
         document.body.appendChild(modal);
         
         document.querySelectorAll('[data-stars]').forEach(el => {
-            el.addEventListener('click', () => {
+            el.addEventListener('click', async () => {
                 const stars = parseInt(el.dataset.stars);
                 if(confirm(`Купить ${stars} звезд за ${stars} ₽?`)) {
                     currentUser.stars = (currentUser.stars||0) + stars;
-                    saveAllUsers();
+                    await saveUserToFirebase(currentUser);
                     updateUIProfile();
                     alert(`✅ Куплено ${stars} звезд!`);
                     modal.remove();
@@ -1037,10 +1115,10 @@
             });
         });
         document.querySelectorAll('[data-gift]').forEach(el => {
-            el.addEventListener('click', () => { buyGift(JSON.parse(el.dataset.gift)); modal.remove(); openShop(); });
+            el.addEventListener('click', async () => { await buyGift(JSON.parse(el.dataset.gift)); modal.remove(); openShop(); });
         });
         document.querySelectorAll('[data-nft]').forEach(el => {
-            el.addEventListener('click', () => { buyNFT(JSON.parse(el.dataset.nft)); modal.remove(); openShop(); });
+            el.addEventListener('click', async () => { await buyNFT(JSON.parse(el.dataset.nft)); modal.remove(); openShop(); });
         });
         document.getElementById('closeShopBtn')?.addEventListener('click', () => modal.remove());
     }
@@ -1058,10 +1136,10 @@
         modal.innerHTML = `<div class="modal-content"><div style="font-size:1.6rem;font-weight:bold;color:#fbbf24;">🏪 МАРКЕТПЛЕЙС NFT</div>${listingsHtml}<div class="modal-actions"><button class="close-btn" id="closeMpBtn">Закрыть</button></div></div>`;
         document.body.appendChild(modal);
         document.querySelectorAll('[data-buy]').forEach(btn => {
-            btn.addEventListener('click', () => { const item = nftMarketplace.find(i => i.nftId === btn.dataset.buy); if(item) buyNFTFromMarketplace(item); modal.remove(); openMarketplace(); });
+            btn.addEventListener('click', async () => { const item = nftMarketplace.find(i => i.nftId === btn.dataset.buy); if(item) await buyNFTFromMarketplace(item); modal.remove(); openMarketplace(); });
         });
         document.querySelectorAll('[data-remove]').forEach(btn => {
-            btn.addEventListener('click', () => { const item = nftMarketplace.find(i => i.nftId === btn.dataset.remove); if(item) removeFromMarketplace(item); modal.remove(); openMarketplace(); });
+            btn.addEventListener('click', async () => { const item = nftMarketplace.find(i => i.nftId === btn.dataset.remove); if(item) await removeFromMarketplace(item); modal.remove(); openMarketplace(); });
         });
         document.getElementById('closeMpBtn')?.addEventListener('click', () => modal.remove());
     }
@@ -1088,9 +1166,44 @@
         document.getElementById('closeSellBtn')?.addEventListener('click', () => modal.remove());
     }
     
+    // ========== ВЫХОД ИЗ АККАУНТА ==========
+    async function logout() {
+        if(confirm('Вы уверены, что хотите выйти из аккаунта?')) {
+            // Очищаем сохраненную сессию
+            localStorage.removeItem('chattium_current_user_phone');
+            localStorage.removeItem('chattium_current_user_password');
+            
+            // Очищаем данные текущего пользователя
+            currentUser = null;
+            chats.clear();
+            groups.clear();
+            favorites.clear();
+            activeChatId = null;
+            
+            // Показываем окно авторизации, скрываем чат
+            document.getElementById('authOverlay').style.display = 'flex';
+            document.getElementById('chatApp').style.display = 'none';
+            
+            // Очищаем поля ввода
+            document.getElementById('phoneInput').value = '+888';
+            document.getElementById('passwordInput').value = 'neverlost566';
+            document.getElementById('authMessage').style.display = 'none';
+            
+            // Сбрасываем режим на вход
+            if(isRegisterMode) {
+                isRegisterMode = false;
+                document.getElementById('authTitle').textContent = 'Вход';
+                document.getElementById('authDesc').textContent = 'Введите номер и пароль';
+                document.getElementById('authBtn').textContent = 'Войти';
+                document.getElementById('switchToRegister').textContent = 'Нет аккаунта? Зарегистрироваться';
+                document.getElementById('phoneInput').readOnly = false;
+            }
+        }
+    }
+    
     // ========== ИНИЦИАЛИЗАЦИЯ MESSENGER ==========
-    function initMessenger() {
-        loadUserChats();
+    async function initMessenger() {
+        await loadUserChatsFromFirebase();
         updateUIProfile();
         renderChatsList();
         if(chats.size > 0) setActiveChat(Array.from(chats.keys())[0]);
@@ -1153,11 +1266,9 @@
     const authDesc = document.getElementById('authDesc');
     const switchToRegister = document.getElementById('switchToRegister');
     let isRegisterMode = false;
-    window.isRegisterMode = isRegisterMode;
     
     function toggleAuthMode() {
         isRegisterMode = !isRegisterMode;
-        window.isRegisterMode = isRegisterMode;
         if(isRegisterMode) {
             authTitle.textContent = 'Регистрация';
             authDesc.textContent = 'Создайте аккаунт';
@@ -1178,7 +1289,7 @@
         if(authMessage) authMessage.style.display = 'none';
     }
     
-    function handleAuth() {
+    async function handleAuth() {
         if(isRegisterMode) {
             let newPhone = generateUniquePhone();
             while(usersMap.has(newPhone)) newPhone = generateUniquePhone();
@@ -1198,10 +1309,10 @@
                 currentUser = newUser;
                 localStorage.setItem('chattium_current_user_phone', newUser.phone);
                 localStorage.setItem('chattium_current_user_password', password);
-                setTimeout(() => {
+                setTimeout(async () => {
                     authOverlay.style.display = 'none';
                     chatApp.style.display = 'block';
-                    initMessenger();
+                    await initMessenger();
                 }, 1500);
             } else {
                 if(authMessage) { authMessage.textContent = '❌ Ошибка регистрации'; authMessage.style.display = 'block'; }
@@ -1221,7 +1332,7 @@
                 localStorage.setItem('chattium_current_user_password', password);
                 authOverlay.style.display = 'none';
                 chatApp.style.display = 'block';
-                initMessenger();
+                await initMessenger();
             } else {
                 if(authMessage) { authMessage.textContent = '❌ Неверный номер или пароль'; authMessage.style.display = 'block'; }
             }
@@ -1229,30 +1340,32 @@
     }
     
     // ========== ЗАПУСК ==========
-    loadAllData();
-    
-    if(switchToRegister) switchToRegister.onclick = toggleAuthMode;
-    if(authBtn) authBtn.onclick = handleAuth;
-    if(phoneInput) phoneInput.onkeypress = (e) => { if(e.key === 'Enter') handleAuth(); };
-    if(passwordInput) passwordInput.onkeypress = (e) => { if(e.key === 'Enter') handleAuth(); };
-    
-    const savedPhone = localStorage.getItem('chattium_current_user_phone');
-    const savedPassword = localStorage.getItem('chattium_current_user_password');
-    if(savedPhone && savedPassword) {
-        const user = loginUser(savedPhone, savedPassword);
-        if(user) {
-            currentUser = user;
-            authOverlay.style.display = 'none';
-            chatApp.style.display = 'block';
-            initMessenger();
+    (async function() {
+        await loadAllDataFromFirebase();
+        
+        if(switchToRegister) switchToRegister.onclick = toggleAuthMode;
+        if(authBtn) authBtn.onclick = handleAuth;
+        if(phoneInput) phoneInput.onkeypress = (e) => { if(e.key === 'Enter') handleAuth(); };
+        if(passwordInput) passwordInput.onkeypress = (e) => { if(e.key === 'Enter') handleAuth(); };
+        
+        const savedPhone = localStorage.getItem('chattium_current_user_phone');
+        const savedPassword = localStorage.getItem('chattium_current_user_password');
+        if(savedPhone && savedPassword) {
+            const user = loginUser(savedPhone, savedPassword);
+            if(user) {
+                currentUser = user;
+                authOverlay.style.display = 'none';
+                chatApp.style.display = 'block';
+                await initMessenger();
+            } else {
+                authOverlay.style.display = 'flex';
+                chatApp.style.display = 'none';
+            }
         } else {
             authOverlay.style.display = 'flex';
             chatApp.style.display = 'none';
         }
-    } else {
-        authOverlay.style.display = 'flex';
-        chatApp.style.display = 'none';
-    }
+    })();
 </script>
 </body>
 </html>
