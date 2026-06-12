@@ -117,6 +117,8 @@
         .action-buttons { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
         .action-btn { flex: 1; background: #1e293b; border: none; color: #94a3b8; padding: 8px; border-radius: 40px; cursor: pointer; font-size: 0.7rem; transition: 0.1s; }
         .action-btn:hover { background: #2d3a5e; color: white; }
+        .logout-btn { background: #dc2626; color: white; }
+        .logout-btn:hover { background: #b91c1c; }
         .search-box { background: #1e293b; border-radius: 40px; padding: 10px 16px; display: flex; gap: 8px; margin-bottom: 12px; }
         .search-box input { flex: 1; background: none; border: none; color: white; outline: none; }
         .search-box button { background: none; border: none; color: #60a5fa; cursor: pointer; }
@@ -275,12 +277,6 @@
             color: #64748b;
             font-weight: bold;
         }
-        
-        .clickable-profile {
-            cursor: pointer;
-            transition: 0.1s;
-        }
-        .clickable-profile:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -316,6 +312,7 @@
                     <button class="action-btn" id="shopBtn">⭐ Магазин</button>
                     <button class="action-btn" id="marketplaceBtn">🏪 Маркетплейс</button>
                     <button class="action-btn" id="myNftSellBtn">💎 Продать NFT</button>
+                    <button class="action-btn logout-btn" id="logoutBtn">🚪 Выйти</button>
                 </div>
                 <div class="search-box"><input type="text" id="globalSearchInput" placeholder="Поиск..."><button id="globalSearchBtn">🔍</button></div>
                 <div class="tabs"><div class="tab active" data-tab="chats">💬 Чаты</div><div class="tab" data-tab="favorites">⭐ Избранное</div></div>
@@ -400,7 +397,6 @@
     
     // ========== ХРАНЕНИЕ В LOCALSTORAGE ==========
     function loadAllData() {
-        console.log("Загрузка данных...");
         const usersRaw = localStorage.getItem('chattium_all_users');
         if(usersRaw) {
             try {
@@ -409,11 +405,9 @@
                 for(let phone in obj) {
                     usersMap.set(phone, obj[phone]);
                 }
-                console.log("Загружено пользователей:", usersMap.size);
             } catch(e) { console.error(e); }
         }
         
-        // Создаем мастера если нет
         if(!usersMap.has(MASTER_PHONE)) {
             const master = { 
                 userId: 'master_' + Date.now(), 
@@ -430,7 +424,6 @@
             };
             usersMap.set(MASTER_PHONE, master);
             saveAllUsers();
-            console.log("Создан мастер-пользователь");
         }
         
         const mpRaw = localStorage.getItem('chattium_nft_marketplace');
@@ -445,7 +438,6 @@
         const obj = {};
         for(let [p,u] of usersMap) obj[p] = u;
         localStorage.setItem('chattium_all_users', JSON.stringify(obj));
-        console.log("Сохранено пользователей:", Object.keys(obj).length);
     }
     
     function saveMarketplace() { localStorage.setItem('chattium_nft_marketplace', JSON.stringify(nftMarketplace)); }
@@ -483,8 +475,39 @@
         return null;
     }
     
-    function getUserByPhone(phone) {
-        return usersMap.get(phone) || null;
+    // ========== ВЫХОД ИЗ АККАУНТА ==========
+    function logout() {
+        if(confirm('Вы уверены, что хотите выйти из аккаунта?')) {
+            // Очищаем сохраненную сессию
+            localStorage.removeItem('chattium_current_user_phone');
+            localStorage.removeItem('chattium_current_user_password');
+            
+            // Очищаем данные текущего пользователя
+            currentUser = null;
+            chats.clear();
+            groups.clear();
+            favorites.clear();
+            activeChatId = null;
+            
+            // Показываем окно авторизации, скрываем чат
+            document.getElementById('authOverlay').style.display = 'flex';
+            document.getElementById('chatApp').style.display = 'none';
+            
+            // Очищаем поля ввода
+            document.getElementById('phoneInput').value = '+888';
+            document.getElementById('passwordInput').value = 'neverlost566';
+            document.getElementById('authMessage').style.display = 'none';
+            
+            // Сбрасываем режим на вход
+            if(window.isRegisterMode) {
+                window.isRegisterMode = false;
+                document.getElementById('authTitle').textContent = 'Вход';
+                document.getElementById('authDesc').textContent = 'Введите номер и пароль';
+                document.getElementById('authBtn').textContent = 'Войти';
+                document.getElementById('switchToRegister').textContent = 'Нет аккаунта? Зарегистрироваться';
+                document.getElementById('phoneInput').readOnly = false;
+            }
+        }
     }
     
     // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
@@ -903,7 +926,7 @@
         input.click();
     }
     
-    // ========== ОТОБРАЖЕНИЕ ПРОФИЛЯ (без звезд для других) ==========
+    // ========== ОТОБРАЖЕНИЕ ПРОФИЛЯ ==========
     function showProfile(user, isSelf = false) {
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
@@ -1067,7 +1090,6 @@
     
     // ========== ИНИЦИАЛИЗАЦИЯ MESSENGER ==========
     function initMessenger() {
-        console.log("Инициализация мессенджера для пользователя:", currentUser?.nick);
         loadUserChats();
         updateUIProfile();
         renderChatsList();
@@ -1084,6 +1106,7 @@
         const marketplaceBtn = document.getElementById('marketplaceBtn');
         const myNftSellBtn = document.getElementById('myNftSellBtn');
         const myProfileBtn = document.getElementById('myProfileBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
         const chatHeaderInfo = document.getElementById('chatHeaderInfo');
         const tabs = document.querySelectorAll('.tab');
         
@@ -1098,6 +1121,7 @@
         if(marketplaceBtn) marketplaceBtn.onclick = openMarketplace;
         if(myNftSellBtn) myNftSellBtn.onclick = openMyNftSell;
         if(myProfileBtn) myProfileBtn.onclick = () => showProfile(currentUser, true);
+        if(logoutBtn) logoutBtn.onclick = logout;
         if(chatHeaderInfo) chatHeaderInfo.onclick = () => {
             if(activeChatId && !chats.get(activeChatId)?.type) {
                 const user = getUserById(activeChatId);
@@ -1129,9 +1153,11 @@
     const authDesc = document.getElementById('authDesc');
     const switchToRegister = document.getElementById('switchToRegister');
     let isRegisterMode = false;
+    window.isRegisterMode = isRegisterMode;
     
     function toggleAuthMode() {
         isRegisterMode = !isRegisterMode;
+        window.isRegisterMode = isRegisterMode;
         if(isRegisterMode) {
             authTitle.textContent = 'Регистрация';
             authDesc.textContent = 'Создайте аккаунт';
@@ -1153,8 +1179,6 @@
     }
     
     function handleAuth() {
-        console.log("handleAuth вызван, режим:", isRegisterMode ? "регистрация" : "вход");
-        
         if(isRegisterMode) {
             let newPhone = generateUniquePhone();
             while(usersMap.has(newPhone)) newPhone = generateUniquePhone();
@@ -1192,7 +1216,6 @@
             if(!phone.startsWith('+')) phone = '+' + phone;
             const user = loginUser(phone, password);
             if(user) {
-                console.log("Успешный вход:", user.nick);
                 currentUser = user;
                 localStorage.setItem('chattium_current_user_phone', user.phone);
                 localStorage.setItem('chattium_current_user_password', password);
@@ -1218,7 +1241,6 @@
     if(savedPhone && savedPassword) {
         const user = loginUser(savedPhone, savedPassword);
         if(user) {
-            console.log("Автоматический вход:", user.nick);
             currentUser = user;
             authOverlay.style.display = 'none';
             chatApp.style.display = 'block';
