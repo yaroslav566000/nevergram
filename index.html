@@ -250,7 +250,8 @@
     let usersProfiles = new Map();
     let nftMarketplace = [];
     let nextNFTNumber = 1;
-    let registeredUsers = new Map();
+    let registeredUsers = new Map(); // userId -> user
+    let registeredUsersByPhone = new Map();
     let unsubscribeChat = null;
     
     function initMobileMenu() {
@@ -320,11 +321,17 @@
     
     async function loadUsersFromFirestore() {
         const querySnapshot = await getDocs(collection(db, "users"));
-        querySnapshot.forEach(doc => registeredUsers.set(doc.data().phone, doc.data()));
+        registeredUsers.clear();
+        registeredUsersByPhone.clear();
+        querySnapshot.forEach(doc => {
+            const user = doc.data();
+            registeredUsers.set(user.userId, user);
+            registeredUsersByPhone.set(user.phone, user);
+        });
     }
     
     async function registerUserToFirestore(phone, password, nick) {
-        if (registeredUsers.has(phone)) return null;
+        if (registeredUsersByPhone.has(phone)) return null;
         const userId = 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
         const user = {
             userId, nick: nick || 'User_' + phone.slice(-5), phone, password,
@@ -333,7 +340,8 @@
             phoneHidden: false
         };
         await setDoc(doc(db, "users", phone), user);
-        registeredUsers.set(phone, user);
+        registeredUsers.set(userId, user);
+        registeredUsersByPhone.set(phone, user);
         return user;
     }
     
@@ -345,6 +353,8 @@
     
     async function saveUserToFirestore() {
         await setDoc(doc(db, "users", currentUser.phone), currentUser);
+        registeredUsers.set(currentUser.userId, currentUser);
+        registeredUsersByPhone.set(currentUser.phone, currentUser);
     }
     
     async function loadUserDataFromFirestore() {
@@ -461,43 +471,51 @@
         updateUIProfile();
     }
     
+    // ИСПРАВЛЕННАЯ функция снятия NFT
     async function removeNFTFromMarketplace(item) {
         if (confirm(`Снять ${item.originalNFT.name} #${item.originalNFT.number} с продажи?`)) {
-            const nft = { ...item.originalNFT };
-            if (!currentUser.nfts) currentUser.nfts = [];
-            currentUser.nfts.push(nft);
-            await saveUserToFirestore();
-            await deleteDoc(doc(db, "marketplace", item.nftId));
-            const mpIndex = nftMarketplace.findIndex(i => i.nftId === item.nftId);
-            if (mpIndex !== -1) nftMarketplace.splice(mpIndex, 1);
-            alert(`✅ NFT ${nft.name} #${nft.number} снят с продажи и возвращён в ваш профиль.`);
-            updateUIProfile();
+            try {
+                const nftToReturn = JSON.parse(JSON.stringify(item.originalNFT));
+                if (!currentUser.nfts) currentUser.nfts = [];
+                currentUser.nfts.push(nftToReturn);
+                await saveUserToFirestore();
+                await deleteDoc(doc(db, "marketplace", item.nftId));
+                const mpIndex = nftMarketplace.findIndex(i => i.nftId === item.nftId);
+                if (mpIndex !== -1) nftMarketplace.splice(mpIndex, 1);
+                updateUIProfile();
+                alert(`✅ NFT ${item.originalNFT.name} #${item.originalNFT.number} снят с продажи и возвращён в ваш профиль.`);
+                const modal = document.querySelector('.modal-overlay');
+                if (modal && modal.innerHTML.includes('МАРКЕТПЛЕЙС')) { modal.remove(); openMarketplace(); }
+            } catch(e) { console.error(e); alert("Ошибка: " + e.message); }
         }
     }
     
+    // ИСПРАВЛЕННАЯ функция покупки NFT
     async function buyNFTFromMarketplace(item) {
         if (currentUser.userId === item.ownerId) { alert("Нельзя купить свой NFT"); return; }
         if ((currentUser.stars || 0) < item.price) { alert(`❌ Нужно ${item.price} ⭐`); return; }
-        
-        currentUser.stars -= item.price;
-        const boughtNFT = { ...item.originalNFT, boughtAt: Date.now() };
-        if (!currentUser.nfts) currentUser.nfts = [];
-        currentUser.nfts.push(boughtNFT);
-        await saveUserToFirestore();
-        
-        const sellerDoc = await getDoc(doc(db, "users", item.ownerId));
-        if (sellerDoc.exists()) {
-            const seller = sellerDoc.data();
-            seller.stars = (seller.stars || 0) + item.price;
-            await setDoc(doc(db, "users", item.ownerId), seller);
-        }
-        
-        await deleteDoc(doc(db, "marketplace", item.nftId));
-        const mpIndex = nftMarketplace.findIndex(i => i.nftId === item.nftId);
-        if (mpIndex !== -1) nftMarketplace.splice(mpIndex, 1);
-        
-        updateUIProfile();
-        alert(`✅ Вы купили ${item.originalNFT.name} #${item.originalNFT.number} за ${item.price} ⭐!`);
+        try {
+            currentUser.stars -= item.price;
+            const boughtNFT = JSON.parse(JSON.stringify(item.originalNFT));
+            boughtNFT.boughtAt = Date.now();
+            if (!currentUser.nfts) currentUser.nfts = [];
+            currentUser.nfts.push(boughtNFT);
+            await saveUserToFirestore();
+            let seller = registeredUsers.get(item.ownerId);
+            if (seller) {
+                seller.stars = (seller.stars || 0) + item.price;
+                await setDoc(doc(db, "users", seller.phone), seller);
+                registeredUsers.set(seller.userId, seller);
+                registeredUsersByPhone.set(seller.phone, seller);
+            }
+            await deleteDoc(doc(db, "marketplace", item.nftId));
+            const mpIndex = nftMarketplace.findIndex(i => i.nftId === item.nftId);
+            if (mpIndex !== -1) nftMarketplace.splice(mpIndex, 1);
+            updateUIProfile();
+            alert(`✅ Вы купили ${item.originalNFT.name} #${item.originalNFT.number} за ${item.price} ⭐!`);
+            const modal = document.querySelector('.modal-overlay');
+            if (modal && modal.innerHTML.includes('МАРКЕТПЛЕЙС')) { modal.remove(); openMarketplace(); }
+        } catch(e) { console.error(e); alert("Ошибка: " + e.message); }
     }
     
     async function resellGift(gift, index) {
@@ -509,7 +527,6 @@
         alert(`✅ Вы продали ${gift.name} за ${refund} ⭐`);
     }
     
-    // === ДОБАВЛЕНО: Приватность (скрыть номер) ===
     function openPrivacySettings() {
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
@@ -536,15 +553,11 @@
         document.getElementById('closePrivacyBtn')?.addEventListener('click', () => modal.remove());
     }
     
-    // === ДОБАВЛЕНО: Просмотр группы/канала ===
     function showGroupInfo(chat) {
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
-        const members = (chat.participants || []).map(pid => {
-            for (let u of registeredUsers.values()) if (u.userId === pid) return u;
-            return null;
-        }).filter(u => u);
-        const owner = members.find(m => m.userId === chat.ownerId);
+        const members = (chat.participants || []).map(pid => registeredUsers.get(pid)).filter(u => u);
+        const owner = members.find(m => m && m.userId === chat.ownerId);
         modal.innerHTML = `
             <div class="modal-content">
                 <h3>${escapeHtml(chat.name)}</h3>
@@ -552,7 +565,7 @@
                 <p>👑 Владелец: ${escapeHtml(owner?.nick || 'Неизвестный')}</p>
                 <h4 style="margin:12px 0 8px;">Участники (${members.length})</h4>
                 <div class="member-list">
-                    ${members.map(m => `<div class="member-item"><span>${escapeHtml(m.nick)} ${m.userId === chat.ownerId ? '👑' : ''}</span></div>`).join('')}
+                    ${members.map(m => `<div class="member-item"><span>${escapeHtml(m?.nick || '???')} ${m?.userId === chat.ownerId ? '👑' : ''}</span></div>`).join('')}
                 </div>
                 <div class="modal-actions"><button class="close-btn" id="closeGroupInfo">Закрыть</button></div>
             </div>
@@ -561,7 +574,7 @@
         document.getElementById('closeGroupInfo')?.addEventListener('click', () => modal.remove());
     }
     
-    // === ДОБАВЛЕНО: Редактирование/удаление сообщений ===
+    // Редактирование/удаление сообщений
     async function deleteMessage(chatId, msgId) {
         const chat = chats.get(chatId);
         if (!chat) return;
@@ -651,7 +664,7 @@
         }).join('');
         ma.scrollTop = ma.scrollHeight;
         
-        // Контекстное меню для сообщений (правая кнопка / долгое нажатие)
+        // Контекстное меню
         document.querySelectorAll('.message-wrapper').forEach(wrapper => {
             const isOwner = wrapper.dataset.msgOwner === 'true';
             if (!isOwner) return;
@@ -695,7 +708,7 @@
         const queryText = document.getElementById('globalSearchInput').value.trim();
         if (!queryText) return;
         let found = null;
-        for (let [phone, user] of registeredUsers) {
+        for (let user of registeredUsers.values()) {
             if (user.userId === currentUser.userId) continue;
             if (user.phone === queryText || user.nick.toLowerCase().includes(queryText.toLowerCase())) { found = user; break; }
         }
@@ -852,15 +865,19 @@
         document.getElementById('closeSellBtn')?.addEventListener('click', () => modal.remove());
     }
     
+    // ИСПРАВЛЕННАЯ функция показа профиля
     function showProfile(userId, isSelf = false) {
         let user;
         if (isSelf) {
             user = currentUser;
         } else {
-            user = usersProfiles.get(userId) || registeredUsers.get(userId) || { 
-                nick: 'Неизвестный', avatarType: 'emoji', avatarData: '👤', bio: 'Нет описания', 
-                phone: 'скрыт', stars: 0, gifts: [], nfts: [] 
-            };
+            user = registeredUsers.get(userId);
+            if (!user) {
+                for (let u of registeredUsers.values()) {
+                    if (u.userId === userId) { user = u; break; }
+                }
+            }
+            if (!user) { alert("Пользователь не найден"); return; }
         }
         
         const modal = document.createElement('div');
@@ -1044,7 +1061,7 @@
     async function handleAuth() {
         if (isRegisterMode) {
             let newPhone = generateUniquePhone();
-            while (registeredUsers.has(newPhone)) newPhone = generateUniquePhone();
+            while (registeredUsersByPhone.has(newPhone)) newPhone = generateUniquePhone();
             const password = passwordInput.value.trim();
             if (!password) { if (authMessage) { authMessage.textContent = '❌ Введите пароль!'; authMessage.style.display = 'block'; } return; }
             if (password.length < 4) { if (authMessage) { authMessage.textContent = '❌ Пароль не менее 4 символов'; authMessage.style.display = 'block'; } return; }
@@ -1093,7 +1110,7 @@
         document.getElementById('privacyBtn').onclick = openPrivacySettings;
         document.getElementById('myProfileBtn').onclick = () => showProfile(currentUser.userId, true);
         
-        // Просмотр профиля собеседника и группы/канала
+        // Исправленный обработчик клика на шапке чата
         document.getElementById('chatHeaderInfo').onclick = () => { 
             if (activeChatId && chats.has(activeChatId)) {
                 const chat = chats.get(activeChatId);
