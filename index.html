@@ -21,7 +21,6 @@
             padding: 16px;
         }
 
-        /* Фон для чатов - красивое размытое изображение */
         .chat-bg {
             position: fixed;
             top: 0;
@@ -358,7 +357,7 @@
     let favorites = new Set();
     let activeChatId = null;
     let currentTab = 'chats';
-    let usersMap = new Map(); // userId -> userData
+    let usersMap = new Map(); // phone -> userData
     
     const MASTER_PHONE = "+888";
     const MASTER_PASSWORD = "neverlost566";
@@ -401,19 +400,37 @@
     
     // ========== ХРАНЕНИЕ В LOCALSTORAGE ==========
     function loadAllData() {
+        console.log("Загрузка данных...");
         const usersRaw = localStorage.getItem('chattium_all_users');
         if(usersRaw) {
             try {
                 const obj = JSON.parse(usersRaw);
                 usersMap.clear();
-                for(let id in obj) usersMap.set(id, obj[id]);
-            } catch(e) {}
+                for(let phone in obj) {
+                    usersMap.set(phone, obj[phone]);
+                }
+                console.log("Загружено пользователей:", usersMap.size);
+            } catch(e) { console.error(e); }
         }
         
+        // Создаем мастера если нет
         if(!usersMap.has(MASTER_PHONE)) {
-            const master = { userId:'master_'+Date.now(), nick:'Admin', phone:MASTER_PHONE, password:MASTER_PASSWORD, avatarType:'emoji', avatarData:'👑', bio:'✨ Владелец ✨', stars:9999999, gifts:[], nfts:[], isMaster:true };
+            const master = { 
+                userId: 'master_' + Date.now(), 
+                nick: 'Admin', 
+                phone: MASTER_PHONE, 
+                password: MASTER_PASSWORD, 
+                avatarType: 'emoji', 
+                avatarData: '👑', 
+                bio: '✨ Владелец ✨', 
+                stars: 9999999, 
+                gifts: [], 
+                nfts: [], 
+                isMaster: true 
+            };
             usersMap.set(MASTER_PHONE, master);
             saveAllUsers();
+            console.log("Создан мастер-пользователь");
         }
         
         const mpRaw = localStorage.getItem('chattium_nft_marketplace');
@@ -428,6 +445,7 @@
         const obj = {};
         for(let [p,u] of usersMap) obj[p] = u;
         localStorage.setItem('chattium_all_users', JSON.stringify(obj));
+        console.log("Сохранено пользователей:", Object.keys(obj).length);
     }
     
     function saveMarketplace() { localStorage.setItem('chattium_nft_marketplace', JSON.stringify(nftMarketplace)); }
@@ -465,8 +483,13 @@
         return null;
     }
     
+    function getUserByPhone(phone) {
+        return usersMap.get(phone) || null;
+    }
+    
     // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
     function renderAvatar(container, user) {
+        if(!container) return;
         container.innerHTML = '';
         if(user.avatarType === 'image' && user.avatarData && user.avatarData.startsWith('data:image')) {
             const img = document.createElement('img');
@@ -942,6 +965,7 @@
                 modal.remove();
                 renderChatsList();
                 if(activeChatId) renderMessages();
+                showProfile(currentUser, true);
             });
             document.querySelectorAll('[data-sell-gift]').forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -1041,8 +1065,9 @@
         document.getElementById('closeSellBtn')?.addEventListener('click', () => modal.remove());
     }
     
-    // ========== ИНИЦИАЛИЗАЦИЯ ==========
+    // ========== ИНИЦИАЛИЗАЦИЯ MESSENGER ==========
     function initMessenger() {
+        console.log("Инициализация мессенджера для пользователя:", currentUser?.nick);
         loadUserChats();
         updateUIProfile();
         renderChatsList();
@@ -1093,7 +1118,7 @@
         const imageBtn = document.getElementById('imageBtn'); if(imageBtn) imageBtn.onclick = sendImage;
     }
     
-    // АВТОРИЗАЦИЯ
+    // ========== АВТОРИЗАЦИЯ ==========
     const authOverlay = document.getElementById('authOverlay');
     const chatApp = document.getElementById('chatApp');
     const phoneInput = document.getElementById('phoneInput');
@@ -1128,12 +1153,20 @@
     }
     
     function handleAuth() {
+        console.log("handleAuth вызван, режим:", isRegisterMode ? "регистрация" : "вход");
+        
         if(isRegisterMode) {
             let newPhone = generateUniquePhone();
             while(usersMap.has(newPhone)) newPhone = generateUniquePhone();
             const password = passwordInput.value.trim();
-            if(!password) { if(authMessage) { authMessage.textContent = '❌ Введите пароль!'; authMessage.style.display = 'block'; } return; }
-            if(password.length < 4) { if(authMessage) { authMessage.textContent = '❌ Пароль не менее 4 символов'; authMessage.style.display = 'block'; } return; }
+            if(!password) { 
+                if(authMessage) { authMessage.textContent = '❌ Введите пароль!'; authMessage.style.display = 'block'; } 
+                return; 
+            }
+            if(password.length < 4) { 
+                if(authMessage) { authMessage.textContent = '❌ Пароль не менее 4 символов'; authMessage.style.display = 'block'; } 
+                return; 
+            }
             const nick = prompt('Придумайте никнейм:', 'User_' + newPhone.slice(-5));
             const newUser = registerUser(newPhone, password, nick || undefined);
             if(newUser) {
@@ -1152,10 +1185,14 @@
         } else {
             let phone = phoneInput.value.trim();
             const password = passwordInput.value.trim();
-            if(!phone || !password) { if(authMessage) { authMessage.textContent = '❌ Введите номер и пароль'; authMessage.style.display = 'block'; } return; }
+            if(!phone || !password) { 
+                if(authMessage) { authMessage.textContent = '❌ Введите номер и пароль'; authMessage.style.display = 'block'; } 
+                return; 
+            }
             if(!phone.startsWith('+')) phone = '+' + phone;
             const user = loginUser(phone, password);
             if(user) {
+                console.log("Успешный вход:", user.nick);
                 currentUser = user;
                 localStorage.setItem('chattium_current_user_phone', user.phone);
                 localStorage.setItem('chattium_current_user_password', password);
@@ -1168,7 +1205,9 @@
         }
     }
     
+    // ========== ЗАПУСК ==========
     loadAllData();
+    
     if(switchToRegister) switchToRegister.onclick = toggleAuthMode;
     if(authBtn) authBtn.onclick = handleAuth;
     if(phoneInput) phoneInput.onkeypress = (e) => { if(e.key === 'Enter') handleAuth(); };
@@ -1179,6 +1218,7 @@
     if(savedPhone && savedPassword) {
         const user = loginUser(savedPhone, savedPassword);
         if(user) {
+            console.log("Автоматический вход:", user.nick);
             currentUser = user;
             authOverlay.style.display = 'none';
             chatApp.style.display = 'block';
