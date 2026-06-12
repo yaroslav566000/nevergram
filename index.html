@@ -3,18 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NeverGram — Облачный мессенджер</title>
-    
-    <!-- Firebase SDK -->
-    <script type="importmap">
-        {
-            "imports": {
-                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
-                "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
-            }
-        }
+    <title>Chattium Stars — NFT с узорами, продажа через маркетплейс</title>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Импорт Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, get, child, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+        
+        // Firebase конфигурация
+        const firebaseConfig = {
+            apiKey: "AIzaSyDjM1lRbEKtCsaYe9e48pEPReh0AMe910U",
+            authDomain: "nevergram-e1d62.firebaseapp.com",
+            projectId: "nevergram-e1d62",
+            storageBucket: "nevergram-e1d62.firebasestorage.app",
+            messagingSenderId: "355130485889",
+            appId: "1:355130485889:web:d6657f9d2cf8b4e28b3180",
+            measurementId: "G-Q0YRVZ1W1E"
+        };
+        
+        // Инициализация Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getDatabase(app);
+        
+        // Сохраняем Firebase объекты в window для доступа из обычного JS
+        window.firebaseDB = db;
+        window.firebaseRef = ref;
+        window.firebaseGet = get;
+        window.firebaseSet = set;
+        window.firebaseUpdate = update;
+        window.firebaseRemove = remove;
+        window.firebaseChild = child;
+        window.firebaseOnValue = onValue;
+        
+        console.log("Firebase инициализирован!");
     </script>
-    
     <style>
         * {
             margin: 0;
@@ -111,7 +135,6 @@
         .chat-item:hover { background: #1e293b; }
         .chat-item.active { background: #1e293b; border-left: 3px solid #3b82f6; }
         .chat-avatar { width: 48px; height: 48px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 1.4rem; }
-        .chat-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .chat-details { flex: 1; min-width: 0; }
         .chat-title { color: white; font-weight: 600; display: flex; justify-content: space-between; flex-wrap: wrap; }
         .chat-last-msg { color: #94a3b8; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -155,34 +178,6 @@
         ::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
         
-        /* Кнопка выхода */
-        .logout-btn {
-            margin: 16px;
-            margin-top: auto;
-            background: #dc2626;
-            border: none;
-            color: white;
-            padding: 12px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: 0.1s;
-        }
-        .logout-btn:hover { background: #b91c1c; transform: scale(0.98); }
-        
-        /* Название мессенджера в шапке */
-        .brand-title {
-            font-size: 1.3rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #c0e0ff, #8ab3ff);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-        
         .gift-card {
             width: 150px;
             padding: 20px 12px;
@@ -196,7 +191,10 @@
             animation: floatGift 3s ease-in-out infinite;
         }
         
-        .gift-card-nft { position: relative; overflow: hidden; }
+        .gift-card-nft {
+            position: relative;
+            overflow: hidden;
+        }
         
         .gift-card-nft .pattern-overlay {
             position: absolute;
@@ -205,7 +203,7 @@
             right: 8px;
             bottom: 8px;
             background-repeat: repeat;
-            background-size: 25px 25px;
+            background-size: 20px 20px;
             opacity: 0.25;
             border-radius: 20px;
             pointer-events: none;
@@ -272,10 +270,17 @@
             z-index: 5;
         }
         
-        .gift-card:hover::before { left: 100%; }
+        .gift-card:hover::before {
+            left: 100%;
+        }
         
-        .gift-name-text { font-size: 0.85rem; font-weight: bold; margin: 8px 0 4px; position: relative; z-index: 10; }
-        .gift-price-text { font-size: 0.7rem; font-weight: bold; margin-top: 8px; padding: 4px 8px; border-radius: 20px; background: rgba(0,0,0,0.3); display: inline-block; position: relative; z-index: 10; }
+        .gift-name-text {
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin: 8px 0 4px;
+            position: relative;
+            z-index: 10;
+        }
         
         .marketplace-item {
             background: #1e293b;
@@ -291,7 +296,17 @@
         .marketplace-item:hover { background: #2d3a5e; transform: scale(1.01); }
         .marketplace-info { flex: 1; text-align: left; }
         .marketplace-price { color: #fbbf24; font-weight: bold; font-size: 1.2rem; }
-        .nft-preview { width: 70px; height: 70px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 2rem; position: relative; overflow: hidden; }
+        .nft-preview { 
+            width: 70px; 
+            height: 70px; 
+            border-radius: 16px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 2rem; 
+            position: relative;
+            overflow: hidden;
+        }
         .my-nft-item {
             background: #1e293b;
             border-radius: 20px;
@@ -322,6 +337,18 @@
             z-index: 20;
         }
         .sell-btn-nft:hover { background: #f59e0b; }
+        
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 20px;
+            color: white;
+            z-index: 9999;
+        }
     </style>
 </head>
 <body>
@@ -329,7 +356,7 @@
 <div id="authOverlay" class="auth-overlay">
     <div class="auth-card">
         <div class="logo">⭐✨</div>
-        <h2 id="authTitle">NeverGram</h2>
+        <h2 id="authTitle">Chattium Stars</h2>
         <p id="authDesc">Введите номер и пароль для входа</p>
         <div class="input-group"><label>📞 Номер</label><input type="tel" id="phoneInput" placeholder="+888" value="+888"></div>
         <div class="input-group"><label>🔑 Пароль</label><input type="password" id="passwordInput" placeholder="Пароль" value="neverlost566"></div>
@@ -343,7 +370,6 @@
     <div class="app-layout">
         <div class="sidebar">
             <div class="sidebar-header">
-                <div class="brand-title">⭐ NeverGram</div>
                 <div class="user-card" id="myProfileBtn">
                     <div class="user-avatar" id="myAvatar">😀</div>
                     <div class="user-info">
@@ -358,11 +384,10 @@
                     <button class="action-btn" id="marketplaceBtn">🏪 Маркетплейс</button>
                     <button class="action-btn" id="myNftSellBtn">💎 Продать NFT</button>
                 </div>
-                <div class="search-box"><input type="text" id="globalSearchInput" placeholder="Поиск по номеру..."><button id="globalSearchBtn">🔍</button></div>
+                <div class="search-box"><input type="text" id="globalSearchInput" placeholder="Поиск..."><button id="globalSearchBtn">🔍</button></div>
                 <div class="tabs"><div class="tab active" data-tab="chats">💬 Чаты</div><div class="tab" data-tab="favorites">⭐ Избранное</div></div>
             </div>
             <div class="chats-list" id="chatsListContainer"></div>
-            <button class="logout-btn" id="logoutBtn">🚪 Выйти из аккаунта</button>
         </div>
 
         <div class="chat-main">
@@ -391,45 +416,31 @@
     </div>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    
-    // ========== ВАШИ ДАННЫЕ ИЗ FIREBASE ==========
-    const firebaseConfig = {
-        apiKey: "AIzaSyDjM1lRbEKtCsaYe9e48pEPReh0AMe910U",
-        authDomain: "nevergram-e1d62.firebaseapp.com",
-        projectId: "nevergram-e1d62",
-        storageBucket: "nevergram-e1d62.firebasestorage.app",
-        messagingSenderId: "355130485889",
-        appId: "1:355130485889:web:d6657f9d2cf8b4e28b3180"
-    };
-    
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    
-    console.log("✅ NeverGram запущен!");
-    
-    // ========== ПЕРЕМЕННЫЕ ==========
+<script>
+    // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
     let currentUser = null;
     let chats = new Map();
     let groups = new Map();
     let favorites = new Set();
     let activeChatId = null;
     let currentTab = 'chats';
+    let broadcastChannel = null;
     let usersProfiles = new Map();
-    let nftMarketplace = [];
     let nextNFTNumber = 1;
-    let registeredUsers = new Map();
-    let unsubscribeChat = null;
-    let unsubscribeMarketplace = null;
+    let nftMarketplace = [];
     
-    // ========== УЗОРЫ ДЛЯ NFT ==========
+    const MASTER_PHONE = "+888";
+    const MASTER_PASSWORD = "neverlost566";
+    const CHANNEL = 'chattium_stars_final_v6';
+    
+    // Паттерны для NFT
     const PATTERNS = [
         { name: '💀 черепа', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E💀%3C/text%3E%3C/svg%3E')", emoji: '💀' },
         { name: '⚔️ мечи', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E⚔️%3C/text%3E%3C/svg%3E')", emoji: '⚔️' },
         { name: '⭐ звёзды', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E⭐%3C/text%3E%3C/svg%3E')", emoji: '⭐' },
         { name: '❤️ сердца', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E❤️%3C/text%3E%3C/svg%3E')", emoji: '❤️' },
+        { name: '✝️ кресты', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E✝️%3C/text%3E%3C/svg%3E')", emoji: '✝️' },
+        { name: '🪙 монеты', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E🪙%3C/text%3E%3C/svg%3E')", emoji: '🪙' },
         { name: '🐉 драконы', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E🐉%3C/text%3E%3C/svg%3E')", emoji: '🐉' },
         { name: '⚡ молнии', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E⚡%3C/text%3E%3C/svg%3E')", emoji: '⚡' }
     ];
@@ -458,186 +469,280 @@
     
     function generateUniquePhone() { let d=''; for(let i=0;i<10;i++) d+=Math.floor(Math.random()*10); return '+9'+d; }
     
-    // ========== ФУНКЦИЯ ВЫХОДА ==========
-    function logout() {
-        if (confirm('Вы уверены, что хотите выйти из аккаунта?')) {
-            localStorage.removeItem('chattium_current_user_phone');
-            localStorage.removeItem('chattium_current_user_password');
-            currentUser = null;
-            chats.clear();
-            groups.clear();
-            favorites.clear();
-            activeChatId = null;
-            usersProfiles.clear();
-            nftMarketplace = [];
-            if (unsubscribeChat) { unsubscribeChat(); unsubscribeChat = null; }
-            if (unsubscribeMarketplace) { unsubscribeMarketplace(); unsubscribeMarketplace = null; }
-            showAuth();
-            console.log("✅ Выход выполнен успешно");
+    function escapeHtml(str){ return String(str||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    
+    // ========== FIREBASE ФУНКЦИИ ==========
+    async function loadAllDataFromFirebase() {
+        if (!window.firebaseDB) {
+            console.log("Firebase еще не готов, используем localStorage");
+            return false;
+        }
+        
+        try {
+            const db = window.firebaseDB;
+            const ref = window.firebaseRef;
+            const get = window.firebaseGet;
+            const child = window.firebaseChild;
+            
+            // Загрузка пользователей
+            const usersSnapshot = await get(child(ref(db), 'users'));
+            if (usersSnapshot.exists()) {
+                const usersData = usersSnapshot.val();
+                for (let phone in usersData) {
+                    // Сохраняем в глобальную переменную registeredUsers (будет объявлена позже)
+                    if (window.registeredUsersMap) {
+                        window.registeredUsersMap.set(phone, usersData[phone]);
+                    }
+                }
+            }
+            
+            // Загрузка NFT маркетплейса
+            const mpSnapshot = await get(child(ref(db), 'nftMarketplace'));
+            if (mpSnapshot.exists()) {
+                nftMarketplace = Object.values(mpSnapshot.val());
+            }
+            
+            // Загрузка счетчика NFT
+            const counterSnapshot = await get(child(ref(db), 'nftCounter'));
+            if (counterSnapshot.exists()) {
+                nextNFTNumber = counterSnapshot.val() + 1;
+            } else {
+                nextNFTNumber = 1;
+            }
+            
+            return true;
+        } catch (error) {
+            console.error("Ошибка загрузки из Firebase:", error);
+            return false;
         }
     }
     
-    // ========== ФУНКЦИИ ДЛЯ РАБОТЫ С FIRESTORE ==========
-    async function loadUsersFromFirestore() {
-        const querySnapshot = await getDocs(collection(db, "users"));
-        querySnapshot.forEach(doc => {
-            const userData = doc.data();
-            registeredUsers.set(userData.phone, userData);
-        });
-        console.log(`📱 Загружено ${registeredUsers.size} пользователей`);
+    async function saveUserToFirebase(user) {
+        if (!window.firebaseDB) return;
+        
+        try {
+            const db = window.firebaseDB;
+            const ref = window.firebaseRef;
+            const set = window.firebaseSet;
+            
+            const userData = {
+                userId: user.userId,
+                nick: user.nick,
+                phone: user.phone,
+                password: user.password,
+                avatarType: user.avatarType,
+                avatarData: user.avatarData,
+                bio: user.bio,
+                stars: user.stars,
+                gifts: user.gifts || [],
+                nfts: user.nfts || [],
+                isMaster: user.isMaster || false
+            };
+            
+            await set(ref(db, `users/${user.phone}`), userData);
+        } catch (error) {
+            console.error("Ошибка сохранения пользователя в Firebase:", error);
+        }
     }
     
-    async function registerUserToFirestore(phone, password, nick) {
-        if (registeredUsers.has(phone)) return null;
-        const userId = 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-        const user = {
-            userId: userId,
-            nick: nick || 'User_' + phone.slice(-5),
-            phone: phone,
-            password: password,
-            avatarType: 'emoji',
-            avatarData: ['😀','😎','🦊','🐱','🌟'][Math.floor(Math.random()*5)],
-            bio: '✨ Новый пользователь ✨',
-            stars: 100,
-            gifts: [],
-            nfts: [],
-            createdAt: Date.now()
+    async function saveMarketplaceToFirebase() {
+        if (!window.firebaseDB) return;
+        
+        try {
+            const db = window.firebaseDB;
+            const ref = window.firebaseRef;
+            const set = window.firebaseSet;
+            
+            const marketplaceObj = {};
+            nftMarketplace.forEach((item, idx) => {
+                marketplaceObj[item.nftId || idx] = item;
+            });
+            await set(ref(db, 'nftMarketplace'), marketplaceObj);
+        } catch (error) {
+            console.error("Ошибка сохранения маркетплейса в Firebase:", error);
+        }
+    }
+    
+    async function saveNFTCounterToFirebase() {
+        if (!window.firebaseDB) return;
+        
+        try {
+            const db = window.firebaseDB;
+            const ref = window.firebaseRef;
+            const set = window.firebaseSet;
+            
+            await set(ref(db, 'nftCounter'), nextNFTNumber - 1);
+        } catch (error) {
+            console.error("Ошибка сохранения счетчика NFT в Firebase:", error);
+        }
+    }
+    
+    async function saveChatToFirebase(chatId, chatData) {
+        if (!window.firebaseDB || !currentUser) return;
+        
+        try {
+            const db = window.firebaseDB;
+            const ref = window.firebaseRef;
+            const set = window.firebaseSet;
+            
+            await set(ref(db, `chats/${currentUser.userId}/${chatId}`), chatData);
+        } catch (error) {
+            console.error("Ошибка сохранения чата в Firebase:", error);
+        }
+    }
+    
+    async function loadChatsFromFirebase() {
+        if (!window.firebaseDB || !currentUser) return false;
+        
+        try {
+            const db = window.firebaseDB;
+            const ref = window.firebaseRef;
+            const get = window.firebaseGet;
+            const child = window.firebaseChild;
+            
+            const chatsSnapshot = await get(child(ref(db), `chats/${currentUser.userId}`));
+            if (chatsSnapshot.exists()) {
+                const chatsData = chatsSnapshot.val();
+                chats.clear();
+                for (let id in chatsData) {
+                    chats.set(id, chatsData[id]);
+                }
+                return true;
+            }
+        } catch (error) {
+            console.error("Ошибка загрузки чатов из Firebase:", error);
+        }
+        return false;
+    }
+    
+    async function saveFavoritesToFirebase() {
+        if (!window.firebaseDB || !currentUser) return;
+        
+        try {
+            const db = window.firebaseDB;
+            const ref = window.firebaseRef;
+            const set = window.firebaseSet;
+            
+            await set(ref(db, `favorites/${currentUser.userId}`), Array.from(favorites));
+        } catch (error) {
+            console.error("Ошибка сохранения избранного в Firebase:", error);
+        }
+    }
+    
+    async function loadFavoritesFromFirebase() {
+        if (!window.firebaseDB || !currentUser) return false;
+        
+        try {
+            const db = window.firebaseDB;
+            const ref = window.firebaseRef;
+            const get = window.firebaseGet;
+            const child = window.firebaseChild;
+            
+            const favSnapshot = await get(child(ref(db), `favorites/${currentUser.userId}`));
+            if (favSnapshot.exists()) {
+                favorites = new Set(favSnapshot.val());
+                return true;
+            }
+        } catch (error) {
+            console.error("Ошибка загрузки избранного из Firebase:", error);
+        }
+        return false;
+    }
+    
+    // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
+    async function registerUser(phone, password, nick) {
+        if (window.registeredUsersMap && window.registeredUsersMap.has(phone)) return null;
+        
+        const user = { 
+            userId: 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6), 
+            nick: nick || 'User_' + phone.slice(-5), 
+            phone, 
+            password, 
+            avatarType: 'emoji', 
+            avatarData: ['😀','😎','🦊','🐱','🌟'][Math.floor(Math.random()*5)], 
+            bio: '✨ Новый пользователь ✨', 
+            stars: 100, 
+            gifts: [], 
+            nfts: [] 
         };
-        await setDoc(doc(db, "users", phone), user);
-        registeredUsers.set(phone, user);
+        
+        if (window.registeredUsersMap) window.registeredUsersMap.set(phone, user);
+        await saveUserToFirebase(user);
         return user;
     }
     
-    async function loginUserFromFirestore(phone, password) {
-        const userDoc = await getDoc(doc(db, "users", phone));
-        if (userDoc.exists()) {
-            const user = userDoc.data();
-            if (user.password === password) {
-                return user;
-            }
-        }
+    function loginUser(phone, password) {
+        if (!window.registeredUsersMap || !window.registeredUsersMap.has(phone)) return null;
+        const u = window.registeredUsersMap.get(phone);
+        if (u.password === password) return u;
         return null;
     }
     
-    async function saveUserToFirestore() {
-        await setDoc(doc(db, "users", currentUser.phone), currentUser);
-    }
-    
-    async function loadUserDataFromFirestore() {
-        const userDoc = await getDoc(doc(db, "users", currentUser.phone));
-        if (userDoc.exists()) {
-            const userData = userDoc.data();
-            currentUser.nfts = userData.nfts || [];
-            currentUser.gifts = userData.gifts || [];
-            currentUser.stars = userData.stars || 0;
-            currentUser.avatarType = userData.avatarType || 'emoji';
-            currentUser.avatarData = userData.avatarData || '😀';
-            currentUser.bio = userData.bio || '✨ Новый пользователь ✨';
-            currentUser.nick = userData.nick;
-            
-            // Загружаем чаты
-            const chatsSnapshot = await getDocs(collection(db, "chats"));
-            chatsSnapshot.forEach(doc => {
-                const chatData = doc.data();
-                if (chatData.participants && chatData.participants.includes(currentUser.userId)) {
-                    if (!chatData.deleted) {
-                        chats.set(chatData.chatId, chatData);
-                    }
-                }
-            });
-            
-            // Подписываемся на маркетплейс в реальном времени
-            if (unsubscribeMarketplace) unsubscribeMarketplace();
-            unsubscribeMarketplace = onSnapshot(collection(db, "marketplace"), (snapshot) => {
-                nftMarketplace = [];
-                snapshot.forEach(doc => {
-                    nftMarketplace.push(doc.data());
-                });
-                if (document.querySelector('.modal-overlay')) {
-                    // Если маркетплейс открыт, обновим его
-                }
-            });
-            
-            updateUIProfile();
-            renderChatsList();
-            if (chats.size > 0) setActiveChat(Array.from(chats.keys())[0]);
+    function renderAvatar(container, user) {
+        container.innerHTML = '';
+        if (user.avatarType === 'image' && user.avatarData && user.avatarData.startsWith('data:image')) { 
+            const img = document.createElement('img'); 
+            img.src = user.avatarData; 
+            container.appendChild(img); 
+        } else { 
+            container.textContent = user.avatarData || '😀'; 
+            container.style.fontSize = '1.8rem'; 
+            container.style.display = 'flex'; 
+            container.style.alignItems = 'center'; 
+            container.style.justifyContent = 'center'; 
         }
     }
     
-    async function sendMessageToFirestore(chatId, msg) {
-        const chatRef = doc(db, "chats", chatId);
-        const chatDoc = await getDoc(chatRef);
-        if (chatDoc.exists()) {
-            const messages = chatDoc.data().messages || [];
-            messages.push(msg);
-            await updateDoc(chatRef, { messages: messages, lastUpdate: Date.now() });
-        } else {
-            await setDoc(chatRef, {
-                chatId: chatId,
-                participants: [msg.senderId, currentUser.userId],
-                name: "Чат",
-                avatar: "👤",
-                type: "user",
-                messages: [msg],
-                lastUpdate: Date.now()
-            });
+    function updateUIProfile() {
+        const nameEl = document.getElementById('myName'); 
+        if (nameEl) nameEl.textContent = currentUser.nick;
+        const starsEl = document.getElementById('myStars'); 
+        if (starsEl) starsEl.innerHTML = `⭐ ${currentUser.stars || 0}`;
+        const avatarEl = document.getElementById('myAvatar'); 
+        if (avatarEl) renderAvatar(avatarEl, currentUser);
+    }
+    
+    function uploadAvatar(callback) { 
+        const input = document.createElement('input'); 
+        input.type = 'file'; 
+        input.accept = 'image/*'; 
+        input.onchange = e => { 
+            const file = e.target.files[0]; 
+            if (file && file.size <= 5 * 1024 * 1024) { 
+                const reader = new FileReader(); 
+                reader.onload = ev => callback(ev.target.result); 
+                reader.readAsDataURL(file); 
+            } else alert('Файл >5МБ'); 
+        }; 
+        input.click(); 
+    }
+    
+    async function buyGift(giftTemplate) {
+        if ((currentUser.stars || 0) < giftTemplate.price) {
+            alert(`❌ Недостаточно звезд! Нужно ${giftTemplate.price} ⭐`);
+            return false;
         }
+        currentUser.stars -= giftTemplate.price;
+        const gift = { ...giftTemplate, purchasedAt: Date.now(), expiresAt: Date.now() + (giftTemplate.resaleDays * 24 * 60 * 60 * 1000) };
+        if (!currentUser.gifts) currentUser.gifts = [];
+        currentUser.gifts.push(gift);
+        await saveUserToFirebase(currentUser);
+        updateUIProfile();
+        alert(`✅ Вы купили ${giftTemplate.name}! Подарок можно перепродать в течение недели за 85% цены.`);
+        return true;
     }
     
-    async function createOrGetChat(partnerId, partnerPhone, partnerNick) {
-        let chatId = [currentUser.userId, partnerId].sort().join('_');
-        if (!chats.has(chatId)) {
-            const newChat = {
-                chatId: chatId,
-                name: partnerNick,
-                avatar: '👤',
-                type: 'user',
-                participants: [currentUser.userId, partnerId],
-                messages: [],
-                lastUpdate: Date.now()
-            };
-            await setDoc(doc(db, "chats", chatId), newChat);
-            chats.set(chatId, newChat);
-        }
-        renderChatsList();
-        return chats.get(chatId);
-    }
-    
-    function listenToChat(chatId) {
-        if (unsubscribeChat) unsubscribeChat();
-        unsubscribeChat = onSnapshot(doc(db, "chats", chatId), (docSnap) => {
-            if (docSnap.exists()) {
-                const chatData = docSnap.data();
-                chats.set(chatId, chatData);
-                if (activeChatId === chatId) {
-                    renderMessages();
-                }
-                renderChatsList();
-            }
-        });
-    }
-    
-    // ========== NFT И ПОДАРКИ ==========
     async function buyNFT(nftTemplate, price = null) {
         const actualPrice = price || nftTemplate.basePrice;
         if ((currentUser.stars || 0) < actualPrice) {
             alert(`❌ Недостаточно звезд! Нужно ${actualPrice} ⭐`);
             return false;
         }
-        
-        // Получаем счётчик NFT
-        const counterDoc = await getDoc(doc(db, "system", "nftCounter"));
-        let currentNumber = 1;
-        if (counterDoc.exists()) {
-            currentNumber = counterDoc.data().lastNumber + 1;
-        }
-        await setDoc(doc(db, "system", "nftCounter"), { lastNumber: currentNumber });
-        
         currentUser.stars -= actualPrice;
         const pattern = randomPattern();
         const nft = {
             ...nftTemplate,
-            number: currentNumber,
+            number: nextNFTNumber++,
             purchasedAt: Date.now(),
             originalPrice: nftTemplate.basePrice,
             bgGradient: randomGradient(),
@@ -645,10 +750,10 @@
             patternName: pattern.name,
             patternEmoji: pattern.emoji
         };
-        
         if (!currentUser.nfts) currentUser.nfts = [];
         currentUser.nfts.push(nft);
-        await saveUserToFirestore();
+        await saveUserToFirebase(currentUser);
+        await saveNFTCounterToFirebase();
         updateUIProfile();
         alert(`✅ Вы купили ${nftTemplate.name} #${nft.number} с узором "${nft.patternName}"!`);
         return true;
@@ -664,34 +769,30 @@
         }
         const index = currentUser.nfts.findIndex(n => n.id === nft.id && n.number === nft.number);
         if (index !== -1) currentUser.nfts.splice(index, 1);
-        await saveUserToFirestore();
-        
-        const marketplaceItem = {
+        await saveUserToFirebase(currentUser);
+        nftMarketplace.push({
             nftId: nft.id + '_' + nft.number,
             originalNFT: nft,
             ownerId: currentUser.userId,
             ownerNick: currentUser.nick,
             price: sellPrice,
             listedAt: Date.now()
-        };
-        await setDoc(doc(db, "marketplace", marketplaceItem.nftId), marketplaceItem);
-        nftMarketplace.push(marketplaceItem);
-        
+        });
+        await saveMarketplaceToFirebase();
         alert(`✅ NFT ${nft.name} #${nft.number} выставлен на продажу за ${sellPrice} ⭐`);
         updateUIProfile();
     }
     
-    async function removeNFTFromMarketplace(item) {
+    async function removeFromMarketplace(item) {
         if (confirm(`Снять ${item.originalNFT.name} #${item.originalNFT.number} с продажи?`)) {
-            const nft = {...item.originalNFT};
-            if (!currentUser.nfts) currentUser.nfts = [];
+            const nft = { ...item.originalNFT };
             currentUser.nfts.push(nft);
-            await saveUserToFirestore();
-            await deleteDoc(doc(db, "marketplace", item.nftId));
+            await saveUserToFirebase(currentUser);
             const mpIndex = nftMarketplace.findIndex(i => i.nftId === item.nftId);
             if (mpIndex !== -1) nftMarketplace.splice(mpIndex, 1);
-            alert(`✅ NFT ${nft.name} #${nft.number} снят с продажи и возвращён в ваш профиль.`);
+            await saveMarketplaceToFirebase();
             updateUIProfile();
+            alert(`✅ NFT ${nft.name} #${nft.number} снят с продажи и возвращён в ваш профиль.`);
         }
     }
     
@@ -704,321 +805,315 @@
             alert(`❌ Недостаточно звезд! Нужно ${item.price} ⭐`);
             return;
         }
-        
         currentUser.stars -= item.price;
-        const boughtNFT = {...item.originalNFT, boughtAt: Date.now()};
+        const boughtNFT = { ...item.originalNFT, boughtAt: Date.now() };
         if (!currentUser.nfts) currentUser.nfts = [];
         currentUser.nfts.push(boughtNFT);
-        await saveUserToFirestore();
+        await saveUserToFirebase(currentUser);
         
-        const sellerDoc = await getDoc(doc(db, "users", item.ownerId));
-        if (sellerDoc.exists()) {
-            const seller = sellerDoc.data();
-            seller.stars = (seller.stars || 0) + item.price;
-            await setDoc(doc(db, "users", item.ownerId), seller);
+        // Добавляем звезды продавцу
+        if (window.registeredUsersMap) {
+            for (let [p, u] of window.registeredUsersMap.entries()) {
+                if (u.userId === item.ownerId) {
+                    u.stars = (u.stars || 0) + item.price;
+                    await saveUserToFirebase(u);
+                    break;
+                }
+            }
         }
         
-        await deleteDoc(doc(db, "marketplace", item.nftId));
         const mpIndex = nftMarketplace.findIndex(i => i.nftId === item.nftId);
         if (mpIndex !== -1) nftMarketplace.splice(mpIndex, 1);
-        
+        await saveMarketplaceToFirebase();
         updateUIProfile();
         alert(`✅ Вы купили ${item.originalNFT.name} #${item.originalNFT.number} за ${item.price} ⭐!`);
-    }
-    
-    async function buyGift(giftTemplate) {
-        if ((currentUser.stars || 0) < giftTemplate.price) {
-            alert(`❌ Недостаточно звезд! Нужно ${giftTemplate.price} ⭐`);
-            return false;
-        }
-        currentUser.stars -= giftTemplate.price;
-        const gift = { ...giftTemplate, purchasedAt: Date.now(), expiresAt: Date.now() + (giftTemplate.resaleDays * 24 * 60 * 60 * 1000) };
-        if (!currentUser.gifts) currentUser.gifts = [];
-        currentUser.gifts.push(gift);
-        await saveUserToFirestore();
-        updateUIProfile();
-        alert(`✅ Вы купили ${giftTemplate.name}! Подарок можно перепродать в течение недели за 85% цены.`);
-        return true;
     }
     
     async function resellGift(gift, index) {
         const refund = Math.floor(gift.price * gift.resalePercent / 100);
         currentUser.stars += refund;
         currentUser.gifts.splice(index, 1);
-        await saveUserToFirestore();
+        await saveUserToFirebase(currentUser);
         updateUIProfile();
         alert(`✅ Вы продали ${gift.name} за ${refund} ⭐ (85% от цены ${gift.price} ⭐)`);
     }
     
-    // ========== UI ФУНКЦИИ ==========
-    function escapeHtml(str) { return String(str || '').replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
-    
-    function renderAvatar(container, user) {
-        container.innerHTML = '';
-        if (user.avatarType === 'image' && user.avatarData && user.avatarData.startsWith('data:image')) {
-            const img = document.createElement('img'); img.src = user.avatarData; container.appendChild(img);
-        } else {
-            container.textContent = user.avatarData || '😀';
-            container.style.fontSize = '1.8rem';
-            container.style.display = 'flex';
-            container.style.alignItems = 'center';
-            container.style.justifyContent = 'center';
-        }
+    // Функции чатов
+    function createGroup() { 
+        const name = prompt('Название группы:'); 
+        if (!name) return; 
+        const id = 'group_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4); 
+        groups.set(id, { id, name, avatar: '👥', members: [currentUser.userId], admins: [currentUser.userId], creatorId: currentUser.userId, messages: [], type: 'group' }); 
+        chats.set(id, { id, name, avatar: '👥', type: 'group', messages: [], pinned: false }); 
+        saveChatToFirebase(id, chats.get(id));
+        renderChatsList(); 
+        setActiveChat(id); 
     }
     
-    function updateUIProfile() {
-        document.getElementById('myName').textContent = currentUser.nick;
-        document.getElementById('myStars').innerHTML = `⭐ ${currentUser.stars || 0}`;
-        renderAvatar(document.getElementById('myAvatar'), currentUser);
+    function createChannel() { 
+        const name = prompt('Название канала:'); 
+        if (!name) return; 
+        const id = 'channel_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4); 
+        groups.set(id, { id, name, avatar: '📢', members: [currentUser.userId], admins: [currentUser.userId], creatorId: currentUser.userId, messages: [], type: 'channel' }); 
+        chats.set(id, { id, name, avatar: '📢', type: 'channel', messages: [], pinned: false }); 
+        saveChatToFirebase(id, chats.get(id));
+        renderChatsList(); 
+        setActiveChat(id); 
     }
     
-    function renderChatsList() {
-        let list = Array.from(chats.values());
-        if (currentTab === 'favorites') list = list.filter(chat => chat.messages?.some(m => favorites.has(m.id)));
-        list.sort((a, b) => (b.lastUpdate || 0) - (a.lastUpdate || 0));
-        const container = document.getElementById('chatsListContainer');
-        if (!container) return;
-        if (list.length === 0) {
-            container.innerHTML = '<div class="system-message" style="margin:20px;">Нет чатов. Найдите пользователя по номеру</div>';
-            return;
-        }
-        container.innerHTML = list.map(chat => {
-            const last = chat.messages?.length ? chat.messages[chat.messages.length - 1] : null;
-            let preview = 'Нет сообщений';
-            if (last) { if (last.deleted) preview = '🗑️ Удалено'; else if (last.image) preview = '🖼️ Изображение'; else if (last.text) preview = last.text.substring(0, 35); }
-            const typeBadge = chat.type === 'group' ? '<span style="background:#8b5cf6;border-radius:12px;padding:2px 6px;font-size:0.6rem;margin-left:6px;">Группа</span>' : (chat.type === 'channel' ? '<span style="background:#06b6d4;border-radius:12px;padding:2px 6px;font-size:0.6rem;margin-left:6px;">Канал</span>' : '');
-            return `<div class="chat-item ${activeChatId === chat.chatId ? 'active' : ''}" data-id="${chat.chatId}">
-                <div class="chat-avatar">${chat.avatar || '👤'}</div>
-                <div class="chat-details">
-                    <div class="chat-title">${escapeHtml(chat.name)} ${typeBadge}</div>
-                    <div class="chat-last-msg">${escapeHtml(preview)}</div>
-                </div>
-                <button class="delete-chat-btn" data-delete="${chat.chatId}">🗑️</button>
-            </div>`;
-        }).join('');
-        document.querySelectorAll('.chat-item').forEach(el => {
-            el.addEventListener('click', (e) => { if (!e.target.classList.contains('delete-chat-btn')) setActiveChat(el.dataset.id); });
-            const delBtn = el.querySelector('.delete-chat-btn');
-            if (delBtn) delBtn.addEventListener('click', async (e) => { e.stopPropagation(); await deleteChat(delBtn.dataset.delete); });
-        });
-    }
-    
-    function setActiveChat(chatId) {
-        if (!chatId || !chats.has(chatId)) return;
-        activeChatId = chatId;
-        const chat = chats.get(chatId);
-        document.getElementById('headerName').textContent = chat.name;
-        document.getElementById('headerAvatar').innerHTML = chat.avatar || '👤';
-        renderChatsList();
-        renderMessages();
-        listenToChat(chatId);
-    }
-    
-    function renderMessages() {
-        const ma = document.getElementById('messagesArea');
-        if (!ma) return;
-        if (!activeChatId || !chats.has(activeChatId)) {
-            ma.innerHTML = '<div class="system-message">Выберите чат</div>';
-            return;
-        }
-        const msgs = chats.get(activeChatId).messages || [];
-        if (!msgs.length) {
-            ma.innerHTML = '<div class="system-message">💭 Напишите первое сообщение</div>';
-            return;
-        }
-        ma.innerHTML = msgs.map(msg => {
-            if (msg.deleted) return `<div class="message-wrapper other-message"><div class="message-bubble" style="background:#334155;">🗑️ Удалено</div></div>`;
-            const isMine = msg.senderId === currentUser.userId;
-            const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const imageHtml = msg.image ? `<img src="${msg.image}" class="message-image" onclick="window.open(this.src)">` : '';
-            const reactionsHtml = msg.reactions?.length ? `<div class="reactions" style="display:flex;gap:4px;margin-top:4px;">${msg.reactions.map(r => `<span style="background:#334155;border-radius:20px;padding:2px 6px;font-size:0.7rem;">${escapeHtml(r)}</span>`).join('')}</div>` : '';
-            return `<div class="message-wrapper ${isMine ? 'my-message' : 'other-message'}" data-msg-id="${msg.id}" data-is-mine="${isMine}">
-                <div class="message-bubble">${escapeHtml(msg.text)}${imageHtml}${msg.edited ? ' <span style="font-size:0.6rem;">(ред.)</span>' : ''}</div>
-                <div class="message-meta"><span>${isMine ? 'Вы' : escapeHtml(msg.senderNick)}</span><span>${time}</span></div>${reactionsHtml}
-            </div>`;
-        }).join('');
-        attachMessageEvents();
-        ma.scrollTop = ma.scrollHeight;
-    }
-    
-    function attachMessageEvents() {
-        document.querySelectorAll('.message-wrapper').forEach(wrapper => {
-            const msgId = wrapper.dataset.msgId;
-            const isMine = wrapper.dataset.isMine === 'true';
-            if (!msgId) return;
-            wrapper.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                showContextMenu(e, msgId, isMine);
-            });
-            wrapper.addEventListener('touchstart', (e) => {
-                let timer;
-                timer = setTimeout(() => {
-                    const rect = wrapper.getBoundingClientRect();
-                    showContextMenu({ pageX: rect.left + 10, pageY: rect.top + 10 }, msgId, isMine);
-                }, 500);
-                wrapper.addEventListener('touchend', () => clearTimeout(timer));
-                wrapper.addEventListener('touchmove', () => clearTimeout(timer));
-            });
-        });
-    }
-    
-    function showContextMenu(e, msgId, isMine) {
-        const existingMenu = document.querySelector('.context-menu');
-        if (existingMenu) existingMenu.remove();
-        const menu = document.createElement('div');
-        menu.className = 'context-menu';
-        if (isMine) {
-            menu.innerHTML = `<button data-action="edit">✏️ Редактировать</button><button data-action="delete">🗑️ Удалить</button><button data-action="fav">⭐ Избранное</button><button data-action="react">😊 Реакция</button>`;
-        } else {
-            menu.innerHTML = `<button data-action="fav">⭐ Избранное</button><button data-action="react">😊 Реакция</button>`;
-        }
-        menu.style.left = e.pageX + 'px';
-        menu.style.top = e.pageY + 'px';
-        document.body.appendChild(menu);
-        menu.querySelectorAll('button').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const action = btn.dataset.action;
-                if (action === 'edit') {
-                    const newText = prompt('Редактировать:');
-                    if (newText) await editMessage(activeChatId, msgId, newText);
-                }
-                if (action === 'delete') {
-                    if (confirm('Удалить?')) await deleteMessage(activeChatId, msgId);
-                }
-                if (action === 'fav') toggleFavorite(msgId);
-                if (action === 'react') {
-                    const emoji = prompt('Эмодзи (❤️, 😂, 👍):', '❤️');
-                    if (emoji) await addReaction(activeChatId, msgId, emoji);
-                }
-                menu.remove();
-            });
-        });
-        setTimeout(() => {
-            document.addEventListener('click', () => menu.remove(), { once: true });
-        }, 100);
-    }
-    
-    async function editMessage(chatId, msgId, newText) {
-        const chat = chats.get(chatId);
-        const msg = chat?.messages?.find(m => m.id === msgId);
-        if (msg && msg.senderId === currentUser.userId) {
-            msg.text = newText;
-            msg.edited = true;
-            await saveUserData();
-            if (activeChatId === chatId) renderMessages();
-            // Сообщаем другому пользователю
-            broadcastChannel?.postMessage({ type: 'edit', targetId: chatId, msgId, newText });
-        }
-    }
-    
-    async function deleteMessage(chatId, msgId) {
-        const chat = chats.get(chatId);
-        const msg = chat?.messages?.find(m => m.id === msgId);
-        if (msg && msg.senderId === currentUser.userId) {
-            msg.deleted = true;
-            msg.text = '🗑️ Удалено';
-            await saveUserData();
-            if (activeChatId === chatId) renderMessages();
-            broadcastChannel?.postMessage({ type: 'delete', targetId: chatId, msgId });
-        }
-    }
-    
-    async function addReaction(chatId, msgId, emoji) {
-        const chat = chats.get(chatId);
-        const msg = chat?.messages?.find(m => m.id === msgId);
-        if (msg) {
-            if (!msg.reactions) msg.reactions = [];
-            if (!msg.reactions.includes(emoji)) msg.reactions.push(emoji);
-            await saveUserData();
-            if (activeChatId === chatId) renderMessages();
-            broadcastChannel?.postMessage({ type: 'reaction', targetId: chatId, msgId, emoji });
-        }
-    }
-    
-    function toggleFavorite(msgId) {
-        if (favorites.has(msgId)) favorites.delete(msgId);
-        else favorites.add(msgId);
-        saveUserData();
-        if (activeChatId) renderMessages();
-        if (currentTab === 'favorites') renderChatsList();
-    }
-    
-    async function sendMessage(text, image = null) {
-        if (!activeChatId || (!text.trim() && !image)) return;
-        const msg = {
-            id: Date.now() + '_' + Math.random().toString(36).substr(2, 6),
-            text: text.trim(),
-            image: image,
-            timestamp: Date.now(),
-            senderId: currentUser.userId,
-            senderNick: currentUser.nick,
-            reactions: [],
-            edited: false,
-            deleted: false
-        };
-        await sendMessageToFirestore(activeChatId, msg);
-        document.getElementById('messageInput').value = '';
-    }
-    
-    async function searchUser() {
-        const queryText = document.getElementById('globalSearchInput').value.trim();
-        if (!queryText) return;
-        let found = null;
-        for (let [phone, user] of registeredUsers) {
-            if (user.userId === currentUser.userId) continue;
-            if (user.phone === queryText || user.nick.toLowerCase().includes(queryText.toLowerCase())) {
-                found = user;
-                break;
+    async function deleteChat(chatId) { 
+        if (!chatId) return; 
+        if (confirm('Удалить чат навсегда?')) { 
+            if (chats.has(chatId)) chats.delete(chatId); 
+            if (groups.has(chatId)) groups.delete(chatId); 
+            if (activeChatId === chatId) { 
+                activeChatId = null; 
+                const hn = document.getElementById('headerName'); 
+                if (hn) hn.textContent = 'Чат не выбран'; 
+                const ha = document.getElementById('headerAvatar'); 
+                if (ha) ha.innerHTML = '💬'; 
+                const ma = document.getElementById('messagesArea'); 
+                if (ma) ma.innerHTML = '<div class="system-message">Выберите чат</div>'; 
+            } 
+            if (window.firebaseDB && currentUser) {
+                const db = window.firebaseDB;
+                const ref = window.firebaseRef;
+                const remove = window.firebaseRemove;
+                await remove(ref(db, `chats/${currentUser.userId}/${chatId}`));
             }
-        }
-        if (found) {
-            const chat = await createOrGetChat(found.userId, found.phone, found.nick);
-            setActiveChat(chat.chatId);
-        } else {
-            alert('❌ Пользователь не найден');
-        }
+            renderChatsList(); 
+        } 
     }
     
-    async function deleteChat(chatId) {
-        if (confirm('Удалить чат?')) {
-            await updateDoc(doc(db, "chats", chatId), { deleted: true });
-            chats.delete(chatId);
-            if (activeChatId === chatId) {
-                activeChatId = null;
-                document.getElementById('headerName').textContent = 'Чат не выбран';
-                document.getElementById('messagesArea').innerHTML = '<div class="system-message">Выберите чат</div>';
-            }
-            renderChatsList();
-        }
+    async function sendMessage(text, image = null) { 
+        if (!activeChatId || (!text.trim() && !image)) return; 
+        const msg = { id: Date.now() + '_' + Math.random(), text: text.trim(), image: image, timestamp: Date.now(), senderId: currentUser.userId, senderNick: currentUser.nick, reactions: [], edited: false, deleted: false }; 
+        if (chats.has(activeChatId)) { 
+            chats.get(activeChatId).messages.push(msg); 
+            await saveChatToFirebase(activeChatId, chats.get(activeChatId));
+            renderMessages(); 
+            renderChatsList(); 
+        } 
+        if (broadcastChannel) broadcastChannel.postMessage({ type: 'msg', targetId: activeChatId, payload: msg, senderInfo: { nick: currentUser.nick, avatarType: currentUser.avatarType, avatarData: currentUser.avatarData } }); 
+        const mi = document.getElementById('messageInput'); 
+        if (mi) mi.value = ''; 
     }
     
-    async function clearActiveChat() {
-        if (activeChatId && chats.has(activeChatId) && confirm('Очистить историю?')) {
-            await updateDoc(doc(db, "chats", activeChatId), { messages: [] });
-            chats.get(activeChatId).messages = [];
-            renderMessages();
-        }
+    async function editMessage(chatId, msgId, newText) { 
+        const msg = chats.get(chatId)?.messages?.find(m => m.id === msgId); 
+        if (msg && msg.senderId === currentUser.userId) { 
+            msg.text = newText; 
+            msg.edited = true; 
+            await saveChatToFirebase(chatId, chats.get(chatId));
+            if (activeChatId === chatId) renderMessages(); 
+            if (broadcastChannel) broadcastChannel.postMessage({ type: 'edit', targetId: chatId, msgId, newText }); 
+        } 
     }
     
-    function sendImage() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = e => {
-            const file = e.target.files[0];
-            if (file && file.size <= 5 * 1024 * 1024) {
-                const reader = new FileReader();
-                reader.onload = ev => sendMessage('', ev.target.result);
-                reader.readAsDataURL(file);
-            } else alert('Файл >5МБ');
-        };
-        input.click();
+    async function deleteMessage(chatId, msgId) { 
+        const msg = chats.get(chatId)?.messages?.find(m => m.id === msgId); 
+        if (msg && msg.senderId === currentUser.userId) { 
+            msg.deleted = true; 
+            msg.text = '🗑️ Удалено'; 
+            await saveChatToFirebase(chatId, chats.get(chatId));
+            if (activeChatId === chatId) renderMessages(); 
+            if (broadcastChannel) broadcastChannel.postMessage({ type: 'delete', targetId: chatId, msgId }); 
+        } 
+    }
+    
+    async function addReaction(chatId, msgId, emoji) { 
+        const msg = chats.get(chatId)?.messages?.find(m => m.id === msgId); 
+        if (msg) { 
+            if (!msg.reactions) msg.reactions = []; 
+            if (!msg.reactions.includes(emoji)) msg.reactions.push(emoji); 
+            await saveChatToFirebase(chatId, chats.get(chatId));
+            if (activeChatId === chatId) renderMessages(); 
+            if (broadcastChannel) broadcastChannel.postMessage({ type: 'reaction', targetId: chatId, msgId, emoji }); 
+        } 
+    }
+    
+    async function toggleFavorite(msgId) { 
+        if (favorites.has(msgId)) favorites.delete(msgId); 
+        else favorites.add(msgId); 
+        await saveFavoritesToFirebase();
+        if (activeChatId) renderMessages(); 
+        if (currentTab === 'favorites') renderChatsList(); 
+    }
+    
+    function showContextMenu(e, msgId, isMine) { 
+        e.preventDefault(); 
+        const existingMenu = document.querySelector('.context-menu'); 
+        if (existingMenu) existingMenu.remove(); 
+        const menu = document.createElement('div'); 
+        menu.className = 'context-menu'; 
+        if (isMine) { 
+            menu.innerHTML = `<button data-action="edit">✏️ Редактировать</button><button data-action="delete">🗑️ Удалить</button><button data-action="fav">⭐ Избранное</button><button data-action="react">😊 Реакция</button>`; 
+        } else { 
+            menu.innerHTML = `<button data-action="fav">⭐ Избранное</button><button data-action="react">😊 Реакция</button>`; 
+        } 
+        menu.style.left = e.pageX + 'px'; 
+        menu.style.top = e.pageY + 'px'; 
+        document.body.appendChild(menu); 
+        menu.querySelectorAll('button').forEach(btn => { 
+            btn.addEventListener('click', () => { 
+                const action = btn.dataset.action; 
+                if (action === 'edit') { 
+                    const newText = prompt('Редактировать:'); 
+                    if (newText) editMessage(activeChatId, msgId, newText); 
+                } 
+                if (action === 'delete') { 
+                    if (confirm('Удалить?')) deleteMessage(activeChatId, msgId); 
+                } 
+                if (action === 'fav') toggleFavorite(msgId); 
+                if (action === 'react') { 
+                    const emoji = prompt('Эмодзи (❤️, 😂, 👍):', '❤️'); 
+                    if (emoji) addReaction(activeChatId, msgId, emoji); 
+                } 
+                menu.remove(); 
+            }); 
+        }); 
+        setTimeout(() => { 
+            document.addEventListener('click', () => menu.remove(), { once: true }); 
+        }, 100); 
+    }
+    
+    function renderChatsList() { 
+        let list = Array.from(chats.values()); 
+        if (currentTab === 'favorites') list = list.filter(chat => chat.messages?.some(m => favorites.has(m.id))); 
+        const container = document.getElementById('chatsListContainer'); 
+        if (!container) return; 
+        if (list.length === 0) { 
+            container.innerHTML = '<div class="system-message" style="margin:20px;">Нет чатов</div>'; 
+            return; 
+        } 
+        container.innerHTML = list.map(chat => { 
+            const last = chat.messages?.length ? chat.messages[chat.messages.length - 1] : null; 
+            let preview = 'Нет сообщений'; 
+            if (last) { 
+                if (last.deleted) preview = '🗑️ Удалено'; 
+                else if (last.image) preview = '🖼️ Изображение'; 
+                else if (last.text) preview = last.text.substring(0, 35); 
+            } 
+            const typeBadge = chat.type === 'group' ? '<span style="background:#8b5cf6;border-radius:12px;padding:2px 6px;font-size:0.6rem;margin-left:6px;">Группа</span>' : (chat.type === 'channel' ? '<span style="background:#06b6d4;border-radius:12px;padding:2px 6px;font-size:0.6rem;margin-left:6px;">Канал</span>' : ''); 
+            return `<div class="chat-item ${activeChatId === chat.id ? 'active' : ''}" data-id="${chat.id}"><div class="chat-avatar">${chat.avatar || '👤'}</div><div class="chat-details"><div class="chat-title">${escapeHtml(chat.name)} ${typeBadge}</div><div class="chat-last-msg">${escapeHtml(preview)}</div></div><button class="delete-chat-btn" data-delete="${chat.id}">🗑️</button></div>`; 
+        }).join(''); 
+        document.querySelectorAll('.chat-item').forEach(el => { 
+            el.addEventListener('click', (e) => { 
+                if (!e.target.classList.contains('delete-chat-btn')) setActiveChat(el.dataset.id); 
+            }); 
+            const delBtn = el.querySelector('.delete-chat-btn'); 
+            if (delBtn) delBtn.addEventListener('click', (e) => { 
+                e.stopPropagation(); 
+                deleteChat(delBtn.dataset.delete); 
+            }); 
+        }); 
+    }
+    
+    function setActiveChat(chatId) { 
+        if (!chatId || !chats.has(chatId)) return; 
+        activeChatId = chatId; 
+        const chat = chats.get(chatId); 
+        const hn = document.getElementById('headerName'); 
+        if (hn) hn.textContent = chat.name; 
+        const ha = document.getElementById('headerAvatar'); 
+        if (ha) ha.innerHTML = chat.avatar || '👤'; 
+        renderChatsList(); 
+        renderMessages(); 
+    }
+    
+    function renderMessages() { 
+        const ma = document.getElementById('messagesArea'); 
+        if (!ma) return; 
+        if (!activeChatId || !chats.has(activeChatId)) { 
+            ma.innerHTML = '<div class="system-message">Выберите чат</div>'; 
+            return; 
+        } 
+        const msgs = chats.get(activeChatId).messages || []; 
+        if (!msgs.length) { 
+            ma.innerHTML = '<div class="system-message">💭 Напишите первое сообщение</div>'; 
+            return; 
+        } 
+        ma.innerHTML = msgs.map(msg => { 
+            if (msg.deleted) return `<div class="message-wrapper other-message"><div class="message-bubble" style="background:#334155;">🗑️ Удалено</div></div>`; 
+            const isMine = msg.senderId === currentUser.userId; 
+            const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); 
+            const imageHtml = msg.image ? `<img src="${msg.image}" class="message-image" onclick="window.open(this.src)">` : ''; 
+            const reactionsHtml = msg.reactions?.length ? `<div class="reactions" style="display:flex;gap:4px;margin-top:4px;">${msg.reactions.map(r => `<span style="background:#334155;border-radius:20px;padding:2px 6px;font-size:0.7rem;">${escapeHtml(r)}</span>`).join('')}</div>` : ''; 
+            return `<div class="message-wrapper ${isMine ? 'my-message' : 'other-message'}" data-msg-id="${msg.id}" data-is-mine="${isMine}"><div class="message-bubble">${escapeHtml(msg.text)}${imageHtml}${msg.edited ? ' <span style="font-size:0.6rem;">(ред.)</span>' : ''}</div><div class="message-meta"><span>${isMine ? 'Вы' : escapeHtml(msg.senderNick)}</span><span>${time}</span></div>${reactionsHtml}</div>`; 
+        }).join(''); 
+        document.querySelectorAll('.message-wrapper').forEach(wrapper => { 
+            wrapper.addEventListener('contextmenu', (e) => { 
+                e.preventDefault(); 
+                const msgId = wrapper.dataset.msgId; 
+                const isMine = wrapper.dataset.isMine === 'true'; 
+                showContextMenu(e, msgId, isMine); 
+            }); 
+            wrapper.addEventListener('touchstart', (e) => { 
+                let timer; 
+                timer = setTimeout(() => { 
+                    const msgId = wrapper.dataset.msgId; 
+                    const isMine = wrapper.dataset.isMine === 'true'; 
+                    const rect = wrapper.getBoundingClientRect(); 
+                    showContextMenu({ pageX: rect.left + 10, pageY: rect.top + 10 }, msgId, isMine); 
+                }, 500); 
+                wrapper.addEventListener('touchend', () => clearTimeout(timer)); 
+                wrapper.addEventListener('touchmove', () => clearTimeout(timer)); 
+            }); 
+        }); 
+        ma.scrollTop = ma.scrollHeight; 
+    }
+    
+    async function searchUser() { 
+        const query = document.getElementById('globalSearchInput')?.value.trim().toLowerCase(); 
+        if (!query) return; 
+        let found = null; 
+        if (window.registeredUsersMap) {
+            for (let [phone, user] of window.registeredUsersMap) { 
+                if (user.userId === currentUser.userId) continue; 
+                if (user.phone === query || user.nick.toLowerCase().includes(query) || user.phone.includes(query)) { 
+                    found = user; 
+                    break; 
+                } 
+            } 
+        }
+        if (found) { 
+            if (!chats.has(found.userId)) { 
+                chats.set(found.userId, { id: found.userId, name: found.nick, avatar: found.avatarData || '👤', type: 'user', messages: [], pinned: false }); 
+                usersProfiles.set(found.userId, { nick: found.nick, avatarType: found.avatarType, avatarData: found.avatarData, phone: found.phone, bio: found.bio, stars: found.stars, gifts: found.gifts, nfts: found.nfts }); 
+                await saveChatToFirebase(found.userId, chats.get(found.userId));
+            } 
+            setActiveChat(found.userId); 
+        } else alert('❌ Пользователь не найден'); 
+    }
+    
+    async function clearActiveChat() { 
+        if (activeChatId && chats.has(activeChatId) && confirm('Очистить историю?')) { 
+            chats.get(activeChatId).messages = []; 
+            await saveChatToFirebase(activeChatId, chats.get(activeChatId));
+            renderMessages(); 
+            renderChatsList(); 
+        } 
+    }
+    
+    function sendImage() { 
+        const input = document.createElement('input'); 
+        input.type = 'file'; 
+        input.accept = 'image/*'; 
+        input.onchange = e => { 
+            const file = e.target.files[0]; 
+            if (file && file.size <= 5 * 1024 * 1024) { 
+                const reader = new FileReader(); 
+                reader.onload = ev => sendMessage('', ev.target.result); 
+                reader.readAsDataURL(file); 
+            } else alert('Файл >5МБ'); 
+        }; 
+        input.click(); 
     }
     
     function openShop() {
-        const modal = document.createElement('div');
+        const modal = document.createElement('div'); 
         modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><div style="font-size:1.8rem;font-weight:bold;color:#fbbf24;">⭐ МАГАЗИН ЗВЕЗД ⭐</div><p style="color:#94a3b8;margin:8px 0 16px;">1 звезда = 1 рубль</p>
+        modal.innerHTML = `<div class="modal-content"><div style="font-size:1.8rem;font-weight:bold;color:#fbbf24;">⭐ МАГАЗИН ЗВЕЗД ⭐</div><p style="color:#94a3b8;margin:8px 0;">1 звезда = 1 рубль</p>
             <div class="gifts-list" style="margin-bottom:20px;">
                 <div class="gift-card" style="background:linear-gradient(135deg,#fbbf24,#b45309);" data-stars="100"><div class="gift-emoji-big">⭐</div><div class="gift-name-text">100 ЗВЕЗД</div><div class="gift-price-text">100 ₽</div></div>
                 <div class="gift-card" style="background:linear-gradient(135deg,#3b82f6,#1e3a8a);" data-stars="500"><div class="gift-emoji-big">⭐⭐</div><div class="gift-name-text">500 ЗВЕЗД</div><div class="gift-price-text">500 ₽</div></div>
@@ -1027,92 +1122,90 @@
             </div>
             <div style="font-size:1.4rem;font-weight:bold;color:#fbbf24;margin:16px 0;">🎁 ПОДАРКИ</div>
             <div class="gifts-list">${GIFT_TEMPLATES.gifts.map(g => `<div class="gift-card" style="background:${g.bg}" data-gift='${JSON.stringify(g)}'><div class="gift-emoji-big">${g.emoji}</div><div class="gift-name-text">${g.name}</div><div class="gift-price-text">${g.price} ⭐</div></div>`).join('')}</div>
-            <div style="font-size:1.4rem;font-weight:bold;color:#fbbf24;margin:16px 0;">💎 NFT</div>
+            <div style="font-size:1.4rem;font-weight:bold;color:#fbbf24;margin:16px 0;">💎 NFT (уникальные номера + узоры)</div>
             <div class="gifts-list">${GIFT_TEMPLATES.nfts.map(n => `<div class="gift-card" style="background:linear-gradient(135deg,#6366f1,#3730a3);" data-nft='${JSON.stringify(n)}'><div class="gift-emoji-big">${n.emoji}</div><div class="gift-name-text">${n.name}</div><div class="gift-price-text">${n.basePrice} ⭐</div></div>`).join('')}</div>
             <div class="modal-actions"><button class="close-btn" id="closeShopBtn">Закрыть</button></div></div>`;
         document.body.appendChild(modal);
-        document.querySelectorAll('[data-stars]').forEach(el => {
-            el.addEventListener('click', () => {
-                const stars = parseInt(el.dataset.stars);
-                if (confirm(`Купить ${stars} звезд за ${stars} ₽?`)) {
-                    currentUser.stars = (currentUser.stars || 0) + stars;
-                    saveUserToFirestore();
-                    updateUIProfile();
-                    alert(`✅ Куплено ${stars} звезд!`);
-                    modal.remove();
-                    openShop();
-                }
-            });
+        
+        document.querySelectorAll('[data-stars]').forEach(el => { 
+            el.addEventListener('click', async () => { 
+                const stars = parseInt(el.dataset.stars); 
+                if (confirm(`Купить ${stars} звезд за ${stars} ₽?`)) { 
+                    currentUser.stars = (currentUser.stars || 0) + stars; 
+                    await saveUserToFirebase(currentUser);
+                    updateUIProfile(); 
+                    alert(`✅ Куплено ${stars} звезд!`); 
+                    modal.remove(); 
+                    openShop(); 
+                } 
+            }); 
         });
-        document.querySelectorAll('[data-gift]').forEach(el => {
-            el.addEventListener('click', async () => {
-                const gift = JSON.parse(el.dataset.gift);
-                await buyGift(gift);
-                modal.remove();
-                openShop();
-            });
+        document.querySelectorAll('[data-gift]').forEach(el => { 
+            el.addEventListener('click', async () => { 
+                const gift = JSON.parse(el.dataset.gift); 
+                await buyGift(gift); 
+                modal.remove(); 
+                openShop(); 
+            }); 
         });
-        document.querySelectorAll('[data-nft]').forEach(el => {
-            el.addEventListener('click', async () => {
-                const nft = JSON.parse(el.dataset.nft);
-                const success = await buyNFT(nft);
-                if (success) {
-                    modal.remove();
-                    openShop();
-                }
-            });
+        document.querySelectorAll('[data-nft]').forEach(el => { 
+            el.addEventListener('click', async () => { 
+                const nft = JSON.parse(el.dataset.nft); 
+                await buyNFT(nft); 
+                modal.remove(); 
+                openShop(); 
+            }); 
         });
         document.getElementById('closeShopBtn')?.addEventListener('click', () => modal.remove());
     }
     
     function openMarketplace() {
-        const modal = document.createElement('div');
+        const modal = document.createElement('div'); 
         modal.className = 'modal-overlay';
         let listingsHtml = '';
         if (nftMarketplace.length === 0) {
             listingsHtml = '<p style="color:#94a3b8;">Нет NFT в продаже</p>';
         } else {
-            listingsHtml = nftMarketplace.map(item => {
-                const isOwner = item.ownerId === currentUser.userId;
-                return `<div class="marketplace-item" style="display:flex; align-items:center; gap:16px;">
+            listingsHtml = nftMarketplace.map(item => `
+                <div class="marketplace-item" style="display:flex; align-items:center; gap:16px;">
                     <div class="nft-preview" style="background: ${item.originalNFT.bgGradient}; position:relative;">
                         <div style="font-size:2rem; z-index:5; position:relative;">${item.originalNFT.emoji}</div>
                         <div style="position:absolute; top:0; left:0; right:0; bottom:0; background:${item.originalNFT.pattern}; background-size:20px 20px; opacity:0.25; border-radius:16px;"></div>
                     </div>
                     <div class="marketplace-info" style="flex:1;">
                         <div><strong style="color:white;">${item.originalNFT.name}</strong> <span style="color:#60a5fa;">#${item.originalNFT.number}</span></div>
-                        <div style="font-size:0.7rem;color:#94a3b8;">Продавец: ${escapeHtml(item.ownerNick)}${isOwner ? ' (Вы)' : ''}</div>
+                        <div style="font-size:0.7rem;color:#94a3b8;">Продавец: ${escapeHtml(item.ownerNick)}</div>
                         <div style="font-size:0.6rem;margin-top:4px;">🎨 ${item.originalNFT.patternName}</div>
                     </div>
                     <div class="marketplace-price" style="color:#fbbf24;font-weight:bold;">${item.price} ⭐</div>
                     <div>
-                        ${!isOwner ? `<button class="action-btn" style="background:#3b82f6; padding:6px 12px;" data-buy='${JSON.stringify(item)}'>Купить</button>` : ''}
-                        ${isOwner ? `<button class="action-btn" style="background:#dc2626; padding:6px 12px; margin-left:5px;" data-remove='${JSON.stringify(item)}'>Снять</button>` : ''}
+                        <button class="action-btn" style="background:#3b82f6; padding:6px 12px;" data-buy="${item.nftId}">Купить</button>
+                        ${item.ownerId === currentUser.userId ? `<button class="action-btn" style="background:#dc2626; padding:6px 12px; margin-left:5px;" data-remove="${item.nftId}">Снять</button>` : ''}
                     </div>
-                </div>`;
-            }).join('');
+                </div>
+            `).join('');
         }
         modal.innerHTML = `<div class="modal-content"><div style="font-size:1.6rem;font-weight:bold;color:#fbbf24;">🏪 МАРКЕТПЛЕЙС NFT</div><p style="color:#94a3b8;margin:8px 0;">Здесь можно купить или снять с продажи NFT</p>${listingsHtml}<div class="modal-actions"><button class="close-btn" id="closeMpBtn">Закрыть</button></div></div>`;
         document.body.appendChild(modal);
         
-        document.querySelectorAll('[data-buy]').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const item = JSON.parse(btn.dataset.buy);
-                await buyNFTFromMarketplace(item);
-                modal.remove();
-                openMarketplace();
-            });
+        document.querySelectorAll('[data-buy]').forEach(btn => { 
+            btn.addEventListener('click', async () => { 
+                const nftId = btn.dataset.buy; 
+                const item = nftMarketplace.find(i => i.nftId === nftId); 
+                if (item) await buyNFTFromMarketplace(item); 
+                modal.remove(); 
+                openMarketplace(); 
+            }); 
         });
-        
-        document.querySelectorAll('[data-remove]').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const item = JSON.parse(btn.dataset.remove);
-                await removeNFTFromMarketplace(item);
-                modal.remove();
-                openMarketplace();
-            });
+        document.querySelectorAll('[data-remove]').forEach(btn => { 
+            btn.addEventListener('click', async () => { 
+                const nftId = btn.dataset.remove; 
+                const item = nftMarketplace.find(i => i.nftId === nftId); 
+                if (item) await removeFromMarketplace(item); 
+                modal.remove(); 
+                openMarketplace(); 
+            }); 
         });
-        
         document.getElementById('closeMpBtn')?.addEventListener('click', () => modal.remove());
     }
     
@@ -1121,7 +1214,7 @@
             alert("У вас нет NFT для продажи");
             return;
         }
-        const modal = document.createElement('div');
+        const modal = document.createElement('div'); 
         modal.className = 'modal-overlay';
         const myNftsHtml = `<div class="gifts-list" style="max-height:60vh; overflow-y:auto;">${currentUser.nfts.map((n, idx) => `
             <div class="my-nft-item" data-nft-index="${idx}" style="background: ${n.bgGradient}; position:relative; overflow:hidden;">
@@ -1153,387 +1246,296 @@
     }
     
     function showProfile(userId, isSelf = false) {
-        let user;
-        if (isSelf) {
-            user = currentUser;
-        } else {
-            user = usersProfiles.get(userId) || registeredUsers.get(userId) || {
-                nick: 'Неизвестный',
-                avatarType: 'emoji',
-                avatarData: '👤',
-                bio: 'Нет описания',
-                phone: 'скрыт',
-                stars: 0,
-                gifts: [],
-                nfts: []
-            };
-        }
+        let user; 
+        if (isSelf) user = currentUser; 
+        else user = usersProfiles.get(userId) || (window.registeredUsersMap ? Array.from(window.registeredUsersMap.values()).find(u => u.userId === userId) : null) || { nick: 'Неизвестный', avatarType: 'emoji', avatarData: '👤', bio: 'Нет описания', phone: 'скрыт', stars: 0, gifts: [], nfts: [] };
         
-        const modal = document.createElement('div');
+        const modal = document.createElement('div'); 
         modal.className = 'modal-overlay';
+        const avatarHtml = (user.avatarType === 'image' && user.avatarData) ? `<img src="${user.avatarData}">` : `<div style="font-size:3rem;">${user.avatarData || '😀'}</div>`;
         
-        const avatarHtml = (user.avatarType === 'image' && user.avatarData && user.avatarData.startsWith('data:image'))
-            ? `<img src="${user.avatarData}" style="width:100%; height:100%; object-fit:cover;">`
-            : `<div style="font-size:3rem;">${user.avatarData || '😀'}</div>`;
+        const giftsHtml = (user.gifts && user.gifts.length) ? `<div class="gifts-list">${user.gifts.map((g, idx) => `
+            <div class="gift-card" style="background:${g.bg}; width:140px; position:relative;">
+                ${isSelf && Date.now() < g.expiresAt ? `<div style="position:absolute;top:5px;right:5px;background:#fbbf24;color:#1e293b;border-radius:20px;padding:2px 6px;font-size:0.6rem;cursor:pointer;" data-sell-gift="${idx}">Продать за ${Math.floor(g.price * 0.85)}⭐</div>` : ''}
+                <div class="gift-emoji-big" style="font-size:3rem;">${g.emoji}</div>
+                <div class="gift-name-text">${g.name}</div>
+            </div>`).join('')}</div>` : '<p style="color:#64748b;">Нет подарков</p>';
         
-        const giftsHtml = (user.gifts && user.gifts.length)
-            ? `<div class="gifts-list">${user.gifts.map((g, idx) => `
-                <div class="gift-card" style="background:${g.bg}; width:140px; position:relative;">
-                    ${isSelf && Date.now() < g.expiresAt ? `<div style="position:absolute;top:5px;right:5px;background:#fbbf24;color:#1e293b;border-radius:20px;padding:2px 6px;font-size:0.6rem;cursor:pointer;" data-sell-gift="${idx}">Продать за ${Math.floor(g.price * 0.85)}⭐</div>` : ''}
-                    <div class="gift-emoji-big" style="font-size:3rem;">${g.emoji}</div>
-                    <div class="gift-name-text">${g.name}</div>
-                </div>`).join('')}</div>`
-            : '<p style="color:#64748b;">Нет подарков</p>';
+        const nftsHtml = (user.nfts && user.nfts.length) ? `<div class="gifts-list">${user.nfts.map(n => `
+            <div class="gift-card gift-card-nft" style="background: ${n.bgGradient}; width:140px; position:relative; overflow:hidden;">
+                <div class="nft-number">#${n.number}</div>
+                <div class="gift-emoji-big" style="font-size:3rem; position:relative; z-index:10;">${n.emoji}</div>
+                <div class="gift-name-text" style="position:relative; z-index:10;">${n.name}</div>
+                <div style="font-size:0.6rem;margin-top:4px; position:relative; z-index:10;">🎨 ${n.patternName || 'классический'}</div>
+                <div class="pattern-overlay" style="background: ${n.pattern}; background-size:20px 20px;"></div>
+            </div>`).join('')}</div>` : '<p style="color:#64748b;">Нет NFT</p>';
         
-        const nftsHtml = (user.nfts && user.nfts.length)
-            ? `<div class="gifts-list">${user.nfts.map(n => `
-                <div class="gift-card gift-card-nft" style="background: ${n.bgGradient}; width:140px; position:relative; overflow:hidden;">
-                    <div class="nft-number">#${n.number}</div>
-                    <div class="gift-emoji-big" style="font-size:3rem; position:relative; z-index:10;">${n.emoji}</div>
-                    <div class="gift-name-text" style="position:relative; z-index:10;">${n.name}</div>
-                    <div style="font-size:0.6rem;margin-top:4px; position:relative; z-index:10;">🎨 ${n.patternName || 'классический'}</div>
-                    <div class="pattern-overlay" style="background: ${n.pattern}; background-size:20px 20px;"></div>
-                </div>`).join('')}</div>`
-            : '<p style="color:#64748b;">Нет NFT</p>';
-        
-        modal.innerHTML = `<div class="modal-content"><div class="profile-avatar" id="profileAvatar">${avatarHtml}</div>${isSelf ? '<button class="save-btn" id="uploadAvatarBtn" style="margin-bottom:12px;">📸 Загрузить аватарку</button>' : ''}<div class="profile-nick">${escapeHtml(user.nick)}</div><div class="profile-stars">⭐ ${user.stars || 0} звезд</div><div class="profile-phone-display" style="color:#60a5fa;margin:8px 0;">📞 ${escapeHtml(user.phone)}</div><div class="profile-bio" style="background:#0f172a;border-radius:24px;padding:12px;margin:16px 0;">${isSelf ? `<textarea id="profileBio" rows="3" style="width:100%;background:#1e293b;border:none;border-radius:20px;padding:12px;color:white;">${escapeHtml(user.bio)}</textarea>` : `<div>${escapeHtml(user.bio)}</div>`}</div>${isSelf ? `<div><input type="text" id="profileNick" placeholder="Никнейм" value="${escapeHtml(user.nick)}" style="width:100%;background:#1e293b;border:none;border-radius:20px;padding:12px;color:white;"></div>` : ''}<h4 style="color:white;margin-top:16px;">🎁 Подарки</h4>${giftsHtml}<h4 style="color:white;margin-top:16px;">💎 NFT</h4>${nftsHtml}<div class="modal-actions">${isSelf ? '<button class="save-btn" id="saveProfileBtn">💾 Сохранить</button>' : ''}<button class="close-btn" id="closeProfileBtn">Закрыть</button></div></div>`;
+        modal.innerHTML = `<div class="modal-content"><div class="profile-avatar" id="profileAvatar">${avatarHtml}</div>${isSelf ? '<button class="save-btn" id="uploadAvatarBtn" style="margin-bottom:12px;">📸 Загрузить аватарку</button>' : ''}<div class="profile-nick">${escapeHtml(user.nick)}</div><div class="profile-stars">⭐ ${user.stars || 0} звезд</div><div class="profile-phone-display" style="color:#60a5fa;margin:8px 0;">📞 ${escapeHtml(user.phone)}</div><div class="profile-bio" style="background:#0f172a;border-radius:24px;padding:12px;margin:16px 0;">${isSelf ? `<textarea id="profileBio" rows="3" style="width:100%;background:#1e293b;border:none;border-radius:20px;padding:12px;color:white;">${escapeHtml(user.bio)}</textarea>` : `<div>${escapeHtml(user.bio)}</div>`}</div>${isSelf ? `<div><input type="text" id="profileNick" placeholder="Никнейм" value="${escapeHtml(user.nick)}" style="width:100%;background:#1e293b;border:none;border-radius:20px;padding:12px;color:white;"></div>` : ''}<h4 style="color:white;margin-top:16px;">🎁 Подарки</h4>${giftsHtml}<h4 style="color:white;margin-top:16px;">💎 NFT (уникальные номера + узоры по краям)</h4>${nftsHtml}<div class="modal-actions">${isSelf ? '<button class="save-btn" id="saveProfileBtn">💾 Сохранить</button>' : ''}<button class="close-btn" id="closeProfileBtn">Закрыть</button></div></div>`;
         document.body.appendChild(modal);
         
         if (isSelf) {
-            document.getElementById('uploadAvatarBtn')?.addEventListener('click', () => {
-                uploadAvatar(base64 => {
-                    currentUser.avatarType = 'image';
-                    currentUser.avatarData = base64;
-                    saveUserToFirestore();
-                    updateUIProfile();
-                    modal.remove();
-                    showProfile(currentUser.userId, true);
-                });
+            document.getElementById('uploadAvatarBtn')?.addEventListener('click', () => { 
+                uploadAvatar(async base64 => { 
+                    currentUser.avatarType = 'image'; 
+                    currentUser.avatarData = base64; 
+                    await saveUserToFirebase(currentUser);
+                    updateUIProfile(); 
+                    modal.remove(); 
+                    showProfile(currentUser.userId, true); 
+                }); 
             });
-            
-            document.getElementById('saveProfileBtn')?.addEventListener('click', async () => {
-                currentUser.bio = document.getElementById('profileBio')?.value || '';
-                const newNick = document.getElementById('profileNick')?.value || '';
-                if (newNick.trim()) currentUser.nick = newNick.trim().substring(0, 30);
-                await saveUserToFirestore();
-                updateUIProfile();
-                modal.remove();
-                renderChatsList();
-                if (activeChatId) renderMessages();
-                showProfile(currentUser.userId, true);
+            document.getElementById('saveProfileBtn')?.addEventListener('click', async () => { 
+                currentUser.bio = document.getElementById('profileBio')?.value || ''; 
+                const newNick = document.getElementById('profileNick')?.value || ''; 
+                if (newNick.trim()) currentUser.nick = newNick.trim().substring(0, 30); 
+                await saveUserToFirebase(currentUser);
+                updateUIProfile(); 
+                modal.remove(); 
+                renderChatsList(); 
+                if (activeChatId) renderMessages(); 
             });
-            
-            document.querySelectorAll('[data-sell-gift]').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    const idx = parseInt(btn.dataset.sellGift);
-                    if (currentUser.gifts[idx]) await resellGift(currentUser.gifts[idx], idx);
-                    modal.remove();
-                    showProfile(currentUser.userId, true);
-                });
+            document.querySelectorAll('[data-sell-gift]').forEach(btn => { 
+                btn.addEventListener('click', async (e) => { 
+                    e.stopPropagation(); 
+                    const idx = parseInt(btn.dataset.sellGift); 
+                    if (currentUser.gifts[idx]) await resellGift(currentUser.gifts[idx], idx); 
+                    modal.remove(); 
+                    showProfile(currentUser.userId, true); 
+                }); 
             });
         }
         document.getElementById('closeProfileBtn')?.addEventListener('click', () => modal.remove());
     }
     
-    function uploadAvatar(callback) {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = e => {
-            const file = e.target.files[0];
-            if (file && file.size <= 5 * 1024 * 1024) {
-                const reader = new FileReader();
-                reader.onload = ev => callback(ev.target.result);
-                reader.readAsDataURL(file);
-            } else alert('Файл >5МБ');
+    async function initMessenger() {
+        updateUIProfile(); 
+        await renderChatsList(); 
+        if (chats.size > 0) setActiveChat(Array.from(chats.keys())[0]);
+        
+        broadcastChannel = new BroadcastChannel(CHANNEL);
+        broadcastChannel.onmessage = async (e) => { 
+            const data = e.data; 
+            if (data.type === 'msg' && data.targetId === currentUser.userId) { 
+                if (!chats.has(data.payload.senderId)) { 
+                    chats.set(data.payload.senderId, { id: data.payload.senderId, name: data.senderInfo?.nick || 'User', avatar: data.senderInfo?.avatarData || '👤', type: 'user', messages: [], pinned: false }); 
+                    usersProfiles.set(data.payload.senderId, { nick: data.senderInfo?.nick, avatarType: data.senderInfo?.avatarType, avatarData: data.senderInfo?.avatarData, phone: '', bio: '', stars: 0, gifts: [], nfts: [] }); 
+                    await saveChatToFirebase(data.payload.senderId, chats.get(data.payload.senderId));
+                } 
+                const chat = chats.get(data.payload.senderId); 
+                chat.messages.push(data.payload); 
+                await saveChatToFirebase(data.payload.senderId, chat);
+                if (activeChatId === data.payload.senderId) renderMessages(); 
+                renderChatsList(); 
+            } 
         };
-        input.click();
-    }
-    
-    function createGroup() {
-        const name = prompt('Название группы:');
-        if (!name) return;
-        const groupId = 'group_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-        const group = {
-            id: groupId,
-            name: name,
-            avatar: '👥',
-            members: [currentUser.userId],
-            admins: [currentUser.userId],
-            creatorId: currentUser.userId,
-            messages: [],
-            type: 'group'
-        };
-        groups.set(groupId, group);
-        chats.set(groupId, {
-            chatId: groupId,
-            name: name,
-            avatar: '👥',
-            type: 'group',
-            participants: [currentUser.userId],
-            messages: [],
-            lastUpdate: Date.now()
+        
+        const sendBtn = document.getElementById('sendMsgBtn'); 
+        const messageInput = document.getElementById('messageInput'); 
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn'); 
+        const deleteChatBtn = document.getElementById('deleteChatBtn'); 
+        const globalSearchBtn = document.getElementById('globalSearchBtn'); 
+        const createGroupBtn = document.getElementById('createGroupBtn'); 
+        const createChannelBtn = document.getElementById('createChannelBtn'); 
+        const shopBtn = document.getElementById('shopBtn'); 
+        const marketplaceBtn = document.getElementById('marketplaceBtn'); 
+        const myNftSellBtn = document.getElementById('myNftSellBtn'); 
+        const myProfileBtn = document.getElementById('myProfileBtn'); 
+        const chatHeaderInfo = document.getElementById('chatHeaderInfo'); 
+        const tabs = document.querySelectorAll('.tab');
+        
+        if (sendBtn) sendBtn.onclick = () => { sendMessage(messageInput?.value || ''); if (messageInput) messageInput.value = ''; };
+        if (messageInput) messageInput.onkeypress = (e) => { if (e.key === 'Enter') { sendMessage(e.target.value); e.target.value = ''; } };
+        if (clearHistoryBtn) clearHistoryBtn.onclick = clearActiveChat;
+        if (deleteChatBtn) deleteChatBtn.onclick = () => { if (activeChatId) deleteChat(activeChatId); };
+        if (globalSearchBtn) globalSearchBtn.onclick = searchUser;
+        if (createGroupBtn) createGroupBtn.onclick = createGroup;
+        if (createChannelBtn) createChannelBtn.onclick = createChannel;
+        if (shopBtn) shopBtn.onclick = openShop;
+        if (marketplaceBtn) marketplaceBtn.onclick = openMarketplace;
+        if (myNftSellBtn) myNftSellBtn.onclick = openMyNftSell;
+        if (myProfileBtn) myProfileBtn.onclick = () => showProfile(currentUser.userId, true);
+        if (chatHeaderInfo) chatHeaderInfo.onclick = () => { if (activeChatId && !chats.get(activeChatId)?.type) showProfile(activeChatId, false); };
+        if (tabs) tabs.forEach(tab => { 
+            tab.onclick = () => { 
+                currentTab = tab.dataset.tab; 
+                tabs.forEach(t => t.classList.remove('active')); 
+                tab.classList.add('active'); 
+                renderChatsList(); 
+            }; 
         });
-        setDoc(doc(db, "chats", groupId), chats.get(groupId));
-        saveUserToFirestore();
-        renderChatsList();
-        setActiveChat(groupId);
-    }
-    
-    function createChannel() {
-        const name = prompt('Название канала:');
-        if (!name) return;
-        const channelId = 'channel_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-        const channel = {
-            id: channelId,
-            name: name,
-            avatar: '📢',
-            members: [currentUser.userId],
-            admins: [currentUser.userId],
-            creatorId: currentUser.userId,
-            messages: [],
-            type: 'channel'
-        };
-        groups.set(channelId, channel);
-        chats.set(channelId, {
-            chatId: channelId,
-            name: name,
-            avatar: '📢',
-            type: 'channel',
-            participants: [currentUser.userId],
-            messages: [],
-            lastUpdate: Date.now()
+        
+        const emojiBtn = document.getElementById('emojiBtn'); 
+        const emojiPicker = document.getElementById('emojiPicker');
+        if (emojiBtn) emojiBtn.onclick = (e) => { e.stopPropagation(); if (emojiPicker) emojiPicker.classList.toggle('active'); };
+        document.querySelectorAll('.emoji-option').forEach(emoji => { 
+            emoji.onclick = () => { 
+                if (messageInput) messageInput.value += emoji.textContent; 
+                if (emojiPicker) emojiPicker.classList.remove('active'); 
+                if (messageInput) messageInput.focus(); 
+            }; 
         });
-        setDoc(doc(db, "chats", channelId), chats.get(channelId));
-        saveUserToFirestore();
-        renderChatsList();
-        setActiveChat(channelId);
+        document.addEventListener('click', (e) => { if (emojiBtn && emojiPicker && !emojiBtn.contains(e.target) && !emojiPicker.contains(e.target) && emojiPicker.classList.contains('active')) emojiPicker.classList.remove('active'); });
+        const imageBtn = document.getElementById('imageBtn'); if (imageBtn) imageBtn.onclick = sendImage;
     }
     
-    // ========== АВТОРИЗАЦИЯ ==========
-    const MASTER_PHONE = "+888";
-    const MASTER_PASSWORD = "neverlost566";
+    // ========== ИНИЦИАЛИЗАЦИЯ ==========
+    window.registeredUsersMap = new Map();
     
-    const authOverlay = document.getElementById('authOverlay');
-    const chatApp = document.getElementById('chatApp');
-    const phoneInput = document.getElementById('phoneInput');
-    const passwordInput = document.getElementById('passwordInput');
-    const authBtn = document.getElementById('authBtn');
-    const authMessage = document.getElementById('authMessage');
-    const authTitle = document.getElementById('authTitle');
-    const authDesc = document.getElementById('authDesc');
-    const switchToRegister = document.getElementById('switchToRegister');
+    async function initApp() {
+        // Ждем Firebase
+        const waitForFirebase = () => {
+            return new Promise((resolve) => {
+                if (window.firebaseDB) {
+                    resolve();
+                } else {
+                    setTimeout(() => waitForFirebase().then(resolve), 100);
+                }
+            });
+        };
+        
+        await waitForFirebase();
+        
+        // Загружаем данные из Firebase
+        await loadAllDataFromFirebase();
+        
+        // Создаем мастера если нет
+        if (!window.registeredUsersMap.has(MASTER_PHONE)) {
+            const masterUser = { 
+                userId: 'master_' + Date.now(), 
+                nick: 'Admin', 
+                phone: MASTER_PHONE, 
+                password: MASTER_PASSWORD, 
+                avatarType: 'emoji', 
+                avatarData: '👑', 
+                bio: '✨ Владелец ✨', 
+                stars: 9999999, 
+                gifts: [], 
+                nfts: [], 
+                isMaster: true 
+            };
+            window.registeredUsersMap.set(MASTER_PHONE, masterUser);
+            await saveUserToFirebase(masterUser);
+        }
+        
+        // Настройка обработчиков авторизации
+        if (document.getElementById('switchToRegister')) document.getElementById('switchToRegister').onclick = toggleAuthMode;
+        if (document.getElementById('authBtn')) document.getElementById('authBtn').onclick = handleAuth;
+        
+        const phoneField = document.getElementById('phoneInput');
+        const passwordField = document.getElementById('passwordInput');
+        if (phoneField) phoneField.onkeypress = (e) => { if (e.key === 'Enter') handleAuth(); };
+        if (passwordField) passwordField.onkeypress = (e) => { if (e.key === 'Enter') handleAuth(); };
+        
+        // Проверка сохраненной сессии
+        const savedPhone = localStorage.getItem('chattium_current_user_phone');
+        const savedPassword = localStorage.getItem('chattium_current_user_password');
+        if (savedPhone && savedPassword) {
+            const user = loginUser(savedPhone, savedPassword);
+            if (user) {
+                currentUser = user;
+                await loadChatsFromFirebase();
+                await loadFavoritesFromFirebase();
+                if (document.getElementById('authOverlay')) document.getElementById('authOverlay').style.display = 'none';
+                if (document.getElementById('chatApp')) document.getElementById('chatApp').style.display = 'block';
+                initMessenger();
+                return;
+            }
+        }
+        
+        if (document.getElementById('authOverlay')) document.getElementById('authOverlay').style.display = 'flex';
+        if (document.getElementById('chatApp')) document.getElementById('chatApp').style.display = 'none';
+    }
+    
     let isRegisterMode = false;
     
     function toggleAuthMode() {
         isRegisterMode = !isRegisterMode;
+        const authTitle = document.getElementById('authTitle');
+        const authDesc = document.getElementById('authDesc');
+        const authBtn = document.getElementById('authBtn');
+        const switchSpan = document.getElementById('switchToRegister');
+        const phoneField = document.getElementById('phoneInput');
+        const passwordField = document.getElementById('passwordInput');
+        
         if (isRegisterMode) {
-            authTitle.textContent = 'Регистрация';
-            authDesc.textContent = 'Создайте аккаунт (номер сгенерируется)';
-            authBtn.textContent = 'Зарегистрироваться';
-            switchToRegister.textContent = 'Уже есть аккаунт? Войти';
-            phoneInput.readOnly = true;
-            phoneInput.value = 'Новый номер +9...';
-            passwordInput.value = '';
+            if (authTitle) authTitle.textContent = 'Регистрация';
+            if (authDesc) authDesc.textContent = 'Создайте аккаунт';
+            if (authBtn) authBtn.textContent = 'Зарегистрироваться';
+            if (switchSpan) switchSpan.textContent = 'Уже есть аккаунт? Войти';
+            if (phoneField) { phoneField.readOnly = true; phoneField.value = 'Новый номер...'; }
+            if (passwordField) passwordField.value = '';
         } else {
-            authTitle.textContent = 'Вход';
-            authDesc.textContent = 'Введите номер и пароль';
-            authBtn.textContent = 'Войти';
-            switchToRegister.textContent = 'Нет аккаунта? Зарегистрироваться';
-            phoneInput.readOnly = false;
-            phoneInput.value = '+888';
-            passwordInput.value = 'neverlost566';
+            if (authTitle) authTitle.textContent = 'Вход';
+            if (authDesc) authDesc.textContent = 'Введите номер и пароль';
+            if (authBtn) authBtn.textContent = 'Войти';
+            if (switchSpan) switchSpan.textContent = 'Нет аккаунта? Зарегистрироваться';
+            if (phoneField) { phoneField.readOnly = false; phoneField.value = '+888'; }
+            if (passwordField) passwordField.value = 'neverlost566';
         }
+        const authMessage = document.getElementById('authMessage');
         if (authMessage) authMessage.style.display = 'none';
     }
     
     async function handleAuth() {
+        const phoneField = document.getElementById('phoneInput');
+        const passwordField = document.getElementById('passwordInput');
+        const authMessage = document.getElementById('authMessage');
+        
         if (isRegisterMode) {
             let newPhone = generateUniquePhone();
-            while (registeredUsers.has(newPhone)) newPhone = generateUniquePhone();
-            const password = passwordInput.value.trim();
+            while (window.registeredUsersMap.has(newPhone)) newPhone = generateUniquePhone();
+            const password = passwordField.value.trim();
             if (!password) {
-                if (authMessage) {
-                    authMessage.textContent = '❌ Введите пароль!';
-                    authMessage.style.display = 'block';
-                }
+                if (authMessage) { authMessage.textContent = '❌ Введите пароль!'; authMessage.style.display = 'block'; }
                 return;
             }
             if (password.length < 4) {
-                if (authMessage) {
-                    authMessage.textContent = '❌ Пароль не менее 4 символов';
-                    authMessage.style.display = 'block';
-                }
+                if (authMessage) { authMessage.textContent = '❌ Пароль не менее 4 символов'; authMessage.style.display = 'block'; }
                 return;
             }
             const nick = prompt('Придумайте никнейм:', 'User_' + newPhone.slice(-5));
-            const newUser = await registerUserToFirestore(newPhone, password, nick || undefined);
+            const newUser = await registerUser(newPhone, password, nick || undefined);
             if (newUser) {
-                if (authMessage) {
-                    authMessage.className = 'success-msg';
-                    authMessage.textContent = `✅ Регистрация успешна! Ваш номер: ${newPhone}\n⭐ В подарок 100 звезд!`;
-                    authMessage.style.display = 'block';
-                }
+                if (authMessage) { authMessage.className = 'success-msg'; authMessage.textContent = `✅ Регистрация успешна! Ваш номер: ${newPhone}\n⭐ В подарок 100 звезд!`; authMessage.style.display = 'block'; }
                 currentUser = newUser;
                 localStorage.setItem('chattium_current_user_phone', newUser.phone);
                 localStorage.setItem('chattium_current_user_password', password);
-                setTimeout(() => initAppAfterAuth(), 1500);
+                setTimeout(async () => {
+                    if (document.getElementById('authOverlay')) document.getElementById('authOverlay').style.display = 'none';
+                    if (document.getElementById('chatApp')) document.getElementById('chatApp').style.display = 'block';
+                    await loadChatsFromFirebase();
+                    await loadFavoritesFromFirebase();
+                    initMessenger();
+                }, 1500);
             } else {
-                if (authMessage) {
-                    authMessage.textContent = '❌ Ошибка регистрации';
-                    authMessage.style.display = 'block';
-                }
+                if (authMessage) { authMessage.textContent = '❌ Ошибка регистрации'; authMessage.style.display = 'block'; }
             }
         } else {
-            let phone = phoneInput.value.trim();
-            const password = passwordInput.value.trim();
+            let phone = phoneField.value.trim();
+            const password = passwordField.value.trim();
             if (!phone || !password) {
-                if (authMessage) {
-                    authMessage.textContent = '❌ Введите номер и пароль';
-                    authMessage.style.display = 'block';
-                }
+                if (authMessage) { authMessage.textContent = '❌ Введите номер и пароль'; authMessage.style.display = 'block'; }
                 return;
             }
             if (!phone.startsWith('+')) phone = '+' + phone;
-            const user = await loginUserFromFirestore(phone, password);
+            const user = loginUser(phone, password);
             if (user) {
                 currentUser = user;
                 localStorage.setItem('chattium_current_user_phone', user.phone);
                 localStorage.setItem('chattium_current_user_password', password);
-                await initAppAfterAuth();
+                if (document.getElementById('authOverlay')) document.getElementById('authOverlay').style.display = 'none';
+                if (document.getElementById('chatApp')) document.getElementById('chatApp').style.display = 'block';
+                await loadChatsFromFirebase();
+                await loadFavoritesFromFirebase();
+                initMessenger();
             } else {
-                if (authMessage) {
-                    authMessage.textContent = '❌ Неверный номер или пароль';
-                    authMessage.style.display = 'block';
-                }
+                if (authMessage) { authMessage.textContent = '❌ Неверный номер или пароль'; authMessage.style.display = 'block'; }
             }
         }
-    }
-    
-    async function initAppAfterAuth() {
-        if (authOverlay) authOverlay.style.display = 'none';
-        if (chatApp) chatApp.style.display = 'block';
-        await loadUserDataFromFirestore();
-        initMessenger();
-    }
-    
-    function showAuth() {
-        if (authOverlay) authOverlay.style.display = 'flex';
-        if (chatApp) chatApp.style.display = 'none';
-        currentUser = null;
-    }
-    
-    function saveUserData() {
-        // Сохраняем только чаты и избранное (пользователь уже сохранён через saveUserToFirestore)
-        const key = `chattium_chats_${currentUser.userId}`;
-        const chatsObj = {};
-        for (let [id, chat] of chats) chatsObj[id] = { ...chat, messages: chat.messages || [] };
-        localStorage.setItem(key, JSON.stringify(chatsObj));
-        localStorage.setItem(`chattium_favorites_${currentUser.userId}`, JSON.stringify([...favorites]));
-        const groupsObj = {};
-        for (let [id, group] of groups) groupsObj[id] = group;
-        localStorage.setItem('chattium_groups', JSON.stringify(groupsObj));
-    }
-    
-    // BroadcastChannel для синхронизации между вкладками одного устройства
-    const broadcastChannel = new BroadcastChannel('nevergram_sync');
-    broadcastChannel.onmessage = (e) => {
-        const data = e.data;
-        if (data.type === 'msg' && data.targetId === activeChatId) {
-            // Дополнительная синхронизация
-        }
-    };
-    
-    function initMessenger() {
-        updateUIProfile();
-        renderChatsList();
-        if (chats.size > 0) setActiveChat(Array.from(chats.keys())[0]);
-        
-        document.getElementById('sendMsgBtn').onclick = () => {
-            sendMessage(document.getElementById('messageInput').value);
-            document.getElementById('messageInput').value = '';
-        };
-        document.getElementById('messageInput').onkeypress = (e) => {
-            if (e.key === 'Enter') {
-                sendMessage(e.target.value);
-                e.target.value = '';
-            }
-        };
-        document.getElementById('clearHistoryBtn').onclick = clearActiveChat;
-        document.getElementById('deleteChatBtn').onclick = () => {
-            if (activeChatId) deleteChat(activeChatId);
-        };
-        document.getElementById('globalSearchBtn').onclick = searchUser;
-        document.getElementById('createGroupBtn').onclick = createGroup;
-        document.getElementById('createChannelBtn').onclick = createChannel;
-        document.getElementById('shopBtn').onclick = openShop;
-        document.getElementById('marketplaceBtn').onclick = openMarketplace;
-        document.getElementById('myNftSellBtn').onclick = openMyNftSell;
-        document.getElementById('myProfileBtn').onclick = () => showProfile(currentUser.userId, true);
-        document.getElementById('chatHeaderInfo').onclick = () => {
-            if (activeChatId && !chats.get(activeChatId)?.type) {
-                showProfile(activeChatId, false);
-            }
-        };
-        document.getElementById('logoutBtn').onclick = logout;
-        
-        const emojiBtn = document.getElementById('emojiBtn');
-        const emojiPicker = document.getElementById('emojiPicker');
-        emojiBtn.onclick = (e) => {
-            e.stopPropagation();
-            emojiPicker.classList.toggle('active');
-        };
-        document.querySelectorAll('.emoji-option').forEach(emoji => {
-            emoji.onclick = () => {
-                document.getElementById('messageInput').value += emoji.textContent;
-                emojiPicker.classList.remove('active');
-                document.getElementById('messageInput').focus();
-            };
-        });
-        document.addEventListener('click', (e) => {
-            if (emojiBtn && emojiPicker && !emojiBtn.contains(e.target) && !emojiPicker.contains(e.target) && emojiPicker.classList.contains('active')) {
-                emojiPicker.classList.remove('active');
-            }
-        });
-        document.getElementById('imageBtn').onclick = sendImage;
-        
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.onclick = () => {
-                currentTab = tab.dataset.tab;
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                renderChatsList();
-            };
-        });
     }
     
     // Запуск приложения
-    (async () => {
-        await loadUsersFromFirestore();
-        const savedPhone = localStorage.getItem('chattium_current_user_phone');
-        const savedPassword = localStorage.getItem('chattium_current_user_password');
-        if (savedPhone && savedPassword) {
-            const user = await loginUserFromFirestore(savedPhone, savedPassword);
-            if (user) {
-                currentUser = user;
-                await initAppAfterAuth();
-            } else {
-                showAuth();
-            }
-        } else {
-            showAuth();
-        }
-    })();
-    
-    if (switchToRegister) switchToRegister.onclick = toggleAuthMode;
-    if (authBtn) authBtn.onclick = handleAuth;
-    if (phoneInput) phoneInput.onkeypress = (e) => {
-        if (e.key === 'Enter') handleAuth();
-    };
-    if (passwordInput) passwordInput.onkeypress = (e) => {
-        if (e.key === 'Enter') handleAuth();
-    };
+    initApp();
 </script>
 </body>
 </html>
