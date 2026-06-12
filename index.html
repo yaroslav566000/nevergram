@@ -3,42 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Chattium Stars — NFT с узорами, продажа через маркетплейс</title>
-    <!-- Firebase SDKs -->
-    <script type="module">
-        // Импорт Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, get, child, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-        
-        // Firebase конфигурация
-        const firebaseConfig = {
-            apiKey: "AIzaSyDjM1lRbEKtCsaYe9e48pEPReh0AMe910U",
-            authDomain: "nevergram-e1d62.firebaseapp.com",
-            projectId: "nevergram-e1d62",
-            storageBucket: "nevergram-e1d62.firebasestorage.app",
-            messagingSenderId: "355130485889",
-            appId: "1:355130485889:web:d6657f9d2cf8b4e28b3180",
-            measurementId: "G-Q0YRVZ1W1E"
-        };
-        
-        // Инициализация Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const db = getDatabase(app);
-        
-        // Сохраняем Firebase объекты в window для доступа из обычного JS
-        window.firebaseDB = db;
-        window.firebaseRef = ref;
-        window.firebaseGet = get;
-        window.firebaseSet = set;
-        window.firebaseUpdate = update;
-        window.firebaseRemove = remove;
-        window.firebaseChild = child;
-        window.firebaseOnValue = onValue;
-        
-        console.log("Firebase инициализирован!");
-    </script>
+    <title>Chattium Stars — NFT с узорами</title>
     <style>
         * {
             margin: 0;
@@ -54,6 +19,30 @@
             justify-content: center;
             align-items: center;
             padding: 16px;
+        }
+
+        /* Фон для чатов - красивое размытое изображение */
+        .chat-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 20% 50%, rgba(59,130,246,0.15) 0%, rgba(15,23,42,0.98) 100%);
+        }
+        
+        .chat-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><path fill="none" stroke="%2360a5fa" stroke-width="0.5" d="M20 20 L80 20 M20 40 L80 40 M20 60 L80 60 M20 80 L80 80 M20 20 L20 80 M40 20 L40 80 M60 20 L60 80 M80 20 L80 80"/><circle cx="50" cy="50" r="8" fill="none" stroke="%233b82f6" stroke-width="0.5"/></svg>');
+            background-repeat: repeat;
+            background-size: 40px;
+            pointer-events: none;
         }
 
         .auth-overlay {
@@ -78,6 +67,7 @@
             padding: 40px 32px;
             text-align: center;
             border: 1px solid #334155;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
         }
 
         .auth-card .logo { font-size: 3rem; margin-bottom: 12px; }
@@ -94,7 +84,9 @@
             color: white;
             outline: none;
             font-size: 1rem;
+            transition: all 0.2s;
         }
+        .input-group input:focus { border-color: #3b82f6; }
         .auth-btn {
             background: linear-gradient(135deg, #3b82f6, #1e40af);
             width: 100%;
@@ -105,17 +97,19 @@
             color: white;
             cursor: pointer;
             margin-top: 8px;
+            transition: transform 0.1s;
         }
+        .auth-btn:hover { transform: scale(1.02); }
         .switch-mode { margin-top: 20px; color: #94a3b8; font-size: 0.85rem; }
         .switch-mode span { color: #60a5fa; cursor: pointer; text-decoration: underline; }
         .error-msg { background: #7f1a1a; color: #fecaca; padding: 10px; border-radius: 60px; margin-top: 16px; }
         .success-msg { background: #14532d; color: #bbf7d0; padding: 10px; border-radius: 60px; margin-top: 16px; }
 
         .app-layout { width: 1500px; max-width: 98vw; height: 92vh; display: flex; gap: 12px; }
-        .sidebar { width: 340px; background: #0f172a; border-radius: 28px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #1e293b; }
-        .sidebar-header { padding: 20px 16px; background: #0f172a; border-bottom: 1px solid #1e293b; }
+        .sidebar { width: 340px; background: rgba(15,23,42,0.95); backdrop-filter: blur(10px); border-radius: 28px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(30,41,59,0.8); }
+        .sidebar-header { padding: 20px 16px; background: rgba(15,23,42,0.8); border-bottom: 1px solid #1e293b; }
         .user-card { display: flex; align-items: center; gap: 12px; padding: 8px; background: #1e293b; border-radius: 60px; margin-bottom: 16px; cursor: pointer; transition: 0.1s; }
-        .user-card:hover { background: #2d3a5e; }
+        .user-card:hover { background: #2d3a5e; transform: scale(1.01); }
         .user-avatar { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #9333ea); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; overflow: hidden; }
         .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .user-info { flex: 1; }
@@ -138,11 +132,11 @@
         .chat-details { flex: 1; min-width: 0; }
         .chat-title { color: white; font-weight: 600; display: flex; justify-content: space-between; flex-wrap: wrap; }
         .chat-last-msg { color: #94a3b8; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .chat-main { flex: 1; background: #0f172a; border-radius: 28px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #1e293b; }
-        .chat-header { padding: 16px 24px; background: #0f172a; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
+        .chat-main { flex: 1; background: rgba(11,17,32,0.7); backdrop-filter: blur(5px); border-radius: 28px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(30,41,59,0.6); }
+        .chat-header { padding: 16px 24px; background: rgba(15,23,42,0.8); border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
         .chat-header-info { display: flex; align-items: center; gap: 12px; cursor: pointer; }
         .chat-header-avatar { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #334155; font-size: 1.3rem; }
-        .messages-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; background: #0b1120; }
+        .messages-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; background: rgba(11,17,32,0.5); }
         .message-wrapper { display: flex; flex-direction: column; max-width: 75%; position: relative; }
         .my-message { align-self: flex-end; }
         .other-message { align-self: flex-start; }
@@ -151,7 +145,7 @@
         .other-message .message-bubble { background: #1e293b; color: #e2e8f0; border-bottom-left-radius: 6px; }
         .message-image { max-width: 200px; max-height: 200px; border-radius: 16px; margin-top: 8px; cursor: pointer; }
         .message-meta { display: flex; gap: 8px; font-size: 0.6rem; margin-top: 4px; padding: 0 6px; }
-        .input-area { padding: 16px 20px; background: #0f172a; border-top: 1px solid #1e293b; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; position: relative; }
+        .input-area { padding: 16px 20px; background: rgba(15,23,42,0.9); border-top: 1px solid #1e293b; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; position: relative; }
         #messageInput { flex: 1; padding: 12px 18px; border-radius: 60px; border: none; background: #1e293b; color: white; outline: none; min-width: 120px; }
         .emoji-btn, .image-btn { background: #1e293b; border: none; color: #94a3b8; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-size: 1.2rem; }
         .send-btn { background: #3b82f6; border: none; color: white; padding: 0 28px; border-radius: 60px; cursor: pointer; font-weight: 600; }
@@ -162,7 +156,6 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 3000; }
         .modal-content { background: #1e293b; border-radius: 32px; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; padding: 28px; text-align: center; }
         .profile-avatar { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 16px; background: #334155; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 3rem; cursor: pointer; }
-        .profile-stars { background: #0f172a; border-radius: 40px; padding: 8px 16px; display: inline-block; margin: 12px 0; color: #fbbf24; font-weight: bold; }
         .gifts-list { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 16px 0; }
         .modal-actions { display: flex; gap: 12px; margin-top: 20px; }
         .modal-actions button { flex: 1; padding: 12px; border-radius: 40px; border: none; cursor: pointer; font-weight: 600; }
@@ -188,7 +181,6 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
             position: relative;
             overflow: hidden;
-            animation: floatGift 3s ease-in-out infinite;
         }
         
         .gift-card-nft {
@@ -226,61 +218,8 @@
             z-index: 15;
         }
         
-        @keyframes floatGift {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            25% { transform: translateY(-8px) rotate(-2deg); }
-            75% { transform: translateY(5px) rotate(2deg); }
-        }
-        
-        .gift-card:hover {
-            animation: bounceGift 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-            filter: drop-shadow(0 0 20px rgba(255,215,0,0.7));
-        }
-        
-        @keyframes bounceGift {
-            0% { transform: translateY(0px) scale(1); }
-            50% { transform: translateY(-20px) scale(1.08); }
-            100% { transform: translateY(-5px) scale(1.02); }
-        }
-        
-        .gift-emoji-big {
-            font-size: 4rem;
-            display: block;
-            margin-bottom: 12px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
-            animation: pulseEmoji 2s ease-in-out infinite;
-            position: relative;
-            z-index: 10;
-        }
-        
-        @keyframes pulseEmoji {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
-        }
-        
-        .gift-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-            z-index: 5;
-        }
-        
-        .gift-card:hover::before {
-            left: 100%;
-        }
-        
-        .gift-name-text {
-            font-size: 0.85rem;
-            font-weight: bold;
-            margin: 8px 0 4px;
-            position: relative;
-            z-index: 10;
-        }
+        .gift-emoji-big { font-size: 4rem; display: block; margin-bottom: 12px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); position: relative; z-index: 10; }
+        .gift-name-text { font-size: 0.85rem; font-weight: bold; margin: 8px 0 4px; position: relative; z-index: 10; }
         
         .marketplace-item {
             background: #1e293b;
@@ -296,17 +235,7 @@
         .marketplace-item:hover { background: #2d3a5e; transform: scale(1.01); }
         .marketplace-info { flex: 1; text-align: left; }
         .marketplace-price { color: #fbbf24; font-weight: bold; font-size: 1.2rem; }
-        .nft-preview { 
-            width: 70px; 
-            height: 70px; 
-            border-radius: 16px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 2rem; 
-            position: relative;
-            overflow: hidden;
-        }
+        .nft-preview { width: 70px; height: 70px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 2rem; position: relative; overflow: hidden; }
         .my-nft-item {
             background: #1e293b;
             border-radius: 20px;
@@ -338,20 +267,25 @@
         }
         .sell-btn-nft:hover { background: #f59e0b; }
         
-        .loading-indicator {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 20px;
-            color: white;
-            z-index: 9999;
+        .profile-stars-private {
+            background: #0f172a;
+            border-radius: 40px;
+            padding: 8px 16px;
+            display: inline-block;
+            margin: 12px 0;
+            color: #64748b;
+            font-weight: bold;
         }
+        
+        .clickable-profile {
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .clickable-profile:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
+<div class="chat-bg"></div>
 
 <div id="authOverlay" class="auth-overlay">
     <div class="auth-card">
@@ -408,8 +342,8 @@
                 <input type="text" id="messageInput" placeholder="Сообщение...">
                 <button class="send-btn" id="sendMsgBtn">📨</button>
                 <div id="emojiPicker" class="emoji-picker">
-                    <span class="emoji-option">😀</span><span class="emoji-option">😎</span><span class="emoji-option">🥰</span><span class="emoji-option">😂</span><span class="emoji-option">😢</span><span class="emoji-option">🔥</span>
-                    <span class="emoji-option">❤️</span><span class="emoji-option">👍</span><span class="emoji-option">🎉</span><span class="emoji-option">🤔</span><span class="emoji-option">💯</span><span class="emoji-option">✨</span>
+                    <span class="emoji-option">😀</span><span class="emoji-option">😎</span><span class="emoji-option">🥰</span><span class="emoji-option">😂</span>
+                    <span class="emoji-option">❤️</span><span class="emoji-option">👍</span><span class="emoji-option">🎉</span><span class="emoji-option">✨</span>
                 </div>
             </div>
         </div>
@@ -424,25 +358,17 @@
     let favorites = new Set();
     let activeChatId = null;
     let currentTab = 'chats';
-    let broadcastChannel = null;
-    let usersProfiles = new Map();
-    let nextNFTNumber = 1;
-    let nftMarketplace = [];
+    let usersMap = new Map(); // userId -> userData
     
     const MASTER_PHONE = "+888";
     const MASTER_PASSWORD = "neverlost566";
-    const CHANNEL = 'chattium_stars_final_v6';
     
     // Паттерны для NFT
     const PATTERNS = [
         { name: '💀 черепа', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E💀%3C/text%3E%3C/svg%3E')", emoji: '💀' },
         { name: '⚔️ мечи', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E⚔️%3C/text%3E%3C/svg%3E')", emoji: '⚔️' },
         { name: '⭐ звёзды', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E⭐%3C/text%3E%3C/svg%3E')", emoji: '⭐' },
-        { name: '❤️ сердца', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E❤️%3C/text%3E%3C/svg%3E')", emoji: '❤️' },
-        { name: '✝️ кресты', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E✝️%3C/text%3E%3C/svg%3E')", emoji: '✝️' },
-        { name: '🪙 монеты', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E🪙%3C/text%3E%3C/svg%3E')", emoji: '🪙' },
-        { name: '🐉 драконы', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E🐉%3C/text%3E%3C/svg%3E')", emoji: '🐉' },
-        { name: '⚡ молнии', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E⚡%3C/text%3E%3C/svg%3E')", emoji: '⚡' }
+        { name: '❤️ сердца', pattern: "url('data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 40 40\\'%3E%3Ctext x=\\'5\\' y=\\'25\\' font-size=\\'20\\'%3E❤️%3C/text%3E%3C/svg%3E')", emoji: '❤️' }
     ];
     
     const GIFT_TEMPLATES = {
@@ -460,6 +386,9 @@
         ]
     };
     
+    let nftMarketplace = [];
+    let nextNFTNumber = 1;
+    
     function randomPattern() { return PATTERNS[Math.floor(Math.random() * PATTERNS.length)]; }
     function randomGradient() {
         const r = Math.floor(Math.random() * 200 + 55), g = Math.floor(Math.random() * 200 + 55), b = Math.floor(Math.random() * 200 + 55);
@@ -468,196 +397,48 @@
     }
     
     function generateUniquePhone() { let d=''; for(let i=0;i<10;i++) d+=Math.floor(Math.random()*10); return '+9'+d; }
-    
     function escapeHtml(str){ return String(str||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
     
-    // ========== FIREBASE ФУНКЦИИ ==========
-    async function loadAllDataFromFirebase() {
-        if (!window.firebaseDB) {
-            console.log("Firebase еще не готов, используем localStorage");
-            return false;
+    // ========== ХРАНЕНИЕ В LOCALSTORAGE ==========
+    function loadAllData() {
+        const usersRaw = localStorage.getItem('chattium_all_users');
+        if(usersRaw) {
+            try {
+                const obj = JSON.parse(usersRaw);
+                usersMap.clear();
+                for(let id in obj) usersMap.set(id, obj[id]);
+            } catch(e) {}
         }
         
-        try {
-            const db = window.firebaseDB;
-            const ref = window.firebaseRef;
-            const get = window.firebaseGet;
-            const child = window.firebaseChild;
-            
-            // Загрузка пользователей
-            const usersSnapshot = await get(child(ref(db), 'users'));
-            if (usersSnapshot.exists()) {
-                const usersData = usersSnapshot.val();
-                for (let phone in usersData) {
-                    // Сохраняем в глобальную переменную registeredUsers (будет объявлена позже)
-                    if (window.registeredUsersMap) {
-                        window.registeredUsersMap.set(phone, usersData[phone]);
-                    }
-                }
-            }
-            
-            // Загрузка NFT маркетплейса
-            const mpSnapshot = await get(child(ref(db), 'nftMarketplace'));
-            if (mpSnapshot.exists()) {
-                nftMarketplace = Object.values(mpSnapshot.val());
-            }
-            
-            // Загрузка счетчика NFT
-            const counterSnapshot = await get(child(ref(db), 'nftCounter'));
-            if (counterSnapshot.exists()) {
-                nextNFTNumber = counterSnapshot.val() + 1;
-            } else {
-                nextNFTNumber = 1;
-            }
-            
-            return true;
-        } catch (error) {
-            console.error("Ошибка загрузки из Firebase:", error);
-            return false;
+        if(!usersMap.has(MASTER_PHONE)) {
+            const master = { userId:'master_'+Date.now(), nick:'Admin', phone:MASTER_PHONE, password:MASTER_PASSWORD, avatarType:'emoji', avatarData:'👑', bio:'✨ Владелец ✨', stars:9999999, gifts:[], nfts:[], isMaster:true };
+            usersMap.set(MASTER_PHONE, master);
+            saveAllUsers();
         }
+        
+        const mpRaw = localStorage.getItem('chattium_nft_marketplace');
+        if(mpRaw) { try { nftMarketplace = JSON.parse(mpRaw); } catch(e){} }
+        
+        const nftCounterRaw = localStorage.getItem('chattium_nft_counter');
+        if(nftCounterRaw) { nextNFTNumber = parseInt(nftCounterRaw) + 1; }
+        else { nextNFTNumber = 1; }
     }
     
-    async function saveUserToFirebase(user) {
-        if (!window.firebaseDB) return;
-        
-        try {
-            const db = window.firebaseDB;
-            const ref = window.firebaseRef;
-            const set = window.firebaseSet;
-            
-            const userData = {
-                userId: user.userId,
-                nick: user.nick,
-                phone: user.phone,
-                password: user.password,
-                avatarType: user.avatarType,
-                avatarData: user.avatarData,
-                bio: user.bio,
-                stars: user.stars,
-                gifts: user.gifts || [],
-                nfts: user.nfts || [],
-                isMaster: user.isMaster || false
-            };
-            
-            await set(ref(db, `users/${user.phone}`), userData);
-        } catch (error) {
-            console.error("Ошибка сохранения пользователя в Firebase:", error);
-        }
+    function saveAllUsers() {
+        const obj = {};
+        for(let [p,u] of usersMap) obj[p] = u;
+        localStorage.setItem('chattium_all_users', JSON.stringify(obj));
     }
     
-    async function saveMarketplaceToFirebase() {
-        if (!window.firebaseDB) return;
-        
-        try {
-            const db = window.firebaseDB;
-            const ref = window.firebaseRef;
-            const set = window.firebaseSet;
-            
-            const marketplaceObj = {};
-            nftMarketplace.forEach((item, idx) => {
-                marketplaceObj[item.nftId || idx] = item;
-            });
-            await set(ref(db, 'nftMarketplace'), marketplaceObj);
-        } catch (error) {
-            console.error("Ошибка сохранения маркетплейса в Firebase:", error);
-        }
-    }
+    function saveMarketplace() { localStorage.setItem('chattium_nft_marketplace', JSON.stringify(nftMarketplace)); }
+    function saveNFTCounter() { localStorage.setItem('chattium_nft_counter', nextNFTNumber - 1); }
     
-    async function saveNFTCounterToFirebase() {
-        if (!window.firebaseDB) return;
-        
-        try {
-            const db = window.firebaseDB;
-            const ref = window.firebaseRef;
-            const set = window.firebaseSet;
-            
-            await set(ref(db, 'nftCounter'), nextNFTNumber - 1);
-        } catch (error) {
-            console.error("Ошибка сохранения счетчика NFT в Firebase:", error);
-        }
-    }
-    
-    async function saveChatToFirebase(chatId, chatData) {
-        if (!window.firebaseDB || !currentUser) return;
-        
-        try {
-            const db = window.firebaseDB;
-            const ref = window.firebaseRef;
-            const set = window.firebaseSet;
-            
-            await set(ref(db, `chats/${currentUser.userId}/${chatId}`), chatData);
-        } catch (error) {
-            console.error("Ошибка сохранения чата в Firebase:", error);
-        }
-    }
-    
-    async function loadChatsFromFirebase() {
-        if (!window.firebaseDB || !currentUser) return false;
-        
-        try {
-            const db = window.firebaseDB;
-            const ref = window.firebaseRef;
-            const get = window.firebaseGet;
-            const child = window.firebaseChild;
-            
-            const chatsSnapshot = await get(child(ref(db), `chats/${currentUser.userId}`));
-            if (chatsSnapshot.exists()) {
-                const chatsData = chatsSnapshot.val();
-                chats.clear();
-                for (let id in chatsData) {
-                    chats.set(id, chatsData[id]);
-                }
-                return true;
-            }
-        } catch (error) {
-            console.error("Ошибка загрузки чатов из Firebase:", error);
-        }
-        return false;
-    }
-    
-    async function saveFavoritesToFirebase() {
-        if (!window.firebaseDB || !currentUser) return;
-        
-        try {
-            const db = window.firebaseDB;
-            const ref = window.firebaseRef;
-            const set = window.firebaseSet;
-            
-            await set(ref(db, `favorites/${currentUser.userId}`), Array.from(favorites));
-        } catch (error) {
-            console.error("Ошибка сохранения избранного в Firebase:", error);
-        }
-    }
-    
-    async function loadFavoritesFromFirebase() {
-        if (!window.firebaseDB || !currentUser) return false;
-        
-        try {
-            const db = window.firebaseDB;
-            const ref = window.firebaseRef;
-            const get = window.firebaseGet;
-            const child = window.firebaseChild;
-            
-            const favSnapshot = await get(child(ref(db), `favorites/${currentUser.userId}`));
-            if (favSnapshot.exists()) {
-                favorites = new Set(favSnapshot.val());
-                return true;
-            }
-        } catch (error) {
-            console.error("Ошибка загрузки избранного из Firebase:", error);
-        }
-        return false;
-    }
-    
-    // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
-    async function registerUser(phone, password, nick) {
-        if (window.registeredUsersMap && window.registeredUsersMap.has(phone)) return null;
-        
+    function registerUser(phone, password, nick) {
+        if(usersMap.has(phone)) return null;
         const user = { 
-            userId: 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6), 
+            userId: 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2,6), 
             nick: nick || 'User_' + phone.slice(-5), 
-            phone, 
-            password, 
+            phone, password, 
             avatarType: 'emoji', 
             avatarData: ['😀','😎','🦊','🐱','🌟'][Math.floor(Math.random()*5)], 
             bio: '✨ Новый пользователь ✨', 
@@ -665,76 +446,83 @@
             gifts: [], 
             nfts: [] 
         };
-        
-        if (window.registeredUsersMap) window.registeredUsersMap.set(phone, user);
-        await saveUserToFirebase(user);
+        usersMap.set(phone, user);
+        saveAllUsers();
         return user;
     }
     
     function loginUser(phone, password) {
-        if (!window.registeredUsersMap || !window.registeredUsersMap.has(phone)) return null;
-        const u = window.registeredUsersMap.get(phone);
-        if (u.password === password) return u;
+        if(!usersMap.has(phone)) return null;
+        const u = usersMap.get(phone);
+        if(u.password === password) return u;
         return null;
     }
     
+    function getUserById(userId) {
+        for(let [p,u] of usersMap) {
+            if(u.userId === userId) return u;
+        }
+        return null;
+    }
+    
+    // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
     function renderAvatar(container, user) {
         container.innerHTML = '';
-        if (user.avatarType === 'image' && user.avatarData && user.avatarData.startsWith('data:image')) { 
-            const img = document.createElement('img'); 
-            img.src = user.avatarData; 
-            container.appendChild(img); 
-        } else { 
-            container.textContent = user.avatarData || '😀'; 
-            container.style.fontSize = '1.8rem'; 
-            container.style.display = 'flex'; 
-            container.style.alignItems = 'center'; 
-            container.style.justifyContent = 'center'; 
+        if(user.avatarType === 'image' && user.avatarData && user.avatarData.startsWith('data:image')) {
+            const img = document.createElement('img');
+            img.src = user.avatarData;
+            container.appendChild(img);
+        } else {
+            container.textContent = user.avatarData || '😀';
+            container.style.fontSize = '1.8rem';
+            container.style.display = 'flex';
+            container.style.alignItems = 'center';
+            container.style.justifyContent = 'center';
         }
     }
     
     function updateUIProfile() {
-        const nameEl = document.getElementById('myName'); 
-        if (nameEl) nameEl.textContent = currentUser.nick;
-        const starsEl = document.getElementById('myStars'); 
-        if (starsEl) starsEl.innerHTML = `⭐ ${currentUser.stars || 0}`;
-        const avatarEl = document.getElementById('myAvatar'); 
-        if (avatarEl) renderAvatar(avatarEl, currentUser);
+        const nameEl = document.getElementById('myName');
+        if(nameEl) nameEl.textContent = currentUser.nick;
+        const starsEl = document.getElementById('myStars');
+        if(starsEl) starsEl.innerHTML = `⭐ ${currentUser.stars || 0}`;
+        const avatarEl = document.getElementById('myAvatar');
+        if(avatarEl) renderAvatar(avatarEl, currentUser);
     }
     
-    function uploadAvatar(callback) { 
-        const input = document.createElement('input'); 
-        input.type = 'file'; 
-        input.accept = 'image/*'; 
-        input.onchange = e => { 
-            const file = e.target.files[0]; 
-            if (file && file.size <= 5 * 1024 * 1024) { 
-                const reader = new FileReader(); 
-                reader.onload = ev => callback(ev.target.result); 
-                reader.readAsDataURL(file); 
-            } else alert('Файл >5МБ'); 
-        }; 
-        input.click(); 
+    function uploadAvatar(callback) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if(file && file.size <= 5*1024*1024) {
+                const reader = new FileReader();
+                reader.onload = ev => callback(ev.target.result);
+                reader.readAsDataURL(file);
+            } else alert('Файл >5МБ');
+        };
+        input.click();
     }
     
-    async function buyGift(giftTemplate) {
-        if ((currentUser.stars || 0) < giftTemplate.price) {
+    function buyGift(giftTemplate) {
+        if((currentUser.stars||0) < giftTemplate.price) {
             alert(`❌ Недостаточно звезд! Нужно ${giftTemplate.price} ⭐`);
             return false;
         }
         currentUser.stars -= giftTemplate.price;
         const gift = { ...giftTemplate, purchasedAt: Date.now(), expiresAt: Date.now() + (giftTemplate.resaleDays * 24 * 60 * 60 * 1000) };
-        if (!currentUser.gifts) currentUser.gifts = [];
+        if(!currentUser.gifts) currentUser.gifts = [];
         currentUser.gifts.push(gift);
-        await saveUserToFirebase(currentUser);
+        saveAllUsers();
         updateUIProfile();
-        alert(`✅ Вы купили ${giftTemplate.name}! Подарок можно перепродать в течение недели за 85% цены.`);
+        alert(`✅ Вы купили ${giftTemplate.name}!`);
         return true;
     }
     
-    async function buyNFT(nftTemplate, price = null) {
+    function buyNFT(nftTemplate, price = null) {
         const actualPrice = price || nftTemplate.basePrice;
-        if ((currentUser.stars || 0) < actualPrice) {
+        if((currentUser.stars||0) < actualPrice) {
             alert(`❌ Недостаточно звезд! Нужно ${actualPrice} ⭐`);
             return false;
         }
@@ -750,26 +538,26 @@
             patternName: pattern.name,
             patternEmoji: pattern.emoji
         };
-        if (!currentUser.nfts) currentUser.nfts = [];
+        if(!currentUser.nfts) currentUser.nfts = [];
         currentUser.nfts.push(nft);
-        await saveUserToFirebase(currentUser);
-        await saveNFTCounterToFirebase();
+        saveAllUsers();
+        saveNFTCounter();
         updateUIProfile();
         alert(`✅ Вы купили ${nftTemplate.name} #${nft.number} с узором "${nft.patternName}"!`);
         return true;
     }
     
-    async function listNFTForSale(nft) {
-        const price = prompt(`Введите цену продажи для ${nft.name} #${nft.number} (минимум ${Math.floor(nft.originalPrice * 0.5)} ⭐):`, nft.originalPrice);
-        if (!price) return;
+    function listNFTForSale(nft) {
+        const price = prompt(`Цена продажи для ${nft.name} #${nft.number} (мин ${Math.floor(nft.originalPrice * 0.5)} ⭐):`, nft.originalPrice);
+        if(!price) return;
         const sellPrice = parseInt(price);
-        if (isNaN(sellPrice) || sellPrice < Math.floor(nft.originalPrice * 0.5)) {
+        if(isNaN(sellPrice) || sellPrice < Math.floor(nft.originalPrice * 0.5)) {
             alert(`Цена должна быть не менее ${Math.floor(nft.originalPrice * 0.5)} ⭐`);
             return;
         }
         const index = currentUser.nfts.findIndex(n => n.id === nft.id && n.number === nft.number);
-        if (index !== -1) currentUser.nfts.splice(index, 1);
-        await saveUserToFirebase(currentUser);
+        if(index !== -1) currentUser.nfts.splice(index,1);
+        saveAllUsers();
         nftMarketplace.push({
             nftId: nft.id + '_' + nft.number,
             originalNFT: nft,
@@ -778,485 +566,330 @@
             price: sellPrice,
             listedAt: Date.now()
         });
-        await saveMarketplaceToFirebase();
+        saveMarketplace();
         alert(`✅ NFT ${nft.name} #${nft.number} выставлен на продажу за ${sellPrice} ⭐`);
         updateUIProfile();
     }
     
-    async function removeFromMarketplace(item) {
-        if (confirm(`Снять ${item.originalNFT.name} #${item.originalNFT.number} с продажи?`)) {
-            const nft = { ...item.originalNFT };
+    function removeFromMarketplace(item) {
+        if(confirm(`Снять ${item.originalNFT.name} #${item.originalNFT.number} с продажи?`)) {
+            const nft = {...item.originalNFT};
             currentUser.nfts.push(nft);
-            await saveUserToFirebase(currentUser);
+            saveAllUsers();
             const mpIndex = nftMarketplace.findIndex(i => i.nftId === item.nftId);
-            if (mpIndex !== -1) nftMarketplace.splice(mpIndex, 1);
-            await saveMarketplaceToFirebase();
+            if(mpIndex !== -1) nftMarketplace.splice(mpIndex,1);
+            saveMarketplace();
             updateUIProfile();
-            alert(`✅ NFT ${nft.name} #${nft.number} снят с продажи и возвращён в ваш профиль.`);
+            alert(`✅ NFT ${nft.name} #${nft.number} возвращён в профиль.`);
         }
     }
     
-    async function buyNFTFromMarketplace(item) {
-        if (currentUser.userId === item.ownerId) {
-            alert("Вы не можете купить свой собственный NFT");
+    function buyNFTFromMarketplace(item) {
+        if(currentUser.userId === item.ownerId) {
+            alert("Нельзя купить свой NFT");
             return;
         }
-        if ((currentUser.stars || 0) < item.price) {
+        if((currentUser.stars||0) < item.price) {
             alert(`❌ Недостаточно звезд! Нужно ${item.price} ⭐`);
             return;
         }
         currentUser.stars -= item.price;
-        const boughtNFT = { ...item.originalNFT, boughtAt: Date.now() };
-        if (!currentUser.nfts) currentUser.nfts = [];
+        const boughtNFT = {...item.originalNFT, boughtAt: Date.now()};
+        if(!currentUser.nfts) currentUser.nfts = [];
         currentUser.nfts.push(boughtNFT);
-        await saveUserToFirebase(currentUser);
+        saveAllUsers();
         
-        // Добавляем звезды продавцу
-        if (window.registeredUsersMap) {
-            for (let [p, u] of window.registeredUsersMap.entries()) {
-                if (u.userId === item.ownerId) {
-                    u.stars = (u.stars || 0) + item.price;
-                    await saveUserToFirebase(u);
-                    break;
-                }
-            }
+        const seller = getUserById(item.ownerId);
+        if(seller) {
+            seller.stars = (seller.stars||0) + item.price;
+            saveAllUsers();
         }
         
         const mpIndex = nftMarketplace.findIndex(i => i.nftId === item.nftId);
-        if (mpIndex !== -1) nftMarketplace.splice(mpIndex, 1);
-        await saveMarketplaceToFirebase();
+        if(mpIndex !== -1) nftMarketplace.splice(mpIndex,1);
+        saveMarketplace();
         updateUIProfile();
         alert(`✅ Вы купили ${item.originalNFT.name} #${item.originalNFT.number} за ${item.price} ⭐!`);
     }
     
-    async function resellGift(gift, index) {
+    function resellGift(gift, index) {
         const refund = Math.floor(gift.price * gift.resalePercent / 100);
         currentUser.stars += refund;
-        currentUser.gifts.splice(index, 1);
-        await saveUserToFirebase(currentUser);
+        currentUser.gifts.splice(index,1);
+        saveAllUsers();
         updateUIProfile();
-        alert(`✅ Вы продали ${gift.name} за ${refund} ⭐ (85% от цены ${gift.price} ⭐)`);
+        alert(`✅ Вы продали ${gift.name} за ${refund} ⭐`);
     }
     
     // Функции чатов
-    function createGroup() { 
-        const name = prompt('Название группы:'); 
-        if (!name) return; 
-        const id = 'group_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4); 
-        groups.set(id, { id, name, avatar: '👥', members: [currentUser.userId], admins: [currentUser.userId], creatorId: currentUser.userId, messages: [], type: 'group' }); 
-        chats.set(id, { id, name, avatar: '👥', type: 'group', messages: [], pinned: false }); 
-        saveChatToFirebase(id, chats.get(id));
-        renderChatsList(); 
-        setActiveChat(id); 
+    function loadUserChats() {
+        const key = `chattium_chats_${currentUser.userId}`;
+        const raw = localStorage.getItem(key);
+        if(raw) {
+            try {
+                const obj = JSON.parse(raw);
+                chats.clear();
+                for(let id in obj) chats.set(id, obj[id]);
+            } catch(e) {}
+        }
+        const favKey = `chattium_favorites_${currentUser.userId}`;
+        const favRaw = localStorage.getItem(favKey);
+        if(favRaw) {
+            try { favorites = new Set(JSON.parse(favRaw)); } catch(e) {}
+        }
     }
     
-    function createChannel() { 
-        const name = prompt('Название канала:'); 
-        if (!name) return; 
-        const id = 'channel_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4); 
-        groups.set(id, { id, name, avatar: '📢', members: [currentUser.userId], admins: [currentUser.userId], creatorId: currentUser.userId, messages: [], type: 'channel' }); 
-        chats.set(id, { id, name, avatar: '📢', type: 'channel', messages: [], pinned: false }); 
-        saveChatToFirebase(id, chats.get(id));
-        renderChatsList(); 
-        setActiveChat(id); 
+    function saveUserChats() {
+        const key = `chattium_chats_${currentUser.userId}`;
+        const chatsObj = {};
+        for(let [id,chat] of chats) chatsObj[id] = {...chat, messages: chat.messages || []};
+        localStorage.setItem(key, JSON.stringify(chatsObj));
+        localStorage.setItem(`chattium_favorites_${currentUser.userId}`, JSON.stringify([...favorites]));
     }
     
-    async function deleteChat(chatId) { 
-        if (!chatId) return; 
-        if (confirm('Удалить чат навсегда?')) { 
-            if (chats.has(chatId)) chats.delete(chatId); 
-            if (groups.has(chatId)) groups.delete(chatId); 
-            if (activeChatId === chatId) { 
-                activeChatId = null; 
-                const hn = document.getElementById('headerName'); 
-                if (hn) hn.textContent = 'Чат не выбран'; 
-                const ha = document.getElementById('headerAvatar'); 
-                if (ha) ha.innerHTML = '💬'; 
-                const ma = document.getElementById('messagesArea'); 
-                if (ma) ma.innerHTML = '<div class="system-message">Выберите чат</div>'; 
-            } 
-            if (window.firebaseDB && currentUser) {
-                const db = window.firebaseDB;
-                const ref = window.firebaseRef;
-                const remove = window.firebaseRemove;
-                await remove(ref(db, `chats/${currentUser.userId}/${chatId}`));
+    function createGroup() {
+        const name = prompt('Название группы:');
+        if(!name) return;
+        const id = 'group_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
+        groups.set(id, {id,name,avatar:'👥',members:[currentUser.userId],admins:[currentUser.userId],creatorId:currentUser.userId,messages:[],type:'group'});
+        chats.set(id, {id,name,avatar:'👥',type:'group',messages:[],pinned:false});
+        saveUserChats();
+        renderChatsList();
+        setActiveChat(id);
+    }
+    
+    function createChannel() {
+        const name = prompt('Название канала:');
+        if(!name) return;
+        const id = 'channel_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
+        groups.set(id, {id,name,avatar:'📢',members:[currentUser.userId],admins:[currentUser.userId],creatorId:currentUser.userId,messages:[],type:'channel'});
+        chats.set(id, {id,name,avatar:'📢',type:'channel',messages:[],pinned:false});
+        saveUserChats();
+        renderChatsList();
+        setActiveChat(id);
+    }
+    
+    function deleteChat(chatId) {
+        if(!chatId) return;
+        if(confirm('Удалить чат навсегда?')) {
+            chats.delete(chatId);
+            groups.delete(chatId);
+            if(activeChatId === chatId) {
+                activeChatId = null;
+                const hn = document.getElementById('headerName');
+                if(hn) hn.textContent = 'Чат не выбран';
+                const ha = document.getElementById('headerAvatar');
+                if(ha) ha.innerHTML = '💬';
+                const ma = document.getElementById('messagesArea');
+                if(ma) ma.innerHTML = '<div class="system-message">Выберите чат</div>';
             }
-            renderChatsList(); 
-        } 
-    }
-    
-    async function sendMessage(text, image = null) { 
-        if (!activeChatId || (!text.trim() && !image)) return; 
-        const msg = { id: Date.now() + '_' + Math.random(), text: text.trim(), image: image, timestamp: Date.now(), senderId: currentUser.userId, senderNick: currentUser.nick, reactions: [], edited: false, deleted: false }; 
-        if (chats.has(activeChatId)) { 
-            chats.get(activeChatId).messages.push(msg); 
-            await saveChatToFirebase(activeChatId, chats.get(activeChatId));
-            renderMessages(); 
-            renderChatsList(); 
-        } 
-        if (broadcastChannel) broadcastChannel.postMessage({ type: 'msg', targetId: activeChatId, payload: msg, senderInfo: { nick: currentUser.nick, avatarType: currentUser.avatarType, avatarData: currentUser.avatarData } }); 
-        const mi = document.getElementById('messageInput'); 
-        if (mi) mi.value = ''; 
-    }
-    
-    async function editMessage(chatId, msgId, newText) { 
-        const msg = chats.get(chatId)?.messages?.find(m => m.id === msgId); 
-        if (msg && msg.senderId === currentUser.userId) { 
-            msg.text = newText; 
-            msg.edited = true; 
-            await saveChatToFirebase(chatId, chats.get(chatId));
-            if (activeChatId === chatId) renderMessages(); 
-            if (broadcastChannel) broadcastChannel.postMessage({ type: 'edit', targetId: chatId, msgId, newText }); 
-        } 
-    }
-    
-    async function deleteMessage(chatId, msgId) { 
-        const msg = chats.get(chatId)?.messages?.find(m => m.id === msgId); 
-        if (msg && msg.senderId === currentUser.userId) { 
-            msg.deleted = true; 
-            msg.text = '🗑️ Удалено'; 
-            await saveChatToFirebase(chatId, chats.get(chatId));
-            if (activeChatId === chatId) renderMessages(); 
-            if (broadcastChannel) broadcastChannel.postMessage({ type: 'delete', targetId: chatId, msgId }); 
-        } 
-    }
-    
-    async function addReaction(chatId, msgId, emoji) { 
-        const msg = chats.get(chatId)?.messages?.find(m => m.id === msgId); 
-        if (msg) { 
-            if (!msg.reactions) msg.reactions = []; 
-            if (!msg.reactions.includes(emoji)) msg.reactions.push(emoji); 
-            await saveChatToFirebase(chatId, chats.get(chatId));
-            if (activeChatId === chatId) renderMessages(); 
-            if (broadcastChannel) broadcastChannel.postMessage({ type: 'reaction', targetId: chatId, msgId, emoji }); 
-        } 
-    }
-    
-    async function toggleFavorite(msgId) { 
-        if (favorites.has(msgId)) favorites.delete(msgId); 
-        else favorites.add(msgId); 
-        await saveFavoritesToFirebase();
-        if (activeChatId) renderMessages(); 
-        if (currentTab === 'favorites') renderChatsList(); 
-    }
-    
-    function showContextMenu(e, msgId, isMine) { 
-        e.preventDefault(); 
-        const existingMenu = document.querySelector('.context-menu'); 
-        if (existingMenu) existingMenu.remove(); 
-        const menu = document.createElement('div'); 
-        menu.className = 'context-menu'; 
-        if (isMine) { 
-            menu.innerHTML = `<button data-action="edit">✏️ Редактировать</button><button data-action="delete">🗑️ Удалить</button><button data-action="fav">⭐ Избранное</button><button data-action="react">😊 Реакция</button>`; 
-        } else { 
-            menu.innerHTML = `<button data-action="fav">⭐ Избранное</button><button data-action="react">😊 Реакция</button>`; 
-        } 
-        menu.style.left = e.pageX + 'px'; 
-        menu.style.top = e.pageY + 'px'; 
-        document.body.appendChild(menu); 
-        menu.querySelectorAll('button').forEach(btn => { 
-            btn.addEventListener('click', () => { 
-                const action = btn.dataset.action; 
-                if (action === 'edit') { 
-                    const newText = prompt('Редактировать:'); 
-                    if (newText) editMessage(activeChatId, msgId, newText); 
-                } 
-                if (action === 'delete') { 
-                    if (confirm('Удалить?')) deleteMessage(activeChatId, msgId); 
-                } 
-                if (action === 'fav') toggleFavorite(msgId); 
-                if (action === 'react') { 
-                    const emoji = prompt('Эмодзи (❤️, 😂, 👍):', '❤️'); 
-                    if (emoji) addReaction(activeChatId, msgId, emoji); 
-                } 
-                menu.remove(); 
-            }); 
-        }); 
-        setTimeout(() => { 
-            document.addEventListener('click', () => menu.remove(), { once: true }); 
-        }, 100); 
-    }
-    
-    function renderChatsList() { 
-        let list = Array.from(chats.values()); 
-        if (currentTab === 'favorites') list = list.filter(chat => chat.messages?.some(m => favorites.has(m.id))); 
-        const container = document.getElementById('chatsListContainer'); 
-        if (!container) return; 
-        if (list.length === 0) { 
-            container.innerHTML = '<div class="system-message" style="margin:20px;">Нет чатов</div>'; 
-            return; 
-        } 
-        container.innerHTML = list.map(chat => { 
-            const last = chat.messages?.length ? chat.messages[chat.messages.length - 1] : null; 
-            let preview = 'Нет сообщений'; 
-            if (last) { 
-                if (last.deleted) preview = '🗑️ Удалено'; 
-                else if (last.image) preview = '🖼️ Изображение'; 
-                else if (last.text) preview = last.text.substring(0, 35); 
-            } 
-            const typeBadge = chat.type === 'group' ? '<span style="background:#8b5cf6;border-radius:12px;padding:2px 6px;font-size:0.6rem;margin-left:6px;">Группа</span>' : (chat.type === 'channel' ? '<span style="background:#06b6d4;border-radius:12px;padding:2px 6px;font-size:0.6rem;margin-left:6px;">Канал</span>' : ''); 
-            return `<div class="chat-item ${activeChatId === chat.id ? 'active' : ''}" data-id="${chat.id}"><div class="chat-avatar">${chat.avatar || '👤'}</div><div class="chat-details"><div class="chat-title">${escapeHtml(chat.name)} ${typeBadge}</div><div class="chat-last-msg">${escapeHtml(preview)}</div></div><button class="delete-chat-btn" data-delete="${chat.id}">🗑️</button></div>`; 
-        }).join(''); 
-        document.querySelectorAll('.chat-item').forEach(el => { 
-            el.addEventListener('click', (e) => { 
-                if (!e.target.classList.contains('delete-chat-btn')) setActiveChat(el.dataset.id); 
-            }); 
-            const delBtn = el.querySelector('.delete-chat-btn'); 
-            if (delBtn) delBtn.addEventListener('click', (e) => { 
-                e.stopPropagation(); 
-                deleteChat(delBtn.dataset.delete); 
-            }); 
-        }); 
-    }
-    
-    function setActiveChat(chatId) { 
-        if (!chatId || !chats.has(chatId)) return; 
-        activeChatId = chatId; 
-        const chat = chats.get(chatId); 
-        const hn = document.getElementById('headerName'); 
-        if (hn) hn.textContent = chat.name; 
-        const ha = document.getElementById('headerAvatar'); 
-        if (ha) ha.innerHTML = chat.avatar || '👤'; 
-        renderChatsList(); 
-        renderMessages(); 
-    }
-    
-    function renderMessages() { 
-        const ma = document.getElementById('messagesArea'); 
-        if (!ma) return; 
-        if (!activeChatId || !chats.has(activeChatId)) { 
-            ma.innerHTML = '<div class="system-message">Выберите чат</div>'; 
-            return; 
-        } 
-        const msgs = chats.get(activeChatId).messages || []; 
-        if (!msgs.length) { 
-            ma.innerHTML = '<div class="system-message">💭 Напишите первое сообщение</div>'; 
-            return; 
-        } 
-        ma.innerHTML = msgs.map(msg => { 
-            if (msg.deleted) return `<div class="message-wrapper other-message"><div class="message-bubble" style="background:#334155;">🗑️ Удалено</div></div>`; 
-            const isMine = msg.senderId === currentUser.userId; 
-            const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); 
-            const imageHtml = msg.image ? `<img src="${msg.image}" class="message-image" onclick="window.open(this.src)">` : ''; 
-            const reactionsHtml = msg.reactions?.length ? `<div class="reactions" style="display:flex;gap:4px;margin-top:4px;">${msg.reactions.map(r => `<span style="background:#334155;border-radius:20px;padding:2px 6px;font-size:0.7rem;">${escapeHtml(r)}</span>`).join('')}</div>` : ''; 
-            return `<div class="message-wrapper ${isMine ? 'my-message' : 'other-message'}" data-msg-id="${msg.id}" data-is-mine="${isMine}"><div class="message-bubble">${escapeHtml(msg.text)}${imageHtml}${msg.edited ? ' <span style="font-size:0.6rem;">(ред.)</span>' : ''}</div><div class="message-meta"><span>${isMine ? 'Вы' : escapeHtml(msg.senderNick)}</span><span>${time}</span></div>${reactionsHtml}</div>`; 
-        }).join(''); 
-        document.querySelectorAll('.message-wrapper').forEach(wrapper => { 
-            wrapper.addEventListener('contextmenu', (e) => { 
-                e.preventDefault(); 
-                const msgId = wrapper.dataset.msgId; 
-                const isMine = wrapper.dataset.isMine === 'true'; 
-                showContextMenu(e, msgId, isMine); 
-            }); 
-            wrapper.addEventListener('touchstart', (e) => { 
-                let timer; 
-                timer = setTimeout(() => { 
-                    const msgId = wrapper.dataset.msgId; 
-                    const isMine = wrapper.dataset.isMine === 'true'; 
-                    const rect = wrapper.getBoundingClientRect(); 
-                    showContextMenu({ pageX: rect.left + 10, pageY: rect.top + 10 }, msgId, isMine); 
-                }, 500); 
-                wrapper.addEventListener('touchend', () => clearTimeout(timer)); 
-                wrapper.addEventListener('touchmove', () => clearTimeout(timer)); 
-            }); 
-        }); 
-        ma.scrollTop = ma.scrollHeight; 
-    }
-    
-    async function searchUser() { 
-        const query = document.getElementById('globalSearchInput')?.value.trim().toLowerCase(); 
-        if (!query) return; 
-        let found = null; 
-        if (window.registeredUsersMap) {
-            for (let [phone, user] of window.registeredUsersMap) { 
-                if (user.userId === currentUser.userId) continue; 
-                if (user.phone === query || user.nick.toLowerCase().includes(query) || user.phone.includes(query)) { 
-                    found = user; 
-                    break; 
-                } 
-            } 
+            saveUserChats();
+            renderChatsList();
         }
-        if (found) { 
-            if (!chats.has(found.userId)) { 
-                chats.set(found.userId, { id: found.userId, name: found.nick, avatar: found.avatarData || '👤', type: 'user', messages: [], pinned: false }); 
-                usersProfiles.set(found.userId, { nick: found.nick, avatarType: found.avatarType, avatarData: found.avatarData, phone: found.phone, bio: found.bio, stars: found.stars, gifts: found.gifts, nfts: found.nfts }); 
-                await saveChatToFirebase(found.userId, chats.get(found.userId));
-            } 
-            setActiveChat(found.userId); 
-        } else alert('❌ Пользователь не найден'); 
     }
     
-    async function clearActiveChat() { 
-        if (activeChatId && chats.has(activeChatId) && confirm('Очистить историю?')) { 
-            chats.get(activeChatId).messages = []; 
-            await saveChatToFirebase(activeChatId, chats.get(activeChatId));
-            renderMessages(); 
-            renderChatsList(); 
-        } 
+    function sendMessage(text, image=null) {
+        if(!activeChatId || (!text.trim() && !image)) return;
+        const msg = {id:Date.now()+'_'+Math.random(), text:text.trim(), image:image, timestamp:Date.now(), senderId:currentUser.userId, senderNick:currentUser.nick, reactions:[], edited:false, deleted:false};
+        if(chats.has(activeChatId)) {
+            chats.get(activeChatId).messages.push(msg);
+            saveUserChats();
+            renderMessages();
+            renderChatsList();
+        }
+        const mi = document.getElementById('messageInput');
+        if(mi) mi.value = '';
     }
     
-    function sendImage() { 
-        const input = document.createElement('input'); 
-        input.type = 'file'; 
-        input.accept = 'image/*'; 
-        input.onchange = e => { 
-            const file = e.target.files[0]; 
-            if (file && file.size <= 5 * 1024 * 1024) { 
-                const reader = new FileReader(); 
-                reader.onload = ev => sendMessage('', ev.target.result); 
-                reader.readAsDataURL(file); 
-            } else alert('Файл >5МБ'); 
-        }; 
-        input.click(); 
+    function editMessage(chatId, msgId, newText) {
+        const msg = chats.get(chatId)?.messages?.find(m => m.id === msgId);
+        if(msg && msg.senderId === currentUser.userId) {
+            msg.text = newText;
+            msg.edited = true;
+            saveUserChats();
+            if(activeChatId === chatId) renderMessages();
+        }
     }
     
-    function openShop() {
-        const modal = document.createElement('div'); 
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content"><div style="font-size:1.8rem;font-weight:bold;color:#fbbf24;">⭐ МАГАЗИН ЗВЕЗД ⭐</div><p style="color:#94a3b8;margin:8px 0;">1 звезда = 1 рубль</p>
-            <div class="gifts-list" style="margin-bottom:20px;">
-                <div class="gift-card" style="background:linear-gradient(135deg,#fbbf24,#b45309);" data-stars="100"><div class="gift-emoji-big">⭐</div><div class="gift-name-text">100 ЗВЕЗД</div><div class="gift-price-text">100 ₽</div></div>
-                <div class="gift-card" style="background:linear-gradient(135deg,#3b82f6,#1e3a8a);" data-stars="500"><div class="gift-emoji-big">⭐⭐</div><div class="gift-name-text">500 ЗВЕЗД</div><div class="gift-price-text">500 ₽</div></div>
-                <div class="gift-card" style="background:linear-gradient(135deg,#9333ea,#581c87);" data-stars="1000"><div class="gift-emoji-big">⭐⭐⭐</div><div class="gift-name-text">1000 ЗВЕЗД</div><div class="gift-price-text">1000 ₽</div></div>
-                <div class="gift-card" style="background:linear-gradient(135deg,#dc2626,#991b1b);" data-stars="5000"><div class="gift-emoji-big">🌟🌟🌟</div><div class="gift-name-text">5000 ЗВЕЗД</div><div class="gift-price-text">5000 ₽</div></div>
-            </div>
-            <div style="font-size:1.4rem;font-weight:bold;color:#fbbf24;margin:16px 0;">🎁 ПОДАРКИ</div>
-            <div class="gifts-list">${GIFT_TEMPLATES.gifts.map(g => `<div class="gift-card" style="background:${g.bg}" data-gift='${JSON.stringify(g)}'><div class="gift-emoji-big">${g.emoji}</div><div class="gift-name-text">${g.name}</div><div class="gift-price-text">${g.price} ⭐</div></div>`).join('')}</div>
-            <div style="font-size:1.4rem;font-weight:bold;color:#fbbf24;margin:16px 0;">💎 NFT (уникальные номера + узоры)</div>
-            <div class="gifts-list">${GIFT_TEMPLATES.nfts.map(n => `<div class="gift-card" style="background:linear-gradient(135deg,#6366f1,#3730a3);" data-nft='${JSON.stringify(n)}'><div class="gift-emoji-big">${n.emoji}</div><div class="gift-name-text">${n.name}</div><div class="gift-price-text">${n.basePrice} ⭐</div></div>`).join('')}</div>
-            <div class="modal-actions"><button class="close-btn" id="closeShopBtn">Закрыть</button></div></div>`;
-        document.body.appendChild(modal);
-        
-        document.querySelectorAll('[data-stars]').forEach(el => { 
-            el.addEventListener('click', async () => { 
-                const stars = parseInt(el.dataset.stars); 
-                if (confirm(`Купить ${stars} звезд за ${stars} ₽?`)) { 
-                    currentUser.stars = (currentUser.stars || 0) + stars; 
-                    await saveUserToFirebase(currentUser);
-                    updateUIProfile(); 
-                    alert(`✅ Куплено ${stars} звезд!`); 
-                    modal.remove(); 
-                    openShop(); 
-                } 
-            }); 
-        });
-        document.querySelectorAll('[data-gift]').forEach(el => { 
-            el.addEventListener('click', async () => { 
-                const gift = JSON.parse(el.dataset.gift); 
-                await buyGift(gift); 
-                modal.remove(); 
-                openShop(); 
-            }); 
-        });
-        document.querySelectorAll('[data-nft]').forEach(el => { 
-            el.addEventListener('click', async () => { 
-                const nft = JSON.parse(el.dataset.nft); 
-                await buyNFT(nft); 
-                modal.remove(); 
-                openShop(); 
-            }); 
-        });
-        document.getElementById('closeShopBtn')?.addEventListener('click', () => modal.remove());
+    function deleteMessage(chatId, msgId) {
+        const msg = chats.get(chatId)?.messages?.find(m => m.id === msgId);
+        if(msg && msg.senderId === currentUser.userId) {
+            msg.deleted = true;
+            msg.text = '🗑️ Удалено';
+            saveUserChats();
+            if(activeChatId === chatId) renderMessages();
+        }
     }
     
-    function openMarketplace() {
-        const modal = document.createElement('div'); 
-        modal.className = 'modal-overlay';
-        let listingsHtml = '';
-        if (nftMarketplace.length === 0) {
-            listingsHtml = '<p style="color:#94a3b8;">Нет NFT в продаже</p>';
+    function addReaction(chatId, msgId, emoji) {
+        const msg = chats.get(chatId)?.messages?.find(m => m.id === msgId);
+        if(msg) {
+            if(!msg.reactions) msg.reactions = [];
+            if(!msg.reactions.includes(emoji)) msg.reactions.push(emoji);
+            saveUserChats();
+            if(activeChatId === chatId) renderMessages();
+        }
+    }
+    
+    function toggleFavorite(msgId) {
+        if(favorites.has(msgId)) favorites.delete(msgId);
+        else favorites.add(msgId);
+        saveUserChats();
+        if(activeChatId) renderMessages();
+        if(currentTab === 'favorites') renderChatsList();
+    }
+    
+    function showContextMenu(e, msgId, isMine) {
+        e.preventDefault();
+        const existingMenu = document.querySelector('.context-menu');
+        if(existingMenu) existingMenu.remove();
+        const menu = document.createElement('div');
+        menu.className = 'context-menu';
+        if(isMine) {
+            menu.innerHTML = `<button data-action="edit">✏️ Редактировать</button><button data-action="delete">🗑️ Удалить</button><button data-action="fav">⭐ Избранное</button><button data-action="react">😊 Реакция</button>`;
         } else {
-            listingsHtml = nftMarketplace.map(item => `
-                <div class="marketplace-item" style="display:flex; align-items:center; gap:16px;">
-                    <div class="nft-preview" style="background: ${item.originalNFT.bgGradient}; position:relative;">
-                        <div style="font-size:2rem; z-index:5; position:relative;">${item.originalNFT.emoji}</div>
-                        <div style="position:absolute; top:0; left:0; right:0; bottom:0; background:${item.originalNFT.pattern}; background-size:20px 20px; opacity:0.25; border-radius:16px;"></div>
-                    </div>
-                    <div class="marketplace-info" style="flex:1;">
-                        <div><strong style="color:white;">${item.originalNFT.name}</strong> <span style="color:#60a5fa;">#${item.originalNFT.number}</span></div>
-                        <div style="font-size:0.7rem;color:#94a3b8;">Продавец: ${escapeHtml(item.ownerNick)}</div>
-                        <div style="font-size:0.6rem;margin-top:4px;">🎨 ${item.originalNFT.patternName}</div>
-                    </div>
-                    <div class="marketplace-price" style="color:#fbbf24;font-weight:bold;">${item.price} ⭐</div>
-                    <div>
-                        <button class="action-btn" style="background:#3b82f6; padding:6px 12px;" data-buy="${item.nftId}">Купить</button>
-                        ${item.ownerId === currentUser.userId ? `<button class="action-btn" style="background:#dc2626; padding:6px 12px; margin-left:5px;" data-remove="${item.nftId}">Снять</button>` : ''}
-                    </div>
-                </div>
-            `).join('');
+            menu.innerHTML = `<button data-action="fav">⭐ Избранное</button><button data-action="react">😊 Реакция</button>`;
         }
-        modal.innerHTML = `<div class="modal-content"><div style="font-size:1.6rem;font-weight:bold;color:#fbbf24;">🏪 МАРКЕТПЛЕЙС NFT</div><p style="color:#94a3b8;margin:8px 0;">Здесь можно купить или снять с продажи NFT</p>${listingsHtml}<div class="modal-actions"><button class="close-btn" id="closeMpBtn">Закрыть</button></div></div>`;
-        document.body.appendChild(modal);
-        
-        document.querySelectorAll('[data-buy]').forEach(btn => { 
-            btn.addEventListener('click', async () => { 
-                const nftId = btn.dataset.buy; 
-                const item = nftMarketplace.find(i => i.nftId === nftId); 
-                if (item) await buyNFTFromMarketplace(item); 
-                modal.remove(); 
-                openMarketplace(); 
-            }); 
-        });
-        document.querySelectorAll('[data-remove]').forEach(btn => { 
-            btn.addEventListener('click', async () => { 
-                const nftId = btn.dataset.remove; 
-                const item = nftMarketplace.find(i => i.nftId === nftId); 
-                if (item) await removeFromMarketplace(item); 
-                modal.remove(); 
-                openMarketplace(); 
-            }); 
-        });
-        document.getElementById('closeMpBtn')?.addEventListener('click', () => modal.remove());
-    }
-    
-    function openMyNftSell() {
-        if (!currentUser.nfts || currentUser.nfts.length === 0) {
-            alert("У вас нет NFT для продажи");
-            return;
-        }
-        const modal = document.createElement('div'); 
-        modal.className = 'modal-overlay';
-        const myNftsHtml = `<div class="gifts-list" style="max-height:60vh; overflow-y:auto;">${currentUser.nfts.map((n, idx) => `
-            <div class="my-nft-item" data-nft-index="${idx}" style="background: ${n.bgGradient}; position:relative; overflow:hidden;">
-                <div class="nft-number">#${n.number}</div>
-                <div class="gift-emoji-big" style="font-size:2.5rem; margin:0;">${n.emoji}</div>
-                <div class="gift-name-text">${n.name}</div>
-                <div style="font-size:0.6rem;">${n.patternName}</div>
-                <div class="pattern-overlay" style="position:absolute; top:8px; left:8px; right:8px; bottom:8px; background:${n.pattern}; background-size:20px 20px; opacity:0.2; border-radius:16px; pointer-events:none;"></div>
-                <button class="sell-btn-nft" data-nft-index="${idx}">💎 Продать</button>
-            </div>
-        `).join('')}</div>`;
-        
-        modal.innerHTML = `<div class="modal-content"><div style="font-size:1.6rem;font-weight:bold;color:#fbbf24;">💎 ВЫБЕРИТЕ NFT ДЛЯ ПРОДАЖИ</div><p style="color:#94a3b8;margin:8px 0;">Нажмите на кнопку "Продать" под NFT</p>${myNftsHtml}<div class="modal-actions"><button class="close-btn" id="closeSellBtn">Закрыть</button></div></div>`;
-        document.body.appendChild(modal);
-        
-        document.querySelectorAll('.sell-btn-nft').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const idx = parseInt(btn.dataset.nftIndex);
-                const nft = currentUser.nfts[idx];
-                if (nft) {
-                    await listNFTForSale(nft);
-                    modal.remove();
-                }
+        menu.style.left = e.pageX + 'px';
+        menu.style.top = e.pageY + 'px';
+        document.body.appendChild(menu);
+        menu.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                if(action === 'edit') { const newText = prompt('Редактировать:'); if(newText) editMessage(activeChatId, msgId, newText); }
+                if(action === 'delete') { if(confirm('Удалить?')) deleteMessage(activeChatId, msgId); }
+                if(action === 'fav') toggleFavorite(msgId);
+                if(action === 'react') { const emoji = prompt('Эмодзи (❤️, 😂, 👍):','❤️'); if(emoji) addReaction(activeChatId, msgId, emoji); }
+                menu.remove();
             });
         });
-        
-        document.getElementById('closeSellBtn')?.addEventListener('click', () => modal.remove());
+        setTimeout(() => { document.addEventListener('click', () => menu.remove(), {once:true}); }, 100);
     }
     
-    function showProfile(userId, isSelf = false) {
-        let user; 
-        if (isSelf) user = currentUser; 
-        else user = usersProfiles.get(userId) || (window.registeredUsersMap ? Array.from(window.registeredUsersMap.values()).find(u => u.userId === userId) : null) || { nick: 'Неизвестный', avatarType: 'emoji', avatarData: '👤', bio: 'Нет описания', phone: 'скрыт', stars: 0, gifts: [], nfts: [] };
-        
-        const modal = document.createElement('div'); 
+    function renderChatsList() {
+        let list = Array.from(chats.values());
+        if(currentTab === 'favorites') list = list.filter(chat => chat.messages?.some(m => favorites.has(m.id)));
+        const container = document.getElementById('chatsListContainer');
+        if(!container) return;
+        if(list.length === 0) {
+            container.innerHTML = '<div class="system-message" style="margin:20px;">Нет чатов</div>';
+            return;
+        }
+        container.innerHTML = list.map(chat => {
+            const last = chat.messages?.length ? chat.messages[chat.messages.length-1] : null;
+            let preview = 'Нет сообщений';
+            if(last) {
+                if(last.deleted) preview = '🗑️ Удалено';
+                else if(last.image) preview = '🖼️ Изображение';
+                else if(last.text) preview = last.text.substring(0,35);
+            }
+            const typeBadge = chat.type === 'group' ? '<span style="background:#8b5cf6;border-radius:12px;padding:2px 6px;font-size:0.6rem;margin-left:6px;">Группа</span>' : (chat.type === 'channel' ? '<span style="background:#06b6d4;border-radius:12px;padding:2px 6px;font-size:0.6rem;margin-left:6px;">Канал</span>' : '');
+            return `<div class="chat-item ${activeChatId === chat.id ? 'active' : ''}" data-id="${chat.id}"><div class="chat-avatar">${chat.avatar || '👤'}</div><div class="chat-details"><div class="chat-title">${escapeHtml(chat.name)} ${typeBadge}</div><div class="chat-last-msg">${escapeHtml(preview)}</div></div><button class="delete-chat-btn" data-delete="${chat.id}">🗑️</button></div>`;
+        }).join('');
+        document.querySelectorAll('.chat-item').forEach(el => {
+            el.addEventListener('click', (e) => { if(!e.target.classList.contains('delete-chat-btn')) setActiveChat(el.dataset.id); });
+            const delBtn = el.querySelector('.delete-chat-btn');
+            if(delBtn) delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteChat(delBtn.dataset.delete); });
+        });
+    }
+    
+    function setActiveChat(chatId) {
+        if(!chatId || !chats.has(chatId)) return;
+        activeChatId = chatId;
+        const chat = chats.get(chatId);
+        const hn = document.getElementById('headerName');
+        if(hn) hn.textContent = chat.name;
+        const ha = document.getElementById('headerAvatar');
+        if(ha) ha.innerHTML = chat.avatar || '👤';
+        renderChatsList();
+        renderMessages();
+    }
+    
+    function renderMessages() {
+        const ma = document.getElementById('messagesArea');
+        if(!ma) return;
+        if(!activeChatId || !chats.has(activeChatId)) {
+            ma.innerHTML = '<div class="system-message">Выберите чат</div>';
+            return;
+        }
+        const msgs = chats.get(activeChatId).messages || [];
+        if(!msgs.length) {
+            ma.innerHTML = '<div class="system-message">💭 Напишите первое сообщение</div>';
+            return;
+        }
+        ma.innerHTML = msgs.map(msg => {
+            if(msg.deleted) return `<div class="message-wrapper other-message"><div class="message-bubble" style="background:#334155;">🗑️ Удалено</div></div>`;
+            const isMine = msg.senderId === currentUser.userId;
+            const time = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+            const imageHtml = msg.image ? `<img src="${msg.image}" class="message-image" onclick="window.open(this.src)">` : '';
+            const reactionsHtml = msg.reactions?.length ? `<div style="display:flex;gap:4px;margin-top:4px;">${msg.reactions.map(r => `<span style="background:#334155;border-radius:20px;padding:2px 6px;font-size:0.7rem;">${escapeHtml(r)}</span>`).join('')}</div>` : '';
+            return `<div class="message-wrapper ${isMine ? 'my-message' : 'other-message'}" data-msg-id="${msg.id}" data-is-mine="${isMine}"><div class="message-bubble">${escapeHtml(msg.text)}${imageHtml}${msg.edited ? ' <span style="font-size:0.6rem;">(ред.)</span>' : ''}</div><div class="message-meta"><span>${isMine ? 'Вы' : escapeHtml(msg.senderNick)}</span><span>${time}</span></div>${reactionsHtml}</div>`;
+        }).join('');
+        document.querySelectorAll('.message-wrapper').forEach(wrapper => {
+            wrapper.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                const msgId = wrapper.dataset.msgId;
+                const isMine = wrapper.dataset.isMine === 'true';
+                showContextMenu(e, msgId, isMine);
+            });
+        });
+        ma.scrollTop = ma.scrollHeight;
+    }
+    
+    function searchUser() {
+        const query = document.getElementById('globalSearchInput')?.value.trim().toLowerCase();
+        if(!query) return;
+        let found = null;
+        for(let [phone, user] of usersMap) {
+            if(user.userId === currentUser.userId) continue;
+            if(user.phone === query || user.nick.toLowerCase().includes(query) || user.phone.includes(query)) {
+                found = user;
+                break;
+            }
+        }
+        if(found) {
+            if(!chats.has(found.userId)) {
+                chats.set(found.userId, { id:found.userId, name:found.nick, avatar:found.avatarData || '👤', type:'user', messages:[], pinned:false });
+                saveUserChats();
+            }
+            setActiveChat(found.userId);
+        } else alert('❌ Пользователь не найден');
+    }
+    
+    function clearActiveChat() {
+        if(activeChatId && chats.has(activeChatId) && confirm('Очистить историю?')) {
+            chats.get(activeChatId).messages = [];
+            saveUserChats();
+            renderMessages();
+            renderChatsList();
+        }
+    }
+    
+    function sendImage() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if(file && file.size <= 5*1024*1024) {
+                const reader = new FileReader();
+                reader.onload = ev => sendMessage('', ev.target.result);
+                reader.readAsDataURL(file);
+            } else alert('Файл >5МБ');
+        };
+        input.click();
+    }
+    
+    // ========== ОТОБРАЖЕНИЕ ПРОФИЛЯ (без звезд для других) ==========
+    function showProfile(user, isSelf = false) {
+        const modal = document.createElement('div');
         modal.className = 'modal-overlay';
-        const avatarHtml = (user.avatarType === 'image' && user.avatarData) ? `<img src="${user.avatarData}">` : `<div style="font-size:3rem;">${user.avatarData || '😀'}</div>`;
+        
+        const avatarHtml = (user.avatarType === 'image' && user.avatarData) ? `<img src="${user.avatarData}" style="width:100%;height:100%;object-fit:cover;">` : `<div style="font-size:3rem;">${user.avatarData || '😀'}</div>`;
         
         const giftsHtml = (user.gifts && user.gifts.length) ? `<div class="gifts-list">${user.gifts.map((g, idx) => `
             <div class="gift-card" style="background:${g.bg}; width:140px; position:relative;">
-                ${isSelf && Date.now() < g.expiresAt ? `<div style="position:absolute;top:5px;right:5px;background:#fbbf24;color:#1e293b;border-radius:20px;padding:2px 6px;font-size:0.6rem;cursor:pointer;" data-sell-gift="${idx}">Продать за ${Math.floor(g.price * 0.85)}⭐</div>` : ''}
+                ${isSelf && Date.now() < g.expiresAt ? `<div style="position:absolute;top:5px;right:5px;background:#fbbf24;color:#1e293b;border-radius:20px;padding:2px 6px;font-size:0.6rem;cursor:pointer;" data-sell-gift="${idx}">Продать за ${Math.floor(g.price*0.85)}⭐</div>` : ''}
                 <div class="gift-emoji-big" style="font-size:3rem;">${g.emoji}</div>
                 <div class="gift-name-text">${g.name}</div>
             </div>`).join('')}</div>` : '<p style="color:#64748b;">Нет подарков</p>';
@@ -1267,275 +900,297 @@
                 <div class="gift-emoji-big" style="font-size:3rem; position:relative; z-index:10;">${n.emoji}</div>
                 <div class="gift-name-text" style="position:relative; z-index:10;">${n.name}</div>
                 <div style="font-size:0.6rem;margin-top:4px; position:relative; z-index:10;">🎨 ${n.patternName || 'классический'}</div>
-                <div class="pattern-overlay" style="background: ${n.pattern}; background-size:20px 20px;"></div>
+                <div class="pattern-overlay" style="background: ${n.pattern}; background-size:20px 20px; position:absolute; top:8px; left:8px; right:8px; bottom:8px; opacity:0.25; border-radius:20px;"></div>
             </div>`).join('')}</div>` : '<p style="color:#64748b;">Нет NFT</p>';
         
-        modal.innerHTML = `<div class="modal-content"><div class="profile-avatar" id="profileAvatar">${avatarHtml}</div>${isSelf ? '<button class="save-btn" id="uploadAvatarBtn" style="margin-bottom:12px;">📸 Загрузить аватарку</button>' : ''}<div class="profile-nick">${escapeHtml(user.nick)}</div><div class="profile-stars">⭐ ${user.stars || 0} звезд</div><div class="profile-phone-display" style="color:#60a5fa;margin:8px 0;">📞 ${escapeHtml(user.phone)}</div><div class="profile-bio" style="background:#0f172a;border-radius:24px;padding:12px;margin:16px 0;">${isSelf ? `<textarea id="profileBio" rows="3" style="width:100%;background:#1e293b;border:none;border-radius:20px;padding:12px;color:white;">${escapeHtml(user.bio)}</textarea>` : `<div>${escapeHtml(user.bio)}</div>`}</div>${isSelf ? `<div><input type="text" id="profileNick" placeholder="Никнейм" value="${escapeHtml(user.nick)}" style="width:100%;background:#1e293b;border:none;border-radius:20px;padding:12px;color:white;"></div>` : ''}<h4 style="color:white;margin-top:16px;">🎁 Подарки</h4>${giftsHtml}<h4 style="color:white;margin-top:16px;">💎 NFT (уникальные номера + узоры по краям)</h4>${nftsHtml}<div class="modal-actions">${isSelf ? '<button class="save-btn" id="saveProfileBtn">💾 Сохранить</button>' : ''}<button class="close-btn" id="closeProfileBtn">Закрыть</button></div></div>`;
+        modal.innerHTML = `<div class="modal-content">
+            <div class="profile-avatar" id="profileAvatar">${avatarHtml}</div>
+            ${isSelf ? '<button class="save-btn" id="uploadAvatarBtn" style="margin-bottom:12px;">📸 Загрузить аватарку</button>' : ''}
+            <div style="font-size:1.5rem; font-weight:bold; color:white;">${escapeHtml(user.nick)}</div>
+            <div class="${isSelf ? 'profile-stars' : 'profile-stars-private'}">${isSelf ? `⭐ ${user.stars || 0} звезд` : '⭐ звёзды скрыты'}</div>
+            <div style="color:#60a5fa; margin:8px 0;">📞 ${escapeHtml(user.phone)}</div>
+            <div style="background:#0f172a; border-radius:24px; padding:12px; margin:16px 0;">${isSelf ? `<textarea id="profileBio" rows="3" style="width:100%;background:#1e293b;border:none;border-radius:20px;padding:12px;color:white;">${escapeHtml(user.bio)}</textarea>` : `<div>${escapeHtml(user.bio)}</div>`}</div>
+            ${isSelf ? `<div><input type="text" id="profileNick" placeholder="Никнейм" value="${escapeHtml(user.nick)}" style="width:100%;background:#1e293b;border:none;border-radius:20px;padding:12px;color:white;"></div>` : ''}
+            <h4 style="color:white; margin-top:16px;">🎁 Подарки</h4>
+            ${giftsHtml}
+            <h4 style="color:white; margin-top:16px;">💎 NFT</h4>
+            ${nftsHtml}
+            <div class="modal-actions">
+                ${isSelf ? '<button class="save-btn" id="saveProfileBtn">💾 Сохранить</button>' : ''}
+                <button class="close-btn" id="closeProfileBtn">Закрыть</button>
+            </div>
+        </div>`;
         document.body.appendChild(modal);
         
-        if (isSelf) {
-            document.getElementById('uploadAvatarBtn')?.addEventListener('click', () => { 
-                uploadAvatar(async base64 => { 
-                    currentUser.avatarType = 'image'; 
-                    currentUser.avatarData = base64; 
-                    await saveUserToFirebase(currentUser);
-                    updateUIProfile(); 
-                    modal.remove(); 
-                    showProfile(currentUser.userId, true); 
-                }); 
+        if(isSelf) {
+            document.getElementById('uploadAvatarBtn')?.addEventListener('click', () => {
+                uploadAvatar(base64 => {
+                    currentUser.avatarType = 'image';
+                    currentUser.avatarData = base64;
+                    saveAllUsers();
+                    updateUIProfile();
+                    modal.remove();
+                    showProfile(currentUser, true);
+                });
             });
-            document.getElementById('saveProfileBtn')?.addEventListener('click', async () => { 
-                currentUser.bio = document.getElementById('profileBio')?.value || ''; 
-                const newNick = document.getElementById('profileNick')?.value || ''; 
-                if (newNick.trim()) currentUser.nick = newNick.trim().substring(0, 30); 
-                await saveUserToFirebase(currentUser);
-                updateUIProfile(); 
-                modal.remove(); 
-                renderChatsList(); 
-                if (activeChatId) renderMessages(); 
+            document.getElementById('saveProfileBtn')?.addEventListener('click', () => {
+                currentUser.bio = document.getElementById('profileBio')?.value || '';
+                const newNick = document.getElementById('profileNick')?.value || '';
+                if(newNick.trim()) currentUser.nick = newNick.trim().substring(0,30);
+                saveAllUsers();
+                updateUIProfile();
+                modal.remove();
+                renderChatsList();
+                if(activeChatId) renderMessages();
             });
-            document.querySelectorAll('[data-sell-gift]').forEach(btn => { 
-                btn.addEventListener('click', async (e) => { 
-                    e.stopPropagation(); 
-                    const idx = parseInt(btn.dataset.sellGift); 
-                    if (currentUser.gifts[idx]) await resellGift(currentUser.gifts[idx], idx); 
-                    modal.remove(); 
-                    showProfile(currentUser.userId, true); 
-                }); 
+            document.querySelectorAll('[data-sell-gift]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const idx = parseInt(btn.dataset.sellGift);
+                    if(currentUser.gifts[idx]) resellGift(currentUser.gifts[idx], idx);
+                    modal.remove();
+                    showProfile(currentUser, true);
+                });
             });
         }
         document.getElementById('closeProfileBtn')?.addEventListener('click', () => modal.remove());
     }
     
-    async function initMessenger() {
-        updateUIProfile(); 
-        await renderChatsList(); 
-        if (chats.size > 0) setActiveChat(Array.from(chats.keys())[0]);
+    // ========== МАГАЗИН И МАРКЕТПЛЕЙС ==========
+    function openShop() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content">
+            <div style="font-size:1.8rem;font-weight:bold;color:#fbbf24;">⭐ МАГАЗИН ЗВЕЗД ⭐</div>
+            <div class="gifts-list">
+                <div class="gift-card" style="background:linear-gradient(135deg,#fbbf24,#b45309);" data-stars="100"><div class="gift-emoji-big">⭐</div><div class="gift-name-text">100 ЗВЕЗД</div><div class="gift-price-text">100 ₽</div></div>
+                <div class="gift-card" style="background:linear-gradient(135deg,#3b82f6,#1e3a8a);" data-stars="500"><div class="gift-emoji-big">⭐⭐</div><div class="gift-name-text">500 ЗВЕЗД</div><div class="gift-price-text">500 ₽</div></div>
+                <div class="gift-card" style="background:linear-gradient(135deg,#9333ea,#581c87);" data-stars="1000"><div class="gift-emoji-big">⭐⭐⭐</div><div class="gift-name-text">1000 ЗВЕЗД</div><div class="gift-price-text">1000 ₽</div></div>
+                <div class="gift-card" style="background:linear-gradient(135deg,#dc2626,#991b1b);" data-stars="5000"><div class="gift-emoji-big">🌟🌟🌟</div><div class="gift-name-text">5000 ЗВЕЗД</div><div class="gift-price-text">5000 ₽</div></div>
+            </div>
+            <div style="font-size:1.4rem;font-weight:bold;color:#fbbf24;margin:16px 0;">🎁 ПОДАРКИ</div>
+            <div class="gifts-list">${GIFT_TEMPLATES.gifts.map(g => `<div class="gift-card" style="background:${g.bg}" data-gift='${JSON.stringify(g)}'><div class="gift-emoji-big">${g.emoji}</div><div class="gift-name-text">${g.name}</div><div class="gift-price-text">${g.price} ⭐</div></div>`).join('')}</div>
+            <div style="font-size:1.4rem;font-weight:bold;color:#fbbf24;margin:16px 0;">💎 NFT</div>
+            <div class="gifts-list">${GIFT_TEMPLATES.nfts.map(n => `<div class="gift-card" style="background:linear-gradient(135deg,#6366f1,#3730a3);" data-nft='${JSON.stringify(n)}'><div class="gift-emoji-big">${n.emoji}</div><div class="gift-name-text">${n.name}</div><div class="gift-price-text">${n.basePrice} ⭐</div></div>`).join('')}</div>
+            <div class="modal-actions"><button class="close-btn" id="closeShopBtn">Закрыть</button></div>
+        </div>`;
+        document.body.appendChild(modal);
         
-        broadcastChannel = new BroadcastChannel(CHANNEL);
-        broadcastChannel.onmessage = async (e) => { 
-            const data = e.data; 
-            if (data.type === 'msg' && data.targetId === currentUser.userId) { 
-                if (!chats.has(data.payload.senderId)) { 
-                    chats.set(data.payload.senderId, { id: data.payload.senderId, name: data.senderInfo?.nick || 'User', avatar: data.senderInfo?.avatarData || '👤', type: 'user', messages: [], pinned: false }); 
-                    usersProfiles.set(data.payload.senderId, { nick: data.senderInfo?.nick, avatarType: data.senderInfo?.avatarType, avatarData: data.senderInfo?.avatarData, phone: '', bio: '', stars: 0, gifts: [], nfts: [] }); 
-                    await saveChatToFirebase(data.payload.senderId, chats.get(data.payload.senderId));
-                } 
-                const chat = chats.get(data.payload.senderId); 
-                chat.messages.push(data.payload); 
-                await saveChatToFirebase(data.payload.senderId, chat);
-                if (activeChatId === data.payload.senderId) renderMessages(); 
-                renderChatsList(); 
-            } 
-        };
-        
-        const sendBtn = document.getElementById('sendMsgBtn'); 
-        const messageInput = document.getElementById('messageInput'); 
-        const clearHistoryBtn = document.getElementById('clearHistoryBtn'); 
-        const deleteChatBtn = document.getElementById('deleteChatBtn'); 
-        const globalSearchBtn = document.getElementById('globalSearchBtn'); 
-        const createGroupBtn = document.getElementById('createGroupBtn'); 
-        const createChannelBtn = document.getElementById('createChannelBtn'); 
-        const shopBtn = document.getElementById('shopBtn'); 
-        const marketplaceBtn = document.getElementById('marketplaceBtn'); 
-        const myNftSellBtn = document.getElementById('myNftSellBtn'); 
-        const myProfileBtn = document.getElementById('myProfileBtn'); 
-        const chatHeaderInfo = document.getElementById('chatHeaderInfo'); 
-        const tabs = document.querySelectorAll('.tab');
-        
-        if (sendBtn) sendBtn.onclick = () => { sendMessage(messageInput?.value || ''); if (messageInput) messageInput.value = ''; };
-        if (messageInput) messageInput.onkeypress = (e) => { if (e.key === 'Enter') { sendMessage(e.target.value); e.target.value = ''; } };
-        if (clearHistoryBtn) clearHistoryBtn.onclick = clearActiveChat;
-        if (deleteChatBtn) deleteChatBtn.onclick = () => { if (activeChatId) deleteChat(activeChatId); };
-        if (globalSearchBtn) globalSearchBtn.onclick = searchUser;
-        if (createGroupBtn) createGroupBtn.onclick = createGroup;
-        if (createChannelBtn) createChannelBtn.onclick = createChannel;
-        if (shopBtn) shopBtn.onclick = openShop;
-        if (marketplaceBtn) marketplaceBtn.onclick = openMarketplace;
-        if (myNftSellBtn) myNftSellBtn.onclick = openMyNftSell;
-        if (myProfileBtn) myProfileBtn.onclick = () => showProfile(currentUser.userId, true);
-        if (chatHeaderInfo) chatHeaderInfo.onclick = () => { if (activeChatId && !chats.get(activeChatId)?.type) showProfile(activeChatId, false); };
-        if (tabs) tabs.forEach(tab => { 
-            tab.onclick = () => { 
-                currentTab = tab.dataset.tab; 
-                tabs.forEach(t => t.classList.remove('active')); 
-                tab.classList.add('active'); 
-                renderChatsList(); 
-            }; 
+        document.querySelectorAll('[data-stars]').forEach(el => {
+            el.addEventListener('click', () => {
+                const stars = parseInt(el.dataset.stars);
+                if(confirm(`Купить ${stars} звезд за ${stars} ₽?`)) {
+                    currentUser.stars = (currentUser.stars||0) + stars;
+                    saveAllUsers();
+                    updateUIProfile();
+                    alert(`✅ Куплено ${stars} звезд!`);
+                    modal.remove();
+                    openShop();
+                }
+            });
         });
-        
-        const emojiBtn = document.getElementById('emojiBtn'); 
-        const emojiPicker = document.getElementById('emojiPicker');
-        if (emojiBtn) emojiBtn.onclick = (e) => { e.stopPropagation(); if (emojiPicker) emojiPicker.classList.toggle('active'); };
-        document.querySelectorAll('.emoji-option').forEach(emoji => { 
-            emoji.onclick = () => { 
-                if (messageInput) messageInput.value += emoji.textContent; 
-                if (emojiPicker) emojiPicker.classList.remove('active'); 
-                if (messageInput) messageInput.focus(); 
-            }; 
+        document.querySelectorAll('[data-gift]').forEach(el => {
+            el.addEventListener('click', () => { buyGift(JSON.parse(el.dataset.gift)); modal.remove(); openShop(); });
         });
-        document.addEventListener('click', (e) => { if (emojiBtn && emojiPicker && !emojiBtn.contains(e.target) && !emojiPicker.contains(e.target) && emojiPicker.classList.contains('active')) emojiPicker.classList.remove('active'); });
-        const imageBtn = document.getElementById('imageBtn'); if (imageBtn) imageBtn.onclick = sendImage;
+        document.querySelectorAll('[data-nft]').forEach(el => {
+            el.addEventListener('click', () => { buyNFT(JSON.parse(el.dataset.nft)); modal.remove(); openShop(); });
+        });
+        document.getElementById('closeShopBtn')?.addEventListener('click', () => modal.remove());
+    }
+    
+    function openMarketplace() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        let listingsHtml = nftMarketplace.length === 0 ? '<p style="color:#94a3b8;">Нет NFT в продаже</p>' : 
+            nftMarketplace.map(item => `<div class="marketplace-item">
+                <div class="nft-preview" style="background:${item.originalNFT.bgGradient}; position:relative;"><div style="font-size:2rem;">${item.originalNFT.emoji}</div><div style="position:absolute;top:0;left:0;right:0;bottom:0;background:${item.originalNFT.pattern};background-size:20px 20px;opacity:0.25;border-radius:16px;"></div></div>
+                <div class="marketplace-info"><div><strong style="color:white;">${item.originalNFT.name}</strong> <span style="color:#60a5fa;">#${item.originalNFT.number}</span></div><div style="font-size:0.7rem;color:#94a3b8;">${escapeHtml(item.ownerNick)}</div><div style="font-size:0.6rem;">🎨 ${item.originalNFT.patternName}</div></div>
+                <div class="marketplace-price">${item.price} ⭐</div>
+                <div><button class="action-btn" style="background:#3b82f6; padding:6px 12px;" data-buy="${item.nftId}">Купить</button>${item.ownerId === currentUser.userId ? `<button class="action-btn" style="background:#dc2626; padding:6px 12px; margin-left:5px;" data-remove="${item.nftId}">Снять</button>` : ''}</div>
+            </div>`).join('');
+        modal.innerHTML = `<div class="modal-content"><div style="font-size:1.6rem;font-weight:bold;color:#fbbf24;">🏪 МАРКЕТПЛЕЙС NFT</div>${listingsHtml}<div class="modal-actions"><button class="close-btn" id="closeMpBtn">Закрыть</button></div></div>`;
+        document.body.appendChild(modal);
+        document.querySelectorAll('[data-buy]').forEach(btn => {
+            btn.addEventListener('click', () => { const item = nftMarketplace.find(i => i.nftId === btn.dataset.buy); if(item) buyNFTFromMarketplace(item); modal.remove(); openMarketplace(); });
+        });
+        document.querySelectorAll('[data-remove]').forEach(btn => {
+            btn.addEventListener('click', () => { const item = nftMarketplace.find(i => i.nftId === btn.dataset.remove); if(item) removeFromMarketplace(item); modal.remove(); openMarketplace(); });
+        });
+        document.getElementById('closeMpBtn')?.addEventListener('click', () => modal.remove());
+    }
+    
+    function openMyNftSell() {
+        if(!currentUser.nfts?.length) { alert("Нет NFT для продажи"); return; }
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content"><div style="font-size:1.6rem;font-weight:bold;color:#fbbf24;">💎 ВЫБЕРИТЕ NFT ДЛЯ ПРОДАЖИ</div>
+            <div class="gifts-list" style="max-height:60vh; overflow-y:auto;">${currentUser.nfts.map((n, idx) => `<div class="my-nft-item" style="background:${n.bgGradient}; position:relative;">
+                <div class="nft-number">#${n.number}</div><div class="gift-emoji-big" style="font-size:2.5rem;">${n.emoji}</div>
+                <div class="gift-name-text">${n.name}</div><div style="font-size:0.6rem;">${n.patternName}</div>
+                <button class="sell-btn-nft" data-nft-index="${idx}">💎 Продать</button>
+            </div>`).join('')}</div>
+            <div class="modal-actions"><button class="close-btn" id="closeSellBtn">Закрыть</button></div></div>`;
+        document.body.appendChild(modal);
+        document.querySelectorAll('.sell-btn-nft').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const nft = currentUser.nfts[parseInt(btn.dataset.nftIndex)];
+                if(nft) { listNFTForSale(nft); modal.remove(); }
+            });
+        });
+        document.getElementById('closeSellBtn')?.addEventListener('click', () => modal.remove());
     }
     
     // ========== ИНИЦИАЛИЗАЦИЯ ==========
-    window.registeredUsersMap = new Map();
-    
-    async function initApp() {
-        // Ждем Firebase
-        const waitForFirebase = () => {
-            return new Promise((resolve) => {
-                if (window.firebaseDB) {
-                    resolve();
-                } else {
-                    setTimeout(() => waitForFirebase().then(resolve), 100);
-                }
-            });
-        };
+    function initMessenger() {
+        loadUserChats();
+        updateUIProfile();
+        renderChatsList();
+        if(chats.size > 0) setActiveChat(Array.from(chats.keys())[0]);
         
-        await waitForFirebase();
+        const sendBtn = document.getElementById('sendMsgBtn');
+        const messageInput = document.getElementById('messageInput');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const deleteChatBtn = document.getElementById('deleteChatBtn');
+        const globalSearchBtn = document.getElementById('globalSearchBtn');
+        const createGroupBtn = document.getElementById('createGroupBtn');
+        const createChannelBtn = document.getElementById('createChannelBtn');
+        const shopBtn = document.getElementById('shopBtn');
+        const marketplaceBtn = document.getElementById('marketplaceBtn');
+        const myNftSellBtn = document.getElementById('myNftSellBtn');
+        const myProfileBtn = document.getElementById('myProfileBtn');
+        const chatHeaderInfo = document.getElementById('chatHeaderInfo');
+        const tabs = document.querySelectorAll('.tab');
         
-        // Загружаем данные из Firebase
-        await loadAllDataFromFirebase();
-        
-        // Создаем мастера если нет
-        if (!window.registeredUsersMap.has(MASTER_PHONE)) {
-            const masterUser = { 
-                userId: 'master_' + Date.now(), 
-                nick: 'Admin', 
-                phone: MASTER_PHONE, 
-                password: MASTER_PASSWORD, 
-                avatarType: 'emoji', 
-                avatarData: '👑', 
-                bio: '✨ Владелец ✨', 
-                stars: 9999999, 
-                gifts: [], 
-                nfts: [], 
-                isMaster: true 
-            };
-            window.registeredUsersMap.set(MASTER_PHONE, masterUser);
-            await saveUserToFirebase(masterUser);
-        }
-        
-        // Настройка обработчиков авторизации
-        if (document.getElementById('switchToRegister')) document.getElementById('switchToRegister').onclick = toggleAuthMode;
-        if (document.getElementById('authBtn')) document.getElementById('authBtn').onclick = handleAuth;
-        
-        const phoneField = document.getElementById('phoneInput');
-        const passwordField = document.getElementById('passwordInput');
-        if (phoneField) phoneField.onkeypress = (e) => { if (e.key === 'Enter') handleAuth(); };
-        if (passwordField) passwordField.onkeypress = (e) => { if (e.key === 'Enter') handleAuth(); };
-        
-        // Проверка сохраненной сессии
-        const savedPhone = localStorage.getItem('chattium_current_user_phone');
-        const savedPassword = localStorage.getItem('chattium_current_user_password');
-        if (savedPhone && savedPassword) {
-            const user = loginUser(savedPhone, savedPassword);
-            if (user) {
-                currentUser = user;
-                await loadChatsFromFirebase();
-                await loadFavoritesFromFirebase();
-                if (document.getElementById('authOverlay')) document.getElementById('authOverlay').style.display = 'none';
-                if (document.getElementById('chatApp')) document.getElementById('chatApp').style.display = 'block';
-                initMessenger();
-                return;
+        if(sendBtn) sendBtn.onclick = () => { sendMessage(messageInput?.value || ''); if(messageInput) messageInput.value = ''; };
+        if(messageInput) messageInput.onkeypress = (e) => { if(e.key === 'Enter') { sendMessage(e.target.value); e.target.value = ''; } };
+        if(clearHistoryBtn) clearHistoryBtn.onclick = clearActiveChat;
+        if(deleteChatBtn) deleteChatBtn.onclick = () => { if(activeChatId) deleteChat(activeChatId); };
+        if(globalSearchBtn) globalSearchBtn.onclick = searchUser;
+        if(createGroupBtn) createGroupBtn.onclick = createGroup;
+        if(createChannelBtn) createChannelBtn.onclick = createChannel;
+        if(shopBtn) shopBtn.onclick = openShop;
+        if(marketplaceBtn) marketplaceBtn.onclick = openMarketplace;
+        if(myNftSellBtn) myNftSellBtn.onclick = openMyNftSell;
+        if(myProfileBtn) myProfileBtn.onclick = () => showProfile(currentUser, true);
+        if(chatHeaderInfo) chatHeaderInfo.onclick = () => {
+            if(activeChatId && !chats.get(activeChatId)?.type) {
+                const user = getUserById(activeChatId);
+                if(user) showProfile(user, false);
             }
-        }
+        };
+        if(tabs) tabs.forEach(tab => {
+            tab.onclick = () => { currentTab = tab.dataset.tab; tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); renderChatsList(); };
+        });
         
-        if (document.getElementById('authOverlay')) document.getElementById('authOverlay').style.display = 'flex';
-        if (document.getElementById('chatApp')) document.getElementById('chatApp').style.display = 'none';
+        const emojiBtn = document.getElementById('emojiBtn');
+        const emojiPicker = document.getElementById('emojiPicker');
+        if(emojiBtn) emojiBtn.onclick = (e) => { e.stopPropagation(); if(emojiPicker) emojiPicker.classList.toggle('active'); };
+        document.querySelectorAll('.emoji-option').forEach(emoji => {
+            emoji.onclick = () => { if(messageInput) messageInput.value += emoji.textContent; if(emojiPicker) emojiPicker.classList.remove('active'); if(messageInput) messageInput.focus(); };
+        });
+        document.addEventListener('click', (e) => { if(emojiBtn && emojiPicker && !emojiBtn.contains(e.target) && !emojiPicker.contains(e.target) && emojiPicker.classList.contains('active')) emojiPicker.classList.remove('active'); });
+        const imageBtn = document.getElementById('imageBtn'); if(imageBtn) imageBtn.onclick = sendImage;
     }
     
+    // АВТОРИЗАЦИЯ
+    const authOverlay = document.getElementById('authOverlay');
+    const chatApp = document.getElementById('chatApp');
+    const phoneInput = document.getElementById('phoneInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const authBtn = document.getElementById('authBtn');
+    const authMessage = document.getElementById('authMessage');
+    const authTitle = document.getElementById('authTitle');
+    const authDesc = document.getElementById('authDesc');
+    const switchToRegister = document.getElementById('switchToRegister');
     let isRegisterMode = false;
     
     function toggleAuthMode() {
         isRegisterMode = !isRegisterMode;
-        const authTitle = document.getElementById('authTitle');
-        const authDesc = document.getElementById('authDesc');
-        const authBtn = document.getElementById('authBtn');
-        const switchSpan = document.getElementById('switchToRegister');
-        const phoneField = document.getElementById('phoneInput');
-        const passwordField = document.getElementById('passwordInput');
-        
-        if (isRegisterMode) {
-            if (authTitle) authTitle.textContent = 'Регистрация';
-            if (authDesc) authDesc.textContent = 'Создайте аккаунт';
-            if (authBtn) authBtn.textContent = 'Зарегистрироваться';
-            if (switchSpan) switchSpan.textContent = 'Уже есть аккаунт? Войти';
-            if (phoneField) { phoneField.readOnly = true; phoneField.value = 'Новый номер...'; }
-            if (passwordField) passwordField.value = '';
+        if(isRegisterMode) {
+            authTitle.textContent = 'Регистрация';
+            authDesc.textContent = 'Создайте аккаунт';
+            authBtn.textContent = 'Зарегистрироваться';
+            switchToRegister.textContent = 'Уже есть аккаунт? Войти';
+            phoneInput.readOnly = true;
+            phoneInput.value = 'Новый номер...';
+            passwordInput.value = '';
         } else {
-            if (authTitle) authTitle.textContent = 'Вход';
-            if (authDesc) authDesc.textContent = 'Введите номер и пароль';
-            if (authBtn) authBtn.textContent = 'Войти';
-            if (switchSpan) switchSpan.textContent = 'Нет аккаунта? Зарегистрироваться';
-            if (phoneField) { phoneField.readOnly = false; phoneField.value = '+888'; }
-            if (passwordField) passwordField.value = 'neverlost566';
+            authTitle.textContent = 'Вход';
+            authDesc.textContent = 'Введите номер и пароль';
+            authBtn.textContent = 'Войти';
+            switchToRegister.textContent = 'Нет аккаунта? Зарегистрироваться';
+            phoneInput.readOnly = false;
+            phoneInput.value = '+888';
+            passwordInput.value = 'neverlost566';
         }
-        const authMessage = document.getElementById('authMessage');
-        if (authMessage) authMessage.style.display = 'none';
+        if(authMessage) authMessage.style.display = 'none';
     }
     
-    async function handleAuth() {
-        const phoneField = document.getElementById('phoneInput');
-        const passwordField = document.getElementById('passwordInput');
-        const authMessage = document.getElementById('authMessage');
-        
-        if (isRegisterMode) {
+    function handleAuth() {
+        if(isRegisterMode) {
             let newPhone = generateUniquePhone();
-            while (window.registeredUsersMap.has(newPhone)) newPhone = generateUniquePhone();
-            const password = passwordField.value.trim();
-            if (!password) {
-                if (authMessage) { authMessage.textContent = '❌ Введите пароль!'; authMessage.style.display = 'block'; }
-                return;
-            }
-            if (password.length < 4) {
-                if (authMessage) { authMessage.textContent = '❌ Пароль не менее 4 символов'; authMessage.style.display = 'block'; }
-                return;
-            }
+            while(usersMap.has(newPhone)) newPhone = generateUniquePhone();
+            const password = passwordInput.value.trim();
+            if(!password) { if(authMessage) { authMessage.textContent = '❌ Введите пароль!'; authMessage.style.display = 'block'; } return; }
+            if(password.length < 4) { if(authMessage) { authMessage.textContent = '❌ Пароль не менее 4 символов'; authMessage.style.display = 'block'; } return; }
             const nick = prompt('Придумайте никнейм:', 'User_' + newPhone.slice(-5));
-            const newUser = await registerUser(newPhone, password, nick || undefined);
-            if (newUser) {
-                if (authMessage) { authMessage.className = 'success-msg'; authMessage.textContent = `✅ Регистрация успешна! Ваш номер: ${newPhone}\n⭐ В подарок 100 звезд!`; authMessage.style.display = 'block'; }
+            const newUser = registerUser(newPhone, password, nick || undefined);
+            if(newUser) {
+                if(authMessage) { authMessage.className = 'success-msg'; authMessage.textContent = `✅ Регистрация успешна! Ваш номер: ${newPhone}\n⭐ В подарок 100 звезд!`; authMessage.style.display = 'block'; }
                 currentUser = newUser;
                 localStorage.setItem('chattium_current_user_phone', newUser.phone);
                 localStorage.setItem('chattium_current_user_password', password);
-                setTimeout(async () => {
-                    if (document.getElementById('authOverlay')) document.getElementById('authOverlay').style.display = 'none';
-                    if (document.getElementById('chatApp')) document.getElementById('chatApp').style.display = 'block';
-                    await loadChatsFromFirebase();
-                    await loadFavoritesFromFirebase();
+                setTimeout(() => {
+                    authOverlay.style.display = 'none';
+                    chatApp.style.display = 'block';
                     initMessenger();
                 }, 1500);
             } else {
-                if (authMessage) { authMessage.textContent = '❌ Ошибка регистрации'; authMessage.style.display = 'block'; }
+                if(authMessage) { authMessage.textContent = '❌ Ошибка регистрации'; authMessage.style.display = 'block'; }
             }
         } else {
-            let phone = phoneField.value.trim();
-            const password = passwordField.value.trim();
-            if (!phone || !password) {
-                if (authMessage) { authMessage.textContent = '❌ Введите номер и пароль'; authMessage.style.display = 'block'; }
-                return;
-            }
-            if (!phone.startsWith('+')) phone = '+' + phone;
+            let phone = phoneInput.value.trim();
+            const password = passwordInput.value.trim();
+            if(!phone || !password) { if(authMessage) { authMessage.textContent = '❌ Введите номер и пароль'; authMessage.style.display = 'block'; } return; }
+            if(!phone.startsWith('+')) phone = '+' + phone;
             const user = loginUser(phone, password);
-            if (user) {
+            if(user) {
                 currentUser = user;
                 localStorage.setItem('chattium_current_user_phone', user.phone);
                 localStorage.setItem('chattium_current_user_password', password);
-                if (document.getElementById('authOverlay')) document.getElementById('authOverlay').style.display = 'none';
-                if (document.getElementById('chatApp')) document.getElementById('chatApp').style.display = 'block';
-                await loadChatsFromFirebase();
-                await loadFavoritesFromFirebase();
+                authOverlay.style.display = 'none';
+                chatApp.style.display = 'block';
                 initMessenger();
             } else {
-                if (authMessage) { authMessage.textContent = '❌ Неверный номер или пароль'; authMessage.style.display = 'block'; }
+                if(authMessage) { authMessage.textContent = '❌ Неверный номер или пароль'; authMessage.style.display = 'block'; }
             }
         }
     }
     
-    // Запуск приложения
-    initApp();
+    loadAllData();
+    if(switchToRegister) switchToRegister.onclick = toggleAuthMode;
+    if(authBtn) authBtn.onclick = handleAuth;
+    if(phoneInput) phoneInput.onkeypress = (e) => { if(e.key === 'Enter') handleAuth(); };
+    if(passwordInput) passwordInput.onkeypress = (e) => { if(e.key === 'Enter') handleAuth(); };
+    
+    const savedPhone = localStorage.getItem('chattium_current_user_phone');
+    const savedPassword = localStorage.getItem('chattium_current_user_password');
+    if(savedPhone && savedPassword) {
+        const user = loginUser(savedPhone, savedPassword);
+        if(user) {
+            currentUser = user;
+            authOverlay.style.display = 'none';
+            chatApp.style.display = 'block';
+            initMessenger();
+        } else {
+            authOverlay.style.display = 'flex';
+            chatApp.style.display = 'none';
+        }
+    } else {
+        authOverlay.style.display = 'flex';
+        chatApp.style.display = 'none';
+    }
 </script>
 </body>
 </html>
