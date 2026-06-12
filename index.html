@@ -34,84 +34,25 @@
         
         .app-layout { width: 1500px; max-width: 98vw; height: 92vh; display: flex; gap: 12px; position: relative; }
         
-        /* Мобильное меню */
-        .sidebar {
-            width: 320px;
-            background: #0f172a;
-            border-radius: 28px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid #1e293b;
-            transition: transform 0.3s ease;
-            position: relative;
-            z-index: 10;
-        }
+        .sidebar { width: 320px; background: #0f172a; border-radius: 28px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #1e293b; transition: transform 0.3s ease; position: relative; z-index: 10; }
         
-        /* Кнопка гамбургер-меню (только на мобильных) */
-        .menu-toggle {
-            display: none;
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 100;
-            background: #1e293b;
-            border: none;
-            color: white;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            font-size: 1.8rem;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: 0.1s;
-        }
+        .menu-toggle { display: none; position: fixed; top: 20px; left: 20px; z-index: 100; background: #1e293b; border: none; color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.8rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: 0.1s; }
         .menu-toggle:hover { background: #2d3a5e; transform: scale(1.02); }
+        .menu-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 90; }
         
-        /* Оверлей для затемнения при открытом меню на мобильных */
-        .menu-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 90;
-        }
-        
-        /* Мобильная адаптация */
         @media (max-width: 768px) {
             body { padding: 0; }
             .app-layout { max-width: 100vw; height: 100vh; border-radius: 0; gap: 0; }
             .chat-main { border-radius: 0; }
-            
             .menu-toggle { display: flex; align-items: center; justify-content: center; }
             .menu-overlay.active { display: block; }
-            
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 280px;
-                height: 100vh;
-                border-radius: 0;
-                z-index: 95;
-                transform: translateX(-100%);
-            }
-            .sidebar.open {
-                transform: translateX(0);
-                box-shadow: 4px 0 20px rgba(0,0,0,0.5);
-            }
-            
+            .sidebar { position: fixed; top: 0; left: 0; width: 280px; height: 100vh; border-radius: 0; z-index: 95; transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.5); }
             .chat-main { margin-left: 0; width: 100%; }
             .chat-header { padding-left: 70px; }
         }
         
-        @media (min-width: 769px) {
-            .sidebar { transform: translateX(0) !important; }
-            .menu-toggle { display: none; }
-        }
+        @media (min-width: 769px) { .sidebar { transform: translateX(0) !important; } .menu-toggle { display: none; } }
         
         .sidebar-header { padding: 20px 16px; background: #0f172a; border-bottom: 1px solid #1e293b; }
         .brand-title { font-size: 1.4rem; font-weight: bold; background: linear-gradient(135deg, #c0e0ff, #8ab3ff); background-clip: text; -webkit-background-clip: text; color: transparent; margin-bottom: 16px; text-align: center; }
@@ -148,7 +89,7 @@
         .message-wrapper { display: flex; flex-direction: column; max-width: 75%; position: relative; }
         .my-message { align-self: flex-end; }
         .other-message { align-self: flex-start; }
-        .message-bubble { padding: 10px 14px; border-radius: 22px; font-size: 0.9rem; word-break: break-word; }
+        .message-bubble { padding: 10px 14px; border-radius: 22px; font-size: 0.9rem; word-break: break-word; cursor: context-menu; }
         .my-message .message-bubble { background: #3b82f6; color: white; border-bottom-right-radius: 6px; }
         .other-message .message-bubble { background: #1e293b; color: #e2e8f0; border-bottom-left-radius: 6px; }
         .message-image { max-width: 200px; max-height: 200px; border-radius: 16px; margin-top: 8px; cursor: pointer; }
@@ -189,7 +130,7 @@
         .gift-name-text { font-size: 0.7rem; font-weight: bold; margin: 4px 0; }
         .gift-price-text { font-size: 0.6rem; font-weight: bold; margin-top: 4px; padding: 2px 6px; border-radius: 16px; background: rgba(0,0,0,0.3); display: inline-block; }
         
-        .marketplace-item { background: #1e293b; border-radius: 20px; padding: 12px; margin: 10px 0; display: flex; align-items: center; gap: 12px; transition: 0.1s; border: 1px solid #334155; }
+        .marketplace-item { background: #1e293b; border-radius: 20px; padding: 12px; margin: 10px 0; display: flex; align-items: center; gap: 12px; transition: 0.1s; border: 1px solid #334155; flex-wrap: wrap; }
         .marketplace-item:hover { background: #2d3a5e; }
         .marketplace-info { flex: 1; text-align: left; }
         .marketplace-price { color: #fbbf24; font-weight: bold; font-size: 1.1rem; }
@@ -198,6 +139,15 @@
         .my-nft-item:hover { background: #2d3a5e; transform: scale(1.02); }
         .sell-btn-nft { position: absolute; bottom: 4px; right: 4px; background: #fbbf24; color: #1e293b; border: none; border-radius: 16px; padding: 2px 6px; font-size: 0.6rem; font-weight: bold; cursor: pointer; z-index: 10; }
         .sell-btn-nft:hover { background: #f59e0b; }
+        
+        .context-menu { position: fixed; background: #1e293b; border-radius: 16px; padding: 8px; z-index: 4000; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid #334155; }
+        .context-menu-item { padding: 8px 16px; cursor: pointer; color: white; border-radius: 10px; transition: 0.1s; }
+        .context-menu-item:hover { background: #3b82f6; }
+        
+        .member-list { max-height: 200px; overflow-y: auto; }
+        .member-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #0f172a; border-radius: 16px; margin: 5px 0; }
+        .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #0f172a; border-radius: 20px; margin: 8px 0; }
+        
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
@@ -239,6 +189,7 @@
                     <button class="action-btn" id="shopBtn">⭐ Магазин</button>
                     <button class="action-btn" id="marketplaceBtn">🏪 Маркетплейс</button>
                     <button class="action-btn" id="myNftSellBtn">💎 Продать NFT</button>
+                    <button class="action-btn" id="privacyBtn">🔒 Приватность</button>
                 </div>
                 <div class="search-box"><input type="text" id="globalSearchInput" placeholder="Поиск по номеру..."><button id="globalSearchBtn">🔍</button></div>
                 <div class="tabs"><div class="tab active" data-tab="chats">💬 Чаты</div><div class="tab" data-tab="favorites">⭐ Избранное</div></div>
@@ -302,59 +253,23 @@
     let registeredUsers = new Map();
     let unsubscribeChat = null;
     
-    // Мобильное меню
     function initMobileMenu() {
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('menuOverlay');
-        
         if (!menuToggle || !sidebar || !overlay) return;
-        
-        function closeMenu() {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-        }
-        
-        function openMenu() {
-            sidebar.classList.add('open');
-            overlay.classList.add('active');
-        }
-        
-        menuToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (sidebar.classList.contains('open')) {
-                closeMenu();
-            } else {
-                openMenu();
-            }
-        });
-        
+        function closeMenu() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
+        function openMenu() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+        menuToggle.addEventListener('click', (e) => { e.stopPropagation(); if (sidebar.classList.contains('open')) closeMenu(); else openMenu(); });
         overlay.addEventListener('click', closeMenu);
-        
-        // Закрываем меню при клике на чат
         const chatMain = document.querySelector('.chat-main');
-        if (chatMain) {
-            chatMain.addEventListener('click', () => {
-                if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
-                    closeMenu();
-                }
-            });
-        }
-        
-        // При изменении размера окна
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                closeMenu();
-            }
-        });
+        if (chatMain) chatMain.addEventListener('click', () => { if (window.innerWidth <= 768 && sidebar.classList.contains('open')) closeMenu(); });
+        window.addEventListener('resize', () => { if (window.innerWidth > 768) closeMenu(); });
     }
     
     (async function initCounter() {
         const counterDoc = await getDoc(doc(db, "system", "nftCounter"));
-        if (!counterDoc.exists()) {
-            await setDoc(doc(db, "system", "nftCounter"), { lastNumber: 0 });
-            console.log("✅ Счётчик NFT создан");
-        }
+        if (!counterDoc.exists()) await setDoc(doc(db, "system", "nftCounter"), { lastNumber: 0 });
     })();
     
     const PATTERNS = [
@@ -382,11 +297,7 @@
     };
     
     function randomPattern() { return PATTERNS[Math.floor(Math.random() * PATTERNS.length)]; }
-    function randomGradient() {
-        const r = Math.floor(Math.random() * 200 + 55), g = Math.floor(Math.random() * 200 + 55), b = Math.floor(Math.random() * 200 + 55);
-        const r2 = Math.floor(Math.random() * 200 + 55), g2 = Math.floor(Math.random() * 200 + 55), b2 = Math.floor(Math.random() * 200 + 55);
-        return `linear-gradient(135deg, rgb(${r}, ${g}, ${b}), rgb(${r2}, ${g2}, ${b2}))`;
-    }
+    function randomGradient() { const r = Math.floor(Math.random() * 200 + 55), g = Math.floor(Math.random() * 200 + 55), b = Math.floor(Math.random() * 200 + 55); const r2 = Math.floor(Math.random() * 200 + 55), g2 = Math.floor(Math.random() * 200 + 55), b2 = Math.floor(Math.random() * 200 + 55); return `linear-gradient(135deg, rgb(${r}, ${g}, ${b}), rgb(${r2}, ${g2}, ${b2}))`; }
     
     function generateUniquePhone() { let d=''; for(let i=0;i<10;i++) d+=Math.floor(Math.random()*10); return '+9'+d; }
     function escapeHtml(str) { return String(str || '').replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
@@ -418,7 +329,8 @@
         const user = {
             userId, nick: nick || 'User_' + phone.slice(-5), phone, password,
             avatarType: 'emoji', avatarData: ['😀','😎','🦊','🐱','🌟'][Math.floor(Math.random()*5)],
-            bio: '✨ Новый пользователь ✨', stars: 100, gifts: [], nfts: [], createdAt: Date.now()
+            bio: '✨ Новый пользователь ✨', stars: 100, gifts: [], nfts: [], createdAt: Date.now(),
+            phoneHidden: false
         };
         await setDoc(doc(db, "users", phone), user);
         registeredUsers.set(phone, user);
@@ -597,6 +509,77 @@
         alert(`✅ Вы продали ${gift.name} за ${refund} ⭐`);
     }
     
+    // === ДОБАВЛЕНО: Приватность (скрыть номер) ===
+    function openPrivacySettings() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3 style="margin-bottom:20px;">🔒 Конфиденциальность</h3>
+                <div class="settings-row">
+                    <span style="color:white;">Скрыть мой номер телефона</span>
+                    <input type="checkbox" id="hidePhoneToggle" ${currentUser.phoneHidden ? 'checked' : ''}>
+                </div>
+                <div class="modal-actions">
+                    <button class="save-btn" id="savePrivacyBtn">Сохранить</button>
+                    <button class="close-btn" id="closePrivacyBtn">Закрыть</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        document.getElementById('savePrivacyBtn')?.addEventListener('click', async () => {
+            currentUser.phoneHidden = document.getElementById('hidePhoneToggle').checked;
+            await saveUserToFirestore();
+            alert('Настройки сохранены!');
+            modal.remove();
+        });
+        document.getElementById('closePrivacyBtn')?.addEventListener('click', () => modal.remove());
+    }
+    
+    // === ДОБАВЛЕНО: Просмотр группы/канала ===
+    function showGroupInfo(chat) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        const members = (chat.participants || []).map(pid => {
+            for (let u of registeredUsers.values()) if (u.userId === pid) return u;
+            return null;
+        }).filter(u => u);
+        const owner = members.find(m => m.userId === chat.ownerId);
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>${escapeHtml(chat.name)}</h3>
+                <p style="margin:8px 0;">${chat.type === 'group' ? '👥 Группа' : '📢 Канал'}</p>
+                <p>👑 Владелец: ${escapeHtml(owner?.nick || 'Неизвестный')}</p>
+                <h4 style="margin:12px 0 8px;">Участники (${members.length})</h4>
+                <div class="member-list">
+                    ${members.map(m => `<div class="member-item"><span>${escapeHtml(m.nick)} ${m.userId === chat.ownerId ? '👑' : ''}</span></div>`).join('')}
+                </div>
+                <div class="modal-actions"><button class="close-btn" id="closeGroupInfo">Закрыть</button></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        document.getElementById('closeGroupInfo')?.addEventListener('click', () => modal.remove());
+    }
+    
+    // === ДОБАВЛЕНО: Редактирование/удаление сообщений ===
+    async function deleteMessage(chatId, msgId) {
+        const chat = chats.get(chatId);
+        if (!chat) return;
+        const newMessages = (chat.messages || []).map(m => 
+            m.id === msgId ? { ...m, deleted: true, text: 'Сообщение удалено', image: null } : m
+        );
+        await updateDoc(doc(db, "chats", chatId), { messages: newMessages });
+    }
+    
+    async function editMessage(chatId, msgId, newText) {
+        const chat = chats.get(chatId);
+        if (!chat) return;
+        const newMessages = (chat.messages || []).map(m => 
+            m.id === msgId ? { ...m, text: newText, edited: true } : m
+        );
+        await updateDoc(doc(db, "chats", chatId), { messages: newMessages });
+    }
+    
     function renderAvatar(container, user) {
         container.innerHTML = '';
         if (user.avatarType === 'image' && user.avatarData && user.avatarData.startsWith('data:image')) {
@@ -657,16 +640,48 @@
         const msgs = chats.get(activeChatId).messages || [];
         if (!msgs.length) { ma.innerHTML = '<div class="system-message">💭 Напишите первое сообщение</div>'; return; }
         ma.innerHTML = msgs.map(msg => {
-            if (msg.deleted) return `<div class="message-wrapper other-message"><div class="message-bubble" style="background:#334155;">🗑️ Удалено</div></div>`;
+            if (msg.deleted) return `<div class="message-wrapper other-message" data-msg-id="${msg.id}"><div class="message-bubble" style="background:#334155;">🗑️ Удалено</div></div>`;
             const isMine = msg.senderId === currentUser.userId;
             const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const imageHtml = msg.image ? `<img src="${msg.image}" class="message-image" onclick="window.open(this.src)">` : '';
-            return `<div class="message-wrapper ${isMine ? 'my-message' : 'other-message'}">
+            return `<div class="message-wrapper ${isMine ? 'my-message' : 'other-message'}" data-msg-id="${msg.id}" data-msg-text="${escapeHtml(msg.text)}" data-msg-owner="${isMine}">
                 <div class="message-bubble">${escapeHtml(msg.text)}${imageHtml}${msg.edited ? ' <span style="font-size:0.6rem;">(ред.)</span>' : ''}</div>
                 <div class="message-meta"><span>${isMine ? 'Вы' : escapeHtml(msg.senderNick)}</span><span>${time}</span></div>
             </div>`;
         }).join('');
         ma.scrollTop = ma.scrollHeight;
+        
+        // Контекстное меню для сообщений (правая кнопка / долгое нажатие)
+        document.querySelectorAll('.message-wrapper').forEach(wrapper => {
+            const isOwner = wrapper.dataset.msgOwner === 'true';
+            if (!isOwner) return;
+            const showMenu = (x, y) => {
+                const existing = document.querySelector('.context-menu');
+                if (existing) existing.remove();
+                const menu = document.createElement('div');
+                menu.className = 'context-menu';
+                menu.style.left = x + 'px';
+                menu.style.top = y + 'px';
+                menu.innerHTML = `<div class="context-menu-item" data-action="edit">✏️ Редактировать</div><div class="context-menu-item" data-action="delete">🗑️ Удалить</div>`;
+                document.body.appendChild(menu);
+                const msgId = wrapper.dataset.msgId;
+                menu.querySelector('[data-action="edit"]').onclick = async () => {
+                    const newText = prompt('Новый текст:', wrapper.dataset.msgText);
+                    if (newText && newText.trim()) await editMessage(activeChatId, msgId, newText);
+                    menu.remove();
+                };
+                menu.querySelector('[data-action="delete"]').onclick = async () => {
+                    if (confirm('Удалить сообщение?')) await deleteMessage(activeChatId, msgId);
+                    menu.remove();
+                };
+                document.addEventListener('click', function rm(e) { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', rm); } });
+            };
+            wrapper.addEventListener('contextmenu', (e) => { e.preventDefault(); showMenu(e.pageX, e.pageY); });
+            let touchTimer = null;
+            wrapper.addEventListener('touchstart', (e) => { touchTimer = setTimeout(() => { showMenu(e.touches[0].pageX, e.touches[0].pageY); }, 500); });
+            wrapper.addEventListener('touchend', () => { clearTimeout(touchTimer); });
+            wrapper.addEventListener('touchmove', () => { clearTimeout(touchTimer); });
+        });
     }
     
     async function sendMessage(text, image = null) {
@@ -758,10 +773,7 @@
             el.addEventListener('click', async () => {
                 const nft = JSON.parse(el.dataset.nft);
                 const success = await buyNFT(nft);
-                if (success) {
-                    modal.remove();
-                    openShop();
-                }
+                if (success) { modal.remove(); openShop(); }
             });
         });
         document.getElementById('closeShopBtn')?.addEventListener('click', () => modal.remove());
@@ -854,6 +866,8 @@
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
         
+        const displayPhone = (isSelf || !user.phoneHidden) ? user.phone : '🔒 Скрыт владельцем';
+        
         const avatarHtml = (user.avatarType === 'image' && user.avatarData && user.avatarData.startsWith('data:image')) 
             ? `<img src="${user.avatarData}" style="width:100%; height:100%; object-fit:cover;">` 
             : `<div style="font-size:3rem;">${user.avatarData || '😀'}</div>`;
@@ -886,7 +900,7 @@
                     ${isSelf ? '<button class="save-btn" id="uploadAvatarBtn" style="margin:6px 0; padding:6px 12px; font-size:0.8rem;">📸 Загрузить аватарку</button>' : ''}
                     <div class="profile-nick" style="font-size:1.4rem; font-weight:700; color:white;">${escapeHtml(user.nick)}</div>
                     <div class="profile-stars">⭐ ${user.stars || 0} звезд</div>
-                    <div class="profile-phone-display" style="color:#60a5fa; font-size:0.8rem;">📞 ${escapeHtml(user.phone)}</div>
+                    <div class="profile-phone-display" style="color:#60a5fa; font-size:0.8rem;">📞 ${escapeHtml(displayPhone)}</div>
                     <div class="profile-bio" style="background:#0f172a; border-radius:20px; padding:10px; margin:12px 0; width:100%; text-align:center;">
                         ${isSelf ? `<textarea id="profileBio" rows="2" style="width:100%; background:#1e293b; border:none; border-radius:16px; padding:10px; color:white;">${escapeHtml(user.bio)}</textarea>` : `<div>${escapeHtml(user.bio)}</div>`}
                     </div>
@@ -974,8 +988,9 @@
         const name = prompt('Название группы:');
         if (!name) return;
         const groupId = 'group_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-        chats.set(groupId, { chatId: groupId, name: name, avatar: '👥', type: 'group', messages: [], participants: [currentUser.userId], lastUpdate: Date.now() });
-        setDoc(doc(db, "chats", groupId), chats.get(groupId));
+        const group = { chatId: groupId, name: name, avatar: '👥', type: 'group', ownerId: currentUser.userId, participants: [currentUser.userId], messages: [], lastUpdate: Date.now() };
+        chats.set(groupId, group);
+        setDoc(doc(db, "chats", groupId), group);
         saveUserToFirestore();
         renderChatsList();
         setActiveChat(groupId);
@@ -985,8 +1000,9 @@
         const name = prompt('Название канала:');
         if (!name) return;
         const channelId = 'channel_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-        chats.set(channelId, { chatId: channelId, name: name, avatar: '📢', type: 'channel', messages: [], participants: [currentUser.userId], lastUpdate: Date.now() });
-        setDoc(doc(db, "chats", channelId), chats.get(channelId));
+        const channel = { chatId: channelId, name: name, avatar: '📢', type: 'channel', ownerId: currentUser.userId, participants: [currentUser.userId], messages: [], lastUpdate: Date.now() };
+        chats.set(channelId, channel);
+        setDoc(doc(db, "chats", channelId), channel);
         saveUserToFirestore();
         renderChatsList();
         setActiveChat(channelId);
@@ -1074,8 +1090,29 @@
         document.getElementById('shopBtn').onclick = openShop;
         document.getElementById('marketplaceBtn').onclick = openMarketplace;
         document.getElementById('myNftSellBtn').onclick = openMyNftSell;
+        document.getElementById('privacyBtn').onclick = openPrivacySettings;
         document.getElementById('myProfileBtn').onclick = () => showProfile(currentUser.userId, true);
-        document.getElementById('chatHeaderInfo').onclick = () => { if (activeChatId && !chats.get(activeChatId)?.type) showProfile(activeChatId, false); };
+        
+        // Просмотр профиля собеседника и группы/канала
+        document.getElementById('chatHeaderInfo').onclick = () => { 
+            if (activeChatId && chats.has(activeChatId)) {
+                const chat = chats.get(activeChatId);
+                if (chat.type === 'user') {
+                    const otherId = chat.participants.find(id => id !== currentUser.userId);
+                    if (otherId) {
+                        let foundUser = null;
+                        for (let u of registeredUsers.values()) {
+                            if (u.userId === otherId) { foundUser = u; break; }
+                        }
+                        if (foundUser) showProfile(foundUser.userId, false);
+                        else alert("Профиль не найден");
+                    }
+                } else if (chat.type === 'group' || chat.type === 'channel') {
+                    showGroupInfo(chat);
+                }
+            }
+        };
+        
         document.getElementById('logoutBtn').onclick = logout;
         const emojiBtn = document.getElementById('emojiBtn'); const emojiPicker = document.getElementById('emojiPicker');
         emojiBtn.onclick = (e) => { e.stopPropagation(); emojiPicker.classList.toggle('active'); };
