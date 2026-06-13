@@ -69,24 +69,8 @@
         .detail-desc { color: #aaa; font-size: 13px; margin: 5px 0 15px 0; }
         .detail-buy-btn { width: 100%; background: #6ab2e4; color: #000; border: none; padding: 12px; border-radius: 30px; font-weight: bold; font-size: 15px; cursor: pointer; }
         
-        .collection-grid { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 5px; 
-            padding: 8px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .collected-item { 
-            background: #1f1f1f; 
-            aspect-ratio: 1; 
-            border-radius: 8px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            overflow: hidden; 
-            border: 1px solid #333; 
-        }
+        .collection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 8px; }
+        .collected-item { background: #1f1f1f; aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #333; }
         .collected-item img { width: 100%; height: 100%; object-fit: cover; }
 
         /* Partner Profile */
@@ -109,19 +93,18 @@
             grid-template-columns: repeat(3, 1fr); 
             gap: 5px; 
             padding: 8px;
-            max-height: 400px;
-            overflow-y: auto;
-            flex: 1;
+            max-height: 400px; /* Добавлено: ограничение высоты */
+            overflow-y: auto; /* Добавлено: скролл */
+            flex: 1; /* Добавлено: занимает свободное место */
         }
 
-        /* Verified Badge - исправлено */
+        /* Verified Badge */
         .verified-badge {
             color: #6ab2e4;
             font-size: 14px;
             cursor: pointer;
             margin-left: 4px;
             display: inline-block;
-            vertical-align: middle;
         }
         .verified-badge:hover {
             opacity: 0.8;
