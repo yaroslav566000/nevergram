@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-storage-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
         body { background: #0f0f0f; color: #fff; height: 100vh; overflow: hidden; display: flex; justify-content: center; align-items: center; }
@@ -39,13 +40,28 @@
         #chat-window { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0f0f0f; z-index: 200; display: none; flex-direction: column; }
         #chat-window.open { display: flex; }
         .messages-area { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; }
-        .msg { padding: 8px 12px; border-radius: 12px; margin-bottom: 5px; max-width: 80%; font-size: 15px; }
+        .msg { padding: 8px 12px; border-radius: 12px; margin-bottom: 5px; max-width: 80%; font-size: 15px; position: relative; }
         .msg.sent { background: #6ab2e4; color: #000; align-self: flex-end; }
         .msg.received { background: #1f1f1f; align-self: flex-start; }
-        .input-area { display: flex; padding: 8px; background: #1f1f1f; gap: 8px; border-top: 1px solid #333; }
-        .input-area input { flex: 1; padding: 10px; border-radius: 20px; border: none; background: #0f0f0f; color: white; }
-        .input-area button { background: #6ab2e4; border: none; padding: 0 15px; border-radius: 20px; color: #000; font-weight: bold; cursor: pointer; }
+        .msg.pinned { border: 2px solid #ffd700; }
+        .msg img { max-width: 100%; border-radius: 8px; margin-top: 5px; }
         
+        .input-area { display: flex; padding: 8px; background: #1f1f1f; gap: 8px; border-top: 1px solid #333; align-items: center; flex-wrap: wrap; }
+        .input-area input { flex: 1; padding: 10px; border-radius: 20px; border: none; background: #0f0f0f; color: white; min-width: 100px; }
+        .input-area button { background: #6ab2e4; border: none; padding: 0 15px; border-radius: 20px; color: #000; font-weight: bold; cursor: pointer; height: 40px; }
+        .input-area .icon-btn { background: transparent; border: none; color: #6ab2e4; font-size: 20px; cursor: pointer; padding: 0 5px; }
+
+        /* Context Menu */
+        #context-menu { position: absolute; background: #1f1f1f; border: 1px solid #333; border-radius: 10px; padding: 5px 0; z-index: 1000; display: none; min-width: 150px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        #context-menu .menu-item { padding: 8px 15px; cursor: pointer; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 10px; }
+        #context-menu .menu-item:hover { background: #2a2a2a; }
+        #context-menu .menu-item.danger { color: #ff5252; }
+
+        /* Emoji Picker */
+        #emoji-picker { display: none; position: absolute; bottom: 60px; right: 10px; background: #1f1f1f; border: 1px solid #333; border-radius: 10px; padding: 10px; z-index: 500; max-width: 300px; max-height: 200px; overflow-y: auto; }
+        #emoji-picker .emoji { font-size: 24px; cursor: pointer; padding: 5px; display: inline-block; }
+        #emoji-picker .emoji:hover { background: #2a2a2a; border-radius: 5px; }
+
         /* Stars & NFT */
         .stars-wrapper { padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .balance-card { background: #1f1f1f; border-radius: 16px; padding: 15px; width: 100%; text-align: center; margin-top: 10px; }
@@ -78,7 +94,7 @@
         #partner-profile.open { display: flex; }
         .partner-header { padding: 20px; text-align: center; }
         .partner-avatar { width: 80px; height: 80px; border-radius: 50%; background: #444; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 30px; }
-        .partner-collection { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 8px; }
+        .partner-collection { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 8px; max-height: 400px; overflow-y: auto; flex: 1; }
 
         /* Verified Badge */
         .verified-badge {
@@ -213,12 +229,37 @@
             <div class="messages-area" id="messages-container"></div>
             <div class="input-area">
                 <input type="text" id="message-input" placeholder="Сообщение...">
+                <button class="icon-btn" onclick="toggleEmojiPicker()"><i class="fas fa-smile"></i></button>
+                <button class="icon-btn" onclick="document.getElementById('image-input').click()"><i class="fas fa-image"></i></button>
+                <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="uploadImage()">
                 <button onclick="sendMessage()">Отправить</button>
             </div>
         </div>
 
     </div>
 
+</div>
+
+<!-- Context Menu -->
+<div id="context-menu">
+    <div class="menu-item" onclick="editMessage()"><i class="fas fa-edit"></i> Редактировать</div>
+    <div class="menu-item" onclick="deleteMessage()"><i class="fas fa-trash"></i> Удалить</div>
+    <div class="menu-item" onclick="pinMessage()"><i class="fas fa-thumbtack"></i> Закрепить</div>
+    <div class="menu-item" onclick="reactMessage()"><i class="fas fa-thumbs-up"></i> 👍</div>
+</div>
+
+<!-- Emoji Picker -->
+<div id="emoji-picker">
+    <span class="emoji" onclick="addEmoji('😊')">😊</span>
+    <span class="emoji" onclick="addEmoji('😂')">😂</span>
+    <span class="emoji" onclick="addEmoji('❤️')">❤️</span>
+    <span class="emoji" onclick="addEmoji('🔥')">🔥</span>
+    <span class="emoji" onclick="addEmoji('👍')">👍</span>
+    <span class="emoji" onclick="addEmoji('👎')">👎</span>
+    <span class="emoji" onclick="addEmoji('😢')">😢</span>
+    <span class="emoji" onclick="addEmoji('😡')">😡</span>
+    <span class="emoji" onclick="addEmoji('🎉')">🎉</span>
+    <span class="emoji" onclick="addEmoji('💯')">💯</span>
 </div>
 
 <script>
@@ -236,6 +277,7 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const storage = firebase.storage();
 
     // ============================
     // STATE
@@ -245,6 +287,8 @@
     let currentChatId = null;
     let chatUnsubscriber = null;
     let currentPartnerId = null;
+    let selectedMessageId = null;
+    let selectedMessageElement = null;
 
     // ============================
     // NFT DATA (ВСТАВЬ СВОИ КАРТИНКИ)
@@ -407,11 +451,28 @@
         chatUnsubscriber = db.collection('chats').doc(id).collection('messages').orderBy('timestamp')
             .onSnapshot(snap => {
                 c.innerHTML = '';
-                snap.forEach(d => {
-                    const data = d.data();
+                snap.forEach(doc => {
+                    const data = doc.data();
                     const div = document.createElement('div');
                     div.className = `msg ${data.sender === currentUser.phone ? 'sent' : 'received'}`;
-                    div.innerText = data.text;
+                    if (data.pinned) div.classList.add('pinned');
+                    div.dataset.id = doc.id;
+                    
+                    let content = '';
+                    if (data.text) content += `<div>${data.text}</div>`;
+                    if (data.imageUrl) content += `<img src="${data.imageUrl}" alt="Image">`;
+                    if (data.reactions) {
+                        content += `<div style="margin-top:5px;font-size:12px;">`;
+                        for (const [emoji, count] of Object.entries(data.reactions)) {
+                            content += `<span style="background:#2a2a2a;padding:2px 6px;border-radius:10px;margin-right:3px;">${emoji} ${count}</span>`;
+                        }
+                        content += `</div>`;
+                    }
+                    div.innerHTML = content;
+                    div.addEventListener('contextmenu', function(e) {
+                        e.preventDefault();
+                        showContextMenu(e.clientX, e.clientY, doc.id, this);
+                    });
                     c.appendChild(div);
                 });
                 c.scrollTop = c.scrollHeight;
@@ -433,6 +494,91 @@
             timestamp: new Date()
         });
         input.value = '';
+    }
+
+    // ============================
+    // IMAGE UPLOAD
+    // ============================
+    async function uploadImage() {
+        const file = document.getElementById('image-input').files[0];
+        if (!file || !currentChatId) return;
+        const storageRef = storage.ref('chat_images/' + Date.now() + '_' + file.name);
+        await storageRef.put(file);
+        const url = await storageRef.getDownloadURL();
+        db.collection('chats').doc(currentChatId).collection('messages').add({
+            sender: currentUser.phone,
+            imageUrl: url,
+            timestamp: new Date()
+        });
+        document.getElementById('image-input').value = '';
+    }
+
+    // ============================
+    // CONTEXT MENU
+    // ============================
+    function showContextMenu(x, y, msgId, element) {
+        const menu = document.getElementById('context-menu');
+        menu.style.display = 'block';
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+        selectedMessageId = msgId;
+        selectedMessageElement = element;
+    }
+
+    document.addEventListener('click', function() {
+        document.getElementById('context-menu').style.display = 'none';
+    });
+
+    async function editMessage() {
+        if (!selectedMessageId || !currentChatId) return;
+        const newText = prompt('Введите новый текст:');
+        if (newText !== null && newText.trim() !== '') {
+            await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).update({
+                text: newText
+            });
+        }
+    }
+
+    async function deleteMessage() {
+        if (!selectedMessageId || !currentChatId) return;
+        if (confirm('Удалить сообщение?')) {
+            await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).delete();
+        }
+    }
+
+    async function pinMessage() {
+        if (!selectedMessageId || !currentChatId) return;
+        const doc = await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).get();
+        const data = doc.data();
+        await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).update({
+            pinned: !data.pinned
+        });
+    }
+
+    async function reactMessage() {
+        if (!selectedMessageId || !currentChatId) return;
+        const doc = await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).get();
+        const data = doc.data();
+        const reactions = data.reactions || {};
+        reactions['👍'] = (reactions['👍'] || 0) + 1;
+        await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).update({
+            reactions
+        });
+    }
+
+    // ============================
+    // EMOJI PICKER
+    // ============================
+    function toggleEmojiPicker() {
+        const picker = document.getElementById('emoji-picker');
+        picker.style.display = picker.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function addEmoji(emoji) {
+        const input = document.getElementById('message-input');
+        input.value += emoji;
+        input.focus();
+        document.getElementById('emoji-picker').style.display = 'none';
     }
 
     // ============================
@@ -469,7 +615,6 @@
         document.getElementById('partner-profile').classList.remove('open');
     }
 
-    // Сообщение при нажатии на галочку
     function showVerifiedMessage() {
         alert('Профиль пользователя подтверждён');
     }
