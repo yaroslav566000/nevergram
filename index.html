@@ -80,6 +80,18 @@
         .partner-avatar { width: 80px; height: 80px; border-radius: 50%; background: #444; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 30px; }
         .partner-collection { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 8px; }
 
+        /* Verified Badge */
+        .verified-badge {
+            color: #6ab2e4;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 5px;
+            display: inline-block;
+        }
+        .verified-badge:hover {
+            opacity: 0.8;
+        }
+
         #page-auth { display: flex; }
         #app-content { display: none; height: 100%; flex-direction: column; }
         #app-content.visible { display: flex; }
@@ -178,6 +190,10 @@
                 <div class="partner-avatar" id="partner-avatar">👤</div>
                 <h3 id="partner-username">Пользователь</h3>
                 <div style="color:#aaa; font-size:13px;">Номер: <span id="partner-phone">---</span></div>
+                <!-- Галочка верификации -->
+                <span id="partner-verified" class="verified-badge" onclick="showVerifiedMessage()" style="display:none;">
+                    <i class="fas fa-check-circle"></i>
+                </span>
             </div>
             <h4 style="padding-left:15px;">NFT</h4>
             <div class="partner-collection" id="partner-collection"></div>
@@ -436,6 +452,13 @@
         document.getElementById('partner-username').innerText = data.username || 'Пользователь';
         document.getElementById('partner-phone').innerText = data.phone || '---';
         
+        // Показываем галочку, если это +888
+        if (data.phone === '+888') {
+            document.getElementById('partner-verified').style.display = 'inline-block';
+        } else {
+            document.getElementById('partner-verified').style.display = 'none';
+        }
+        
         const invSnap = await snap.docs[0].ref.collection('inventory').get();
         const c = document.getElementById('partner-collection');
         c.innerHTML = '';
@@ -453,6 +476,11 @@
 
     function closePartnerProfile() {
         document.getElementById('partner-profile').classList.remove('open');
+    }
+
+    // Сообщение при нажатии на галочку
+    function showVerifiedMessage() {
+        alert('Профиль пользователя подтверждён');
     }
 
     // ============================
