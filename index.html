@@ -83,9 +83,9 @@
         /* Verified Badge */
         .verified-badge {
             color: #6ab2e4;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
-            margin-left: 5px;
+            margin-left: 4px;
             display: inline-block;
         }
         .verified-badge:hover {
@@ -190,10 +190,6 @@
                 <div class="partner-avatar" id="partner-avatar">👤</div>
                 <h3 id="partner-username">Пользователь</h3>
                 <div style="color:#aaa; font-size:13px;">Номер: <span id="partner-phone">---</span></div>
-                <!-- Галочка верификации -->
-                <span id="partner-verified" class="verified-badge" onclick="showVerifiedMessage()" style="display:none;">
-                    <i class="fas fa-check-circle"></i>
-                </span>
             </div>
             <h4 style="padding-left:15px;">NFT</h4>
             <div class="partner-collection" id="partner-collection"></div>
@@ -336,7 +332,6 @@
         balance = currentUser.balance || 5000;
         updateBalance();
         loadChats();
-        // Загружаем коллекцию сразу при входе
         renderCollection();
         const nav = document.querySelector('.nav-item:first-child');
         switchTab('chats', nav);
@@ -354,10 +349,11 @@
         snap.forEach(d => {
             const data = d.data();
             if (data.phone === currentUser.phone) return c.innerHTML = '<div style="padding:10px;color:#aaa;">Это вы</div>';
+            const verified = data.phone === '+888' ? ' <span class="verified-badge" onclick="showVerifiedMessage()"><i class="fas fa-check-circle"></i></span>' : '';
             c.innerHTML += `
                 <div class="user-result" onclick="startChat('${d.id}','${data.username}','${data.phone}')">
                     <div class="avatar">👤</div>
-                    <div><div style="font-weight:bold;">${data.username}</div><div style="color:#aaa;font-size:12px;">${data.phone}</div></div>
+                    <div><div style="font-weight:bold;">${data.username}${verified}</div><div style="color:#aaa;font-size:12px;">${data.phone}</div></div>
                 </div>
             `;
         });
@@ -376,10 +372,11 @@
             const data = d.data();
             const partner = data.participants.find(p => p !== currentUser.phone);
             const name = data.participantNames?.[partner] || 'Неизвестно';
+            const verified = partner === '+888' ? ' <span class="verified-badge" onclick="showVerifiedMessage()"><i class="fas fa-check-circle"></i></span>' : '';
             c.innerHTML += `
                 <div class="chat-list-item" onclick="openChat('${d.id}','${name}','${partner}')">
                     <div class="avatar">👤</div>
-                    <div><div style="font-weight:bold;">${name}</div><div style="color:#aaa;font-size:12px;">${partner}</div></div>
+                    <div><div style="font-weight:bold;">${name}${verified}</div><div style="color:#aaa;font-size:12px;">${partner}</div></div>
                 </div>
             `;
         });
@@ -449,15 +446,9 @@
         const snap = await db.collection('users').where('phone', '==', currentPartnerId).get();
         if (snap.empty) return;
         const data = snap.docs[0].data();
-        document.getElementById('partner-username').innerText = data.username || 'Пользователь';
+        const verified = data.phone === '+888' ? ' <span class="verified-badge" onclick="showVerifiedMessage()"><i class="fas fa-check-circle"></i></span>' : '';
+        document.getElementById('partner-username').innerHTML = `${data.username || 'Пользователь'}${verified}`;
         document.getElementById('partner-phone').innerText = data.phone || '---';
-        
-        // Показываем галочку, если это +888
-        if (data.phone === '+888') {
-            document.getElementById('partner-verified').style.display = 'inline-block';
-        } else {
-            document.getElementById('partner-verified').style.display = 'none';
-        }
         
         const invSnap = await snap.docs[0].ref.collection('inventory').get();
         const c = document.getElementById('partner-collection');
