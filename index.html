@@ -449,19 +449,34 @@
     // ============================
     function createOneShotLottiePlayer(url, container) {
         const player = document.createElement('lottie-player');
+    
+    // Основные настройки
         player.setAttribute('src', url);
-        player.setAttribute('loop', 'false');
         player.setAttribute('autoplay', '');
+        player.setAttribute('loop', 'false');
         player.setAttribute('renderer', 'svg');
         player.style.width = '100%';
         player.style.height = '100%';
-        
+        player.style.display = 'block';
+    
+    // ⬅️ ОСТАНОВКА ПОСЛЕ ЗАВЕРШЕНИЯ
         player.addEventListener('complete', function() {
             this.stop();
         });
-        
+    
+    // ⬅️ СТРАХОВКА — ЕСЛИ АНИМАЦИЯ ЗАВИСЛА
+        player.addEventListener('load', function() {
+        // Примерное время анимации 3-5 секунд, останавливаем принудительно
+            setTimeout(() => {
+                if (this.isPlaying) {
+                    this.stop();
+                }
+            }, 5000);
+        });
+    
         activeLottiePlayers.push(player);
         container.appendChild(player);
+    
         return player;
     }
 
