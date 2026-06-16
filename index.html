@@ -5,75 +5,414 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Telegram NFT</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-storage-compat.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-storage-compat.js">
+    </script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
-        body { background: #0f0f0f; color: #fff; height: 100vh; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        #app { width: 100%; max-width: 420px; height: 100%; max-height: 900px; background: #0f0f0f; display: flex; flex-direction: column; position: relative; overflow: hidden; }
-        @media (min-width: 600px) { #app { border-radius: 20px; border: 1px solid #333; box-shadow: 0 0 30px rgba(0,0,0,0.8); } }
-        .page { display: none; height: 100%; flex-direction: column; overflow-y: auto; padding-bottom: 60px; }
-        .page.active { display: flex; }
-        .header { padding: 10px 15px; background: #0f0f0f; border-bottom: 1px solid #222; display: flex; align-items: center; height: 50px; position: sticky; top: 0; z-index: 10; background: #0f0f0f; }
-        .header h2 { flex: 1; font-size: 17px; font-weight: 600; }
-        .back-btn { font-size: 20px; cursor: pointer; margin-right: 15px; color: #6ab2e4; }
-        .bottom-nav { position: absolute; bottom: 0; width: 100%; height: 60px; background: #1a1a1a; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; z-index: 10; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #aaa; font-size: 9px; cursor: pointer; padding: 3px 10px; }
-        .nav-item i { font-size: 20px; margin-bottom: 2px; }
-        .nav-item.active { color: #6ab2e4; }
-        
-        .auth-screen { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
-        .auth-screen input { width: 100%; padding: 12px; background: #1f1f1f; border: 1px solid #333; border-radius: 10px; color: #fff; margin-bottom: 10px; }
-        .auth-screen button { width: 100%; padding: 12px; background: #6ab2e4; border: none; border-radius: 10px; font-weight: bold; margin-top: 5px; cursor: pointer; color: #000; }
-        .auth-link { color: #6ab2e4; cursor: pointer; margin-top: 15px; font-size: 14px; }
-        
-        .search-input { width: calc(100% - 20px); margin: 10px; padding: 12px; background: #1f1f1f; border: 1px solid #333; border-radius: 10px; color: #fff; }
-        .user-result { padding: 10px 15px; border-bottom: 1px solid #222; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .user-result .avatar { width: 40px; height: 40px; border-radius: 50%; background: #444; display: flex; align-items: center; justify-content: center; }
-        .user-result:hover { background: #1a1a1a; }
-        
-        .chat-list-item { display: flex; padding: 12px 15px; border-bottom: 1px solid #222; cursor: pointer; align-items: center; gap: 12px; }
-        .chat-list-item:hover { background: #1a1a1a; }
-        .chat-list-item .avatar { width: 50px; height: 50px; border-radius: 50%; background: #444; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        #chat-window { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0f0f0f; z-index: 200; display: none; flex-direction: column; }
-        #chat-window.open { display: flex; }
-        .messages-area { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .msg { padding: 10px 14px; border-radius: 18px; margin-bottom: 4px; max-width: 80%; font-size: 15px; word-wrap: break-word; }
-        .msg.sent { background: #6ab2e4; color: #000; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .msg.received { background: #1f1f1f; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .msg.pinned { border: 2px solid #ffd700; }
-        .msg img { max-width: 100%; border-radius: 12px; margin-top: 5px; }
-        
-        .input-area { display: flex; padding: 10px; background: #1f1f1f; gap: 8px; border-top: 1px solid #333; align-items: center; }
-        .input-area input { flex: 1; padding: 12px; border-radius: 25px; border: none; background: #0f0f0f; color: white; font-size: 15px; }
-        .input-area button { background: #6ab2e4; border: none; padding: 0 18px; border-radius: 25px; color: #000; font-weight: bold; cursor: pointer; height: 42px; }
-        .input-area .icon-btn { background: transparent; border: none; color: #6ab2e4; font-size: 22px; cursor: pointer; padding: 0 8px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, sans-serif;
+        }
+        body {
+            background: #0f0f0f;
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #app {
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            max-height: 900px;
+            background: #0f0f0f;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        @media (min-width: 600px) {
+            #app {
+                border-radius: 20px;
+                border: 1px solid #333;
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            }
+        }
+        .page {
+            display: none;
+            height: 100%;
+            flex-direction: column;
+            overflow-y: auto;
+            padding-bottom: 60px;
+        }
+        .page.active {
+            display: flex;
+        }
+        .header {
+            padding: 10px 15px;
+            background: #0f0f0f;
+            border-bottom: 1px solid #222;
+            display: flex;
+            align-items: center;
+            height: 50px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #0f0f0f;
+        }
+        .header h2 {
+            flex: 1;
+            font-size: 17px;
+            font-weight: 600;
+        }
+        .back-btn {
+            font-size: 20px;
+            cursor: pointer;
+            margin-right: 15px;
+            color: #6ab2e4;
+        }
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            background: #1a1a1a;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #333;
+            z-index: 10;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #aaa;
+            font-size: 9px;
+            cursor: pointer;
+            padding: 3px 10px;
+        }
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        .nav-item.active {
+            color: #6ab2e4;
+        }
 
-        #context-menu { position: absolute; background: #1f1f1f; border: 1px solid #333; border-radius: 12px; padding: 8px 0; z-index: 1000; display: none; min-width: 160px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        #context-menu .menu-item { padding: 10px 16px; cursor: pointer; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 12px; }
-        #context-menu .menu-item:hover { background: #2a2a2a; }
+        .auth-screen {
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .auth-screen input {
+            width: 100%;
+            padding: 12px;
+            background: #1f1f1f;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        .auth-screen button {
+            width: 100%;
+            padding: 12px;
+            background: #6ab2e4;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-top: 5px;
+            cursor: pointer;
+            color: #000;
+        }
+        .auth-link {
+            color: #6ab2e4;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 14px;
+        }
 
-        #emoji-picker { display: none; position: absolute; bottom: 70px; right: 10px; background: #1f1f1f; border: 1px solid #333; border-radius: 16px; padding: 12px; z-index: 500; width: 280px; max-height: 250px; overflow-y: auto; }
-        #emoji-picker .emoji { font-size: 28px; cursor: pointer; padding: 8px; display: inline-block; text-align: center; width: 20%; }
-        #emoji-picker .emoji:hover { background: #2a2a2a; border-radius: 8px; }
+        .search-input {
+            width: calc(100% - 20px);
+            margin: 10px;
+            padding: 12px;
+            background: #1f1f1f;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #fff;
+        }
+        .user-result {
+            padding: 10px 15px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .user-result .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .user-result:hover {
+            background: #1a1a1a;
+        }
 
-        .stars-wrapper { padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .balance-card { background: #1a1a1a; border-radius: 20px; padding: 20px; width: 100%; text-align: center; border: 1px solid #333; }
-        .balance-row { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 32px; font-weight: 700; }
-        .balance-row i { color: #ffd700; font-size: 28px; }
-        .balance-label { color: #aaa; font-size: 13px; margin: 8px 0 16px 0; }
-        .btn-group { display: flex; gap: 10px; }
-        .btn-blue { flex: 1; background: #6ab2e4; color: #000; border: none; border-radius: 30px; padding: 12px 0; font-weight: 600; font-size: 14px; cursor: pointer; }
-        
-        .nft-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 6px; padding-bottom: 70px; background: #0f0f0f; }
-        .nft-card { background: #1a1a1a; border-radius: 16px; overflow: hidden; cursor: pointer; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; border: none; transition: transform 0.2s; position: relative; }
-        .nft-card:active { transform: scale(0.97); }
-        .nft-card img { width: 100%; height: 100%; object-fit: cover; }
-        .nft-card lottie-player { width: 100%; height: 100%; }
-        
+        .chat-list-item {
+            display: flex;
+            padding: 12px 15px;
+            border-bottom: 1px solid #222;
+            cursor: pointer;
+            align-items: center;
+            gap: 12px;
+        }
+        .chat-list-item:hover {
+            background: #1a1a1a;
+        }
+        .chat-list-item .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        #chat-window {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f0f0f;
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+        }
+        #chat-window.open {
+            display: flex;
+        }
+        .messages-area {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .msg {
+            padding: 10px 14px;
+            border-radius: 18px;
+            margin-bottom: 4px;
+            max-width: 80%;
+            font-size: 15px;
+            word-wrap: break-word;
+        }
+        .msg.sent {
+            background: #6ab2e4;
+            color: #000;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .msg.received {
+            background: #1f1f1f;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        .msg.pinned {
+            border: 2px solid #ffd700;
+        }
+        .msg img {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 5px;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 10px;
+            background: #1f1f1f;
+            gap: 8px;
+            border-top: 1px solid #333;
+            align-items: center;
+        }
+        .input-area input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 25px;
+            border: none;
+            background: #0f0f0f;
+            color: white;
+            font-size: 15px;
+        }
+        .input-area button {
+            background: #6ab2e4;
+            border: none;
+            padding: 0 18px;
+            border-radius: 25px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            height: 42px;
+        }
+        .input-area .icon-btn {
+            background: transparent;
+            border: none;
+            color: #6ab2e4;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 0 8px;
+        }
+
+        #context-menu {
+            position: absolute;
+            background: #1f1f1f;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 8px 0;
+            z-index: 1000;
+            display: none;
+            min-width: 160px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+        #context-menu .menu-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        #context-menu .menu-item:hover {
+            background: #2a2a2a;
+        }
+
+        #emoji-picker {
+            display: none;
+            position: absolute;
+            bottom: 70px;
+            right: 10px;
+            background: #1f1f1f;
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 12px;
+            z-index: 500;
+            width: 280px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        #emoji-picker .emoji {
+            font-size: 28px;
+            cursor: pointer;
+            padding: 8px;
+            display: inline-block;
+            text-align: center;
+            width: 20%;
+        }
+        #emoji-picker .emoji:hover {
+            background: #2a2a2a;
+            border-radius: 8px;
+        }
+
+        .stars-wrapper {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .balance-card {
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        .balance-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .balance-row i {
+            color: #ffd700;
+            font-size: 28px;
+        }
+        .balance-label {
+            color: #aaa;
+            font-size: 13px;
+            margin: 8px 0 16px 0;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-blue {
+            flex: 1;
+            background: #6ab2e4;
+            color: #000;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 0;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .nft-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            padding: 6px;
+            padding-bottom: 70px;
+            background: #0f0f0f;
+        }
+        .nft-card {
+            background: #1a1a1a;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            transition: transform 0.2s;
+            position: relative;
+        }
+        .nft-card:active {
+            transform: scale(0.97);
+        }
+        .nft-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .nft-card lottie-player {
+            width: 100%;
+            height: 100%;
+        }
+
         .lottie-badge {
             position: absolute;
             bottom: 8px;
@@ -92,8 +431,11 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 5;
         }
-        .lottie-badge i { font-size: 10px; color: #6ab2e4; }
-        
+        .lottie-badge i {
+            font-size: 10px;
+            color: #6ab2e4;
+        }
+
         .collected-number {
             position: absolute;
             top: 6px;
@@ -107,44 +449,180 @@
             z-index: 2;
             border: 1px solid rgba(255, 215, 0, 0.3);
         }
-        
-        #detail-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0f0f0f; z-index: 300; display: none; flex-direction: column; }
-        #detail-screen.open { display: flex; }
-        .detail-img-area { height: 45%; display: flex; align-items: center; justify-content: center; background: #1a1a1a; position: relative; margin: 20px; border-radius: 24px; overflow: hidden; }
-        .detail-img-area img { max-height: 90%; max-width: 90%; object-fit: contain; border-radius: 16px; }
-        .detail-img-area lottie-player { width: 90%; height: 90%; }
-        .detail-info { padding: 20px; flex: 1; }
-        .detail-title { font-size: 24px; font-weight: bold; margin-bottom: 8px; }
-        .detail-desc { color: #aaa; font-size: 14px; margin-bottom: 20px; line-height: 1.4; }
-        .detail-buy-btn { width: 100%; background: #6ab2e4; color: #000; border: none; padding: 16px; border-radius: 30px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 20px; }
-        
-        .collection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 6px; background: #0f0f0f; }
-        .collected-item { background: #1a1a1a; aspect-ratio: 1 / 1; border-radius: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: none; position: relative; }
-        .collected-item img { width: 100%; height: 100%; object-fit: cover; }
-        .collected-item lottie-player { width: 100%; height: 100%; }
 
-        #partner-profile { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0f0f0f; z-index: 350; display: none; flex-direction: column; }
-        #partner-profile.open { display: flex; }
-        .partner-header { padding: 30px 20px; text-align: center; border-bottom: 1px solid #222; flex-shrink: 0; }
-        .partner-avatar { width: 80px; height: 80px; border-radius: 50%; background: #444; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
-        .partner-username { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
-        .partner-phone { color: #aaa; font-size: 14px; }
-        .partner-collection-wrapper { flex: 1; overflow-y: auto; }
-        .partner-collection { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 6px; }
+        #detail-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f0f0f;
+            z-index: 300;
+            display: none;
+            flex-direction: column;
+        }
+        #detail-screen.open {
+            display: flex;
+        }
+        .detail-img-area {
+            height: 45%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+            position: relative;
+            margin: 20px;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+        .detail-img-area img {
+            max-height: 90%;
+            max-width: 90%;
+            object-fit: contain;
+            border-radius: 16px;
+        }
+        .detail-img-area lottie-player {
+            width: 90%;
+            height: 90%;
+        }
+        .detail-info {
+            padding: 20px;
+            flex: 1;
+        }
+        .detail-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .detail-desc {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .detail-buy-btn {
+            width: 100%;
+            background: #6ab2e4;
+            color: #000;
+            border: none;
+            padding: 16px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
 
-        #page-auth { display: flex; }
-        #app-content { display: none; height: 100%; flex-direction: column; }
-        #app-content.visible { display: flex; }
-        ::-webkit-scrollbar { width: 0; }
-        
-        .profile-username { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
-        .profile-phone { color: #aaa; font-size: 13px; }
-        
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            padding: 6px;
+            background: #0f0f0f;
+        }
+        .collected-item {
+            background: #1a1a1a;
+            aspect-ratio: 1 / 1;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: none;
+            position: relative;
+        }
+        .collected-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .collected-item lottie-player {
+            width: 100%;
+            height: 100%;
+        }
+
+        #partner-profile {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f0f0f;
+            z-index: 350;
+            display: none;
+            flex-direction: column;
+        }
+        #partner-profile.open {
+            display: flex;
+        }
+        .partner-header {
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid #222;
+            flex-shrink: 0;
+        }
+        .partner-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #444;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        .partner-username {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .partner-phone {
+            color: #aaa;
+            font-size: 14px;
+        }
+        .partner-collection-wrapper {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .partner-collection {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            padding: 6px;
+        }
+
+        #page-auth {
+            display: flex;
+        }
+        #app-content {
+            display: none;
+            height: 100%;
+            flex-direction: column;
+        }
+        #app-content.visible {
+            display: flex;
+        }
+        ::-webkit-scrollbar {
+            width: 0;
+        }
+
+        .profile-username {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .profile-phone {
+            color: #aaa;
+            font-size: 13px;
+        }
+
         lottie-player {
             will-change: transform;
             transform: translateZ(0);
         }
-        .nft-card, .collected-item {
+        .nft-card,
+        .collected-item {
             will-change: transform;
             -webkit-transform: translateZ(0);
             transform: translateZ(0);
@@ -153,832 +631,837 @@
 </head>
 <body>
 
-<div id="app">
+    <div id="app">
 
-    <!-- AUTH -->
-    <div id="page-auth" class="page active">
-        <div class="header"><h2>Вход</h2></div>
-        <div class="auth-screen" id="login-form">
-            <input id="login-phone" placeholder="+888">
-            <input id="login-password" type="password" placeholder="Пароль">
-            <button onclick="login()">Войти</button>
-            <div id="auth-status" style="margin-top:10px; color:#aaa; font-size:13px;"></div>
-            <div class="auth-link" onclick="showRegister()">Нет аккаунта? Зарегистрироваться</div>
+        <!-- AUTH -->
+        <div id="page-auth" class="page active">
+            <div class="header"><h2>Вход</h2></div>
+            <div class="auth-screen" id="login-form">
+                <input id="login-phone" placeholder="+888">
+                <input id="login-password" type="password" placeholder="Пароль">
+                <button onclick="login()">Войти</button>
+                <div id="auth-status" style="margin-top:10px; color:#aaa; font-size:13px;"></div>
+                <div class="auth-link" onclick="showRegister()">Нет аккаунта? Зарегистрироваться</div>
+            </div>
+            <div class="auth-screen" id="register-form" style="display:none;">
+                <input id="reg-username" placeholder="Никнейм">
+                <input id="reg-password" type="password" placeholder="Пароль">
+                <button onclick="register()">Зарегистрироваться</button>
+                <div id="reg-status" style="margin-top:10px; color:#aaa; font-size:13px;"></div>
+                <div class="auth-link" onclick="showLogin()">Уже есть аккаунт? Войти</div>
+            </div>
         </div>
-        <div class="auth-screen" id="register-form" style="display:none;">
-            <input id="reg-username" placeholder="Никнейм">
-            <input id="reg-password" type="password" placeholder="Пароль">
-            <button onclick="register()">Зарегистрироваться</button>
-            <div id="reg-status" style="margin-top:10px; color:#aaa; font-size:13px;"></div>
-            <div class="auth-link" onclick="showLogin()">Уже есть аккаунт? Войти</div>
+
+        <!-- APP CONTENT -->
+        <div id="app-content">
+
+            <!-- CHATS -->
+            <div id="page-chats" class="page active">
+                <div class="header"><h2>Чаты</h2></div>
+                <div id="chat-list" style="flex:1;"></div>
+            </div>
+
+            <!-- SEARCH -->
+            <div id="page-search" class="page">
+                <div class="header"><h2>Поиск</h2></div>
+                <input class="search-input" id="search-input" placeholder="Введите номер..." oninput="searchUser()">
+                <div id="search-results"></div>
+            </div>
+
+            <!-- MARKET -->
+            <div id="page-market" class="page">
+                <div class="header"><h2>Маркет</h2></div>
+                <div class="stars-wrapper">
+                    <div class="balance-card">
+                        <div class="balance-row"><i class="fas fa-star"></i><span id="bal-text">5000</span></div>
+                        <div class="balance-label">Ваш баланс</div>
+                        <div class="btn-group"><button class="btn-blue" onclick="addStars()">Пополнить</button></div>
+                    </div>
+                </div>
+                <div class="nft-list" id="nft-list"></div>
+            </div>
+
+            <!-- DETAIL -->
+            <div id="detail-screen">
+                <div class="header">
+                    <i class="fas fa-arrow-left back-btn" onclick="closeDetail()"></i>
+                    <h2 id="detail-name">NFT</h2>
+                </div>
+                <div class="detail-img-area"><img id="detail-main-img" src="" alt="NFT"></div>
+                <div class="detail-info">
+                    <div class="detail-title" id="detail-title">NFT</div>
+                    <div class="detail-desc">Уникальный анимированный NFT с эффектами.</div>
+                    <div style="font-size:20px; font-weight:bold; color:#ffd700; margin-bottom:15px;">
+                        <i class="fas fa-star"></i> <span id="detail-price">0</span>
+                    </div>
+                    <button class="detail-buy-btn" onclick="buyDetailNFT()">Купить</button>
+                </div>
+            </div>
+
+            <!-- PROFILE -->
+            <div id="page-profile" class="page">
+                <div class="header"><h2>Профиль</h2></div>
+                <div style="padding:20px; text-align:center;">
+                    <div style="width:80px; height:80px; border-radius:50%; background:#444; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:40px;">👤</div>
+                    <div class="profile-username" id="profile-name">Гость</div>
+                    <div class="profile-phone" id="profile-phone">---</div>
+                    <div style="color:#ffd700; margin-top:12px; font-size:16px;">⭐ <span id="prof-bal">5000</span></div>
+                </div>
+                <h4 style="padding-left:12px; margin-bottom:4px; font-size:14px; color:#aaa;">Мои NFT</h4>
+                <div class="collection-grid" id="my-collection"></div>
+            </div>
+
+            <!-- PARTNER PROFILE -->
+            <div id="partner-profile">
+                <div class="header">
+                    <i class="fas fa-arrow-left back-btn" onclick="closePartnerProfile()"></i>
+                    <h2>Профиль</h2>
+                </div>
+                <div class="partner-header">
+                    <div class="partner-avatar" id="partner-avatar">👤</div>
+                    <div class="partner-username" id="partner-username">Пользователь</div>
+                    <div class="partner-phone" id="partner-phone">---</div>
+                </div>
+                <div class="partner-collection-wrapper">
+                    <h4 style="padding-left:12px; margin-bottom:4px; font-size:14px; color:#aaa;">NFT</h4>
+                    <div class="partner-collection" id="partner-collection"></div>
+                </div>
+            </div>
+
+            <!-- NAV -->
+            <nav class="bottom-nav">
+                <div class="nav-item active" onclick="switchTab('chats', this)"><i class="fas fa-comments"></i><span>Чаты</span></div>
+                <div class="nav-item" onclick="switchTab('search', this)"><i class="fas fa-search"></i><span>Поиск</span></div>
+                <div class="nav-item" onclick="switchTab('market', this)"><i class="fas fa-store"></i><span>Маркет</span></div>
+                <div class="nav-item" onclick="switchTab('profile', this)"><i class="fas fa-user"></i><span>Профиль</span></div>
+            </nav>
+
+            <!-- CHAT WINDOW -->
+            <div id="chat-window">
+                <div class="header">
+                    <i class="fas fa-arrow-left back-btn" onclick="closeChat()"></i>
+                    <h2 id="chat-partner-name">Чат</h2>
+                    <i class="fas fa-user" style="font-size:20px; cursor:pointer;" onclick="openPartnerProfile()"></i>
+                </div>
+                <div class="messages-area" id="messages-container"></div>
+                <div class="input-area">
+                    <input type="text" id="message-input" placeholder="Сообщение...">
+                    <button class="icon-btn" onclick="toggleEmojiPicker()"><i class="fas fa-smile"></i></button>
+                    <button class="icon-btn" onclick="document.getElementById('image-input').click()"><i class="fas fa-image"></i></button>
+                    <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="uploadImage()">
+                    <button onclick="sendMessage()">Отправить</button>
+                </div>
+            </div>
+
         </div>
+
     </div>
 
-    <!-- APP CONTENT -->
-    <div id="app-content">
-        
-        <!-- CHATS -->
-        <div id="page-chats" class="page active">
-            <div class="header"><h2>Чаты</h2></div>
-            <div id="chat-list" style="flex:1;"></div>
-        </div>
-
-        <!-- SEARCH -->
-        <div id="page-search" class="page">
-            <div class="header"><h2>Поиск</h2></div>
-            <input class="search-input" id="search-input" placeholder="Введите номер..." oninput="searchUser()">
-            <div id="search-results"></div>
-        </div>
-
-        <!-- MARKET -->
-        <div id="page-market" class="page">
-            <div class="header"><h2>Маркет</h2></div>
-            <div class="stars-wrapper">
-                <div class="balance-card">
-                    <div class="balance-row"><i class="fas fa-star"></i><span id="bal-text">5000</span></div>
-                    <div class="balance-label">Ваш баланс</div>
-                    <div class="btn-group"><button class="btn-blue" onclick="addStars()">Пополнить</button></div>
-                </div>
-            </div>
-            <div class="nft-list" id="nft-list"></div>
-        </div>
-
-        <!-- DETAIL -->
-        <div id="detail-screen">
-            <div class="header">
-                <i class="fas fa-arrow-left back-btn" onclick="closeDetail()"></i>
-                <h2 id="detail-name">NFT</h2>
-            </div>
-            <div class="detail-img-area"><img id="detail-main-img" src="" alt="NFT"></div>
-            <div class="detail-info">
-                <div class="detail-title" id="detail-title">NFT</div>
-                <div class="detail-desc">Уникальный анимированный NFT с эффектами.</div>
-                <div style="font-size:20px; font-weight:bold; color:#ffd700; margin-bottom:15px;">
-                    <i class="fas fa-star"></i> <span id="detail-price">0</span>
-                </div>
-                <button class="detail-buy-btn" onclick="buyDetailNFT()">Купить</button>
-            </div>
-        </div>
-
-        <!-- PROFILE -->
-        <div id="page-profile" class="page">
-            <div class="header"><h2>Профиль</h2></div>
-            <div style="padding:20px; text-align:center;">
-                <div style="width:80px; height:80px; border-radius:50%; background:#444; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:40px;">👤</div>
-                <div class="profile-username" id="profile-name">Гость</div>
-                <div class="profile-phone" id="profile-phone">---</div>
-                <div style="color:#ffd700; margin-top:12px; font-size:16px;">⭐ <span id="prof-bal">5000</span></div>
-            </div>
-            <h4 style="padding-left:12px; margin-bottom:4px; font-size:14px; color:#aaa;">Мои NFT</h4>
-            <div class="collection-grid" id="my-collection"></div>
-        </div>
-
-        <!-- PARTNER PROFILE -->
-        <div id="partner-profile">
-            <div class="header">
-                <i class="fas fa-arrow-left back-btn" onclick="closePartnerProfile()"></i>
-                <h2>Профиль</h2>
-            </div>
-            <div class="partner-header">
-                <div class="partner-avatar" id="partner-avatar">👤</div>
-                <div class="partner-username" id="partner-username">Пользователь</div>
-                <div class="partner-phone" id="partner-phone">---</div>
-            </div>
-            <div class="partner-collection-wrapper">
-                <h4 style="padding-left:12px; margin-bottom:4px; font-size:14px; color:#aaa;">NFT</h4>
-                <div class="partner-collection" id="partner-collection"></div>
-            </div>
-        </div>
-
-        <!-- NAV -->
-        <nav class="bottom-nav">
-            <div class="nav-item active" onclick="switchTab('chats', this)"><i class="fas fa-comments"></i><span>Чаты</span></div>
-            <div class="nav-item" onclick="switchTab('search', this)"><i class="fas fa-search"></i><span>Поиск</span></div>
-            <div class="nav-item" onclick="switchTab('market', this)"><i class="fas fa-store"></i><span>Маркет</span></div>
-            <div class="nav-item" onclick="switchTab('profile', this)"><i class="fas fa-user"></i><span>Профиль</span></div>
-        </nav>
-
-        <!-- CHAT WINDOW -->
-        <div id="chat-window">
-            <div class="header">
-                <i class="fas fa-arrow-left back-btn" onclick="closeChat()"></i>
-                <h2 id="chat-partner-name">Чат</h2>
-                <i class="fas fa-user" style="font-size:20px; cursor:pointer;" onclick="openPartnerProfile()"></i>
-            </div>
-            <div class="messages-area" id="messages-container"></div>
-            <div class="input-area">
-                <input type="text" id="message-input" placeholder="Сообщение...">
-                <button class="icon-btn" onclick="toggleEmojiPicker()"><i class="fas fa-smile"></i></button>
-                <button class="icon-btn" onclick="document.getElementById('image-input').click()"><i class="fas fa-image"></i></button>
-                <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="uploadImage()">
-                <button onclick="sendMessage()">Отправить</button>
-            </div>
-        </div>
-
+    <!-- Context Menu -->
+    <div id="context-menu">
+        <div class="menu-item" onclick="editMessage()"><i class="fas fa-edit"></i> Редактировать</div>
+        <div class="menu-item" onclick="deleteMessage()"><i class="fas fa-trash"></i> Удалить</div>
+        <div class="menu-item" onclick="pinMessage()"><i class="fas fa-thumbtack"></i> Закрепить</div>
+        <div class="menu-item" onclick="reactMessage()"><i class="fas fa-thumbs-up"></i> 👍</div>
     </div>
 
-</div>
+    <!-- Emoji Picker -->
+    <div id="emoji-picker">
+        <span class="emoji" onclick="addEmoji('😊')">😊</span>
+        <span class="emoji" onclick="addEmoji('😂')">😂</span>
+        <span class="emoji" onclick="addEmoji('❤️')">❤️</span>
+        <span class="emoji" onclick="addEmoji('🔥')">🔥</span>
+        <span class="emoji" onclick="addEmoji('👍')">👍</span>
+        <span class="emoji" onclick="addEmoji('👎')">👎</span>
+        <span class="emoji" onclick="addEmoji('😢')">😢</span>
+        <span class="emoji" onclick="addEmoji('😡')">😡</span>
+        <span class="emoji" onclick="addEmoji('🎉')">🎉</span>
+        <span class="emoji" onclick="addEmoji('💯')">💯</span>
+        <span class="emoji" onclick="addEmoji('🥺')">🥺</span>
+        <span class="emoji" onclick="addEmoji('😎')">😎</span>
+    </div>
 
-<!-- Context Menu -->
-<div id="context-menu">
-    <div class="menu-item" onclick="editMessage()"><i class="fas fa-edit"></i> Редактировать</div>
-    <div class="menu-item" onclick="deleteMessage()"><i class="fas fa-trash"></i> Удалить</div>
-    <div class="menu-item" onclick="pinMessage()"><i class="fas fa-thumbtack"></i> Закрепить</div>
-    <div class="menu-item" onclick="reactMessage()"><i class="fas fa-thumbs-up"></i> 👍</div>
-</div>
+    <script>
+        // ============================
+        // FIREBASE
+        // ============================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDjM1lRbEKtCsaYe9e48pEPReh0AMe910U",
+            authDomain: "nevergram-e1d62.firebaseapp.com",
+            projectId: "nevergram-e1d62",
+            storageBucket: "nevergram-e1d62.firebasestorage.app",
+            messagingSenderId: "355130485889",
+            appId: "1:355130485889:web:d6657f9d2cf8b4e28b3180",
+            measurementId: "G-Q0YRVZ1W1E"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
 
-<!-- Emoji Picker -->
-<div id="emoji-picker">
-    <span class="emoji" onclick="addEmoji('😊')">😊</span>
-    <span class="emoji" onclick="addEmoji('😂')">😂</span>
-    <span class="emoji" onclick="addEmoji('❤️')">❤️</span>
-    <span class="emoji" onclick="addEmoji('🔥')">🔥</span>
-    <span class="emoji" onclick="addEmoji('👍')">👍</span>
-    <span class="emoji" onclick="addEmoji('👎')">👎</span>
-    <span class="emoji" onclick="addEmoji('😢')">😢</span>
-    <span class="emoji" onclick="addEmoji('😡')">😡</span>
-    <span class="emoji" onclick="addEmoji('🎉')">🎉</span>
-    <span class="emoji" onclick="addEmoji('💯')">💯</span>
-    <span class="emoji" onclick="addEmoji('🥺')">🥺</span>
-    <span class="emoji" onclick="addEmoji('😎')">😎</span>
-</div>
+        // ============================
+        // STATE
+        // ============================
+        let currentUser = null;
+        let balance = 5000;
+        let currentChatId = null;
+        let chatUnsubscriber = null;
+        let currentPartnerId = null;
+        let selectedMessageId = null;
+        let selectedMessageElement = null;
+        let activeLottiePlayers = [];
 
-<script>
-    // ============================
-    // FIREBASE
-    // ============================
-    const firebaseConfig = {
-        apiKey: "AIzaSyDjM1lRbEKtCsaYe9e48pEPReh0AMe910U",
-        authDomain: "nevergram-e1d62.firebaseapp.com",
-        projectId: "nevergram-e1d62",
-        storageBucket: "nevergram-e1d62.firebasestorage.app",
-        messagingSenderId: "355130485889",
-        appId: "1:355130485889:web:d6657f9d2cf8b4e28b3180",
-        measurementId: "G-Q0YRVZ1W1E"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const storage = firebase.storage();
+        // ============================
+        // ⭐ NFT DATA
+        // ============================
+        const nftCatalog = [
+            // ===== ОБЫЧНЫЕ NFT =====
+            {
+                id: 'nft1',
+                name: 'Синий Пепе',
+                price: 500,
+                img: 'ССЫЛКА_НА_КАРТИНКУ_1',
+                isLottie: false
+            },
+            {
+                id: 'nft2',
+                name: 'Тёмный Пепе',
+                price: 600,
+                img: 'ССЫЛКА_НА_КАРТИНКУ_2',
+                isLottie: false
+            },
+            {
+                id: 'nft3',
+                name: 'Огненный Пепе',
+                price: 700,
+                img: 'ССЫЛКА_НА_КАРТИНКУ_3',
+                isLottie: false
+            },
+            {
+                id: 'nft4',
+                name: 'Ледяной Пепе',
+                price: 800,
+                img: 'ССЫЛКА_НА_КАРТИНКУ_4',
+                isLottie: false
+            },
 
-    // ============================
-    // STATE
-    // ============================
-    let currentUser = null;
-    let balance = 5000;
-    let currentChatId = null;
-    let chatUnsubscriber = null;
-    let currentPartnerId = null;
-    let selectedMessageId = null;
-    let selectedMessageElement = null;
-    let activeLottiePlayers = [];
+            // ===== АНИМИРОВАННЫЕ NFT =====
+            {
+                id: 'lowrider_9738',
+                name: 'Low Rider #9738',
+                price: 20000,
+                img: 'https://i.getgems.io/4GsJBBY_lnkL6gS1bj-iy-LkCesk0idWThI-mgger2w/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvYjE5ZjI3YTA1YTgzMzkzYQ.jpg',
+                lottieUrl: 'lottie/lowrider1.json',
+                isLottie: true
+            },
+            {
+                id: 'lowrider_20764',
+                name: 'Low Rider #20764',
+                price: 20000,
+                img: 'https://i.getgems.io/Hz9860DzuZHiqGlq8IMIJl2sfWeetRRaZ1mw_1nPfsA/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvNzAxM2E1YzE4MmMzMDAwZg.jpg',
+                lottieUrl: 'lottie/lowrider2.json',
+                isLottie: true
+            },
+            {
+                id: 'lowrider_16023',
+                name: 'Low Rider (LA Noir)',
+                price: 50000,
+                img: 'https://i.getgems.io/V_7pZVoj_JKltBw2_g8hr0ggFpuWXfiLbZiyjbrpvvM/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvMTNlMGZhMWY1ZmUzYjFiYw.jpg',
+                lottieUrl: 'lottie/blacklowrider.json',
+                isLottie: true
+            },
+            {
+                id: 'swiss_watch_15507',
+                name: 'Swiss Watch (Full Tint)',
+                price: 50000,
+                img: 'https://i.getgems.io/54zOgq_vDTOAHisi7zts8QrNtYVYuTsiLKgcLVy1GeI/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUJJMDdQWGV3OTRZUXo3R3dONzJuUE5HRjZodFNUT0prdVU0S3hfYmpUWnYzMlUvMmJmYjhiMzg2OTk2MjM5Ng.jpg',
+                lottieUrl: 'lottie/watch.json',
+                isLottie: true
+            },
+            {
+                id: 'low_rider_samolet',
+                name: 'Low Rider (Airplane Black)',
+                price: 100000,
+                img: 'https://i.getgems.io/Ay0CLib1FDIllMaH4vNCkBbutADDTCAuWnZ5q9mPHss/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvN2FmZTc4NWVkY2M0MWVjMw.jpg',
+                lottieUrl: 'lottie/samolet.json',
+                isLottie: true
+            },
+            {
+                id: 'low_rider_8808',
+                name: 'Low Rider #8808',
+                price: 1000,
+                img: 'https://i.getgems.io/vnamktaD8dh0HiWt13p1NVE8JrIiuo6sGrsEUMsV-Mk/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvNzcyYWNjYTQ5NzBjY2E2ZA.jpg',
+                lottieUrl: 'lottie/lowridermoney.json',
+                isLottie: true
+            },
+            {
+                id: 'pepe_animated',
+                name: 'Анимированный Пепе',
+                price: 30000000,
+                img: 'https://i.getgems.io/Ms7WU-h18ys6IR2vgnodlddEDOwaDIKoe3JjAsUYSCQ/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUJHLWc2YWhrQVVHV3BlZldieC1EXzlzUThvV2J2eTZwdXVxNzhVMmM0TlVERlMvYTk2YmNjYjgzYjA2ZjAyMA.jpg',
+                lottieUrl: 'lottie/pepe.json',
+                isLottie: true
+            }
+        ];
 
-    // ============================
-    // ⭐ NFT DATA (ТВОЙ МАССИВ)
-    // ============================
-    const nftCatalog = [
-        // ===== ОБЫЧНЫЕ NFT =====
-        { 
-            id: 'nft1', 
-            name: 'Синий Пепе', 
-            price: 500, 
-            img: 'ССЫЛКА_НА_КАРТИНКУ_1',
-            isLottie: false
-        },
-        { 
-            id: 'nft2', 
-            name: 'Тёмный Пепе', 
-            price: 600, 
-            img: 'ССЫЛКА_НА_КАРТИНКУ_2',
-            isLottie: false
-        },
-        { 
-            id: 'nft3', 
-            name: 'Огненный Пепе', 
-            price: 700, 
-            img: 'ССЫЛКА_НА_КАРТИНКУ_3',
-            isLottie: false
-        },
-        { 
-            id: 'nft4', 
-            name: 'Ледяной Пепе', 
-            price: 800, 
-            img: 'ССЫЛКА_НА_КАРТИНКУ_4',
-            isLottie: false
-        },
-        
-        // ===== АНИМИРОВАННЫЕ NFT =====
-        { 
-            id: 'lowrider_9738', 
-            name: 'Low Rider #9738', 
-            price: 20000, 
-            img: 'https://i.getgems.io/4GsJBBY_lnkL6gS1bj-iy-LkCesk0idWThI-mgger2w/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvYjE5ZjI3YTA1YTgzMzkzYQ.jpg', 
-            lottieUrl: 'lottie/lowrider1.json',
-            isLottie: true
-        },
-        { 
-            id: 'lowrider_20764', 
-            name: 'Low Rider #20764', 
-            price: 20000, 
-            img: 'https://i.getgems.io/Hz9860DzuZHiqGlq8IMIJl2sfWeetRRaZ1mw_1nPfsA/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvNzAxM2E1YzE4MmMzMDAwZg.jpg', 
-            lottieUrl: 'lottie/lowrider2.json',
-            isLottie: true
-        },
-        { 
-            id: 'lowrider_16023', 
-            name: 'Low Rider (LA Noir)', 
-            price: 50000, 
-            img: 'https://i.getgems.io/V_7pZVoj_JKltBw2_g8hr0ggFpuWXfiLbZiyjbrpvvM/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvMTNlMGZhMWY1ZmUzYjFiYw.jpg', 
-            lottieUrl: 'lottie/blacklowrider.json',
-            isLottie: true
-        },
-        { 
-            id: 'swiss_watch_15507', 
-            name: 'Swiss Watch (Full Tint)', 
-            price: 50000,
-            img: 'https://i.getgems.io/54zOgq_vDTOAHisi7zts8QrNtYVYuTsiLKgcLVy1GeI/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUJJMDdQWGV3OTRZUXo3R3dONzJuUE5HRjZodFNUT0prdVU0S3hfYmpUWnYzMlUvMmJmYjhiMzg2OTk2MjM5Ng.jpg', 
-            lottieUrl: 'lottie/watch.json',
-            isLottie: true
-        },
-        { 
-            id: 'low_rider_samolet', 
-            name: 'Low Rider (Airplane Black)', 
-            price: 100000,
-            img: 'https://i.getgems.io/Ay0CLib1FDIllMaH4vNCkBbutADDTCAuWnZ5q9mPHss/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvN2FmZTc4NWVkY2M0MWVjMw.jpg', 
-            lottieUrl: 'lottie/samolet.json',
-            isLottie: true
-        },
-        { 
-            id: 'low_rider_8808', 
-            name: 'Low Rider #8808', 
-            price: 1000,
-            img: 'https://i.getgems.io/vnamktaD8dh0HiWt13p1NVE8JrIiuo6sGrsEUMsV-Mk/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvNzcyYWNjYTQ5NzBjY2E2ZA.jpg', 
-            lottieUrl: 'lottie/lowridermoney.json',
-            isLottie: true
-        },
-        { 
-            id: 'pepe_animated', 
-            name: 'Анимированный Пепе', 
-            price: 30000000, 
-            img: 'https://i.getgems.io/Ms7WU-h18ys6IR2vgnodlddEDOwaDIKoe3JjAsUYSCQ/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUJHLWc2YWhrQVVHV3BlZldieC1EXzlzUThvV2J2eTZwdXVxNzhVMmM0TlVERlMvYTk2YmNjYjgzYjA2ZjAyMA.jpg', 
-            lottieUrl: 'lottie/pepe.json',
-            isLottie: true
-        }
-    ];
-
-    // ============================
-    // ФУНКЦИЯ ДЛЯ УНИЧТОЖЕНИЯ ПЛЕЕРОВ
-    // ============================
-    function destroyLottiePlayersInContainer(container) {
-        const players = container.querySelectorAll('lottie-player');
-        players.forEach(player => {
-            const index = activeLottiePlayers.indexOf(player);
-            if (index !== -1) activeLottiePlayers.splice(index, 1);
-            if (player.stop) player.stop();
-            player.remove();
-        });
-    }
-
-    // ============================
-    // СОЗДАНИЕ ПЛЕЕРА — 1 РАЗ И ЗАСТЫВАЕТ
-    // ============================
-    function createOneShotLottiePlayer(url, container) {
-        const player = document.createElement('lottie-player');
-        player.setAttribute('src', url);
-        player.setAttribute('autoplay', '');
-        player.setAttribute('loop', 'false');
-        player.setAttribute('renderer', 'svg');
-        player.style.width = '100%';
-        player.style.height = '100%';
-        player.style.display = 'block';
-        
-        // Останавливаем после завершения
-        player.addEventListener('complete', function() {
-            this.stop();
-        });
-        
-        activeLottiePlayers.push(player);
-        container.appendChild(player);
-        return player;
-    }
-
-    // ============================
-    // ИНИЦИАЛИЗАЦИЯ СЧЁТЧИКА
-    // ============================
-    async function initCounter() {
-        const counterRef = db.collection('system').doc('counters');
-        const doc = await counterRef.get();
-        if (!doc.exists) {
-            await counterRef.set({ nftCounter: 0 });
-            console.log('✅ Счётчик NFT создан');
-        }
-    }
-
-    // ============================
-    // UI
-    // ============================
-    function showRegister() {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('register-form').style.display = 'flex';
-    }
-    function showLogin() {
-        document.getElementById('login-form').style.display = 'flex';
-        document.getElementById('register-form').style.display = 'none';
-    }
-    function switchTab(tab, el) {
-        const allPlayers = document.querySelectorAll('lottie-player');
-        allPlayers.forEach(player => {
-            if (player.stop) player.stop();
-            player.remove();
-        });
-        activeLottiePlayers = [];
-        
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById('page-' + tab).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-        
-        if (tab === 'market') renderMarket();
-        if (tab === 'profile') renderCollection();
-    }
-    function updateBalance() {
-        document.getElementById('bal-text').innerText = balance.toLocaleString();
-        document.getElementById('prof-bal').innerText = balance.toLocaleString();
-    }
-    function addStars() { balance += 100; updateBalance(); if (currentUser) db.collection('users').doc(currentUser.id).update({ balance }); }
-
-    // ============================
-    // AUTH
-    // ============================
-    async function login() {
-        const phone = document.getElementById('login-phone').value.trim();
-        const password = document.getElementById('login-password').value.trim();
-        if (!phone || !password) return document.getElementById('auth-status').innerText = 'Заполните поля';
-        const snap = await db.collection('users').where('phone', '==', phone).get();
-        if (snap.empty) return document.getElementById('auth-status').innerText = 'Не найден';
-        const data = snap.docs[0].data();
-        if (data.password !== password) return document.getElementById('auth-status').innerText = 'Неверный пароль';
-        currentUser = { id: snap.docs[0].id, ...data };
-        await initCounter();
-        afterLogin();
-    }
-
-    async function register() {
-        const username = document.getElementById('reg-username').value.trim();
-        const password = document.getElementById('reg-password').value.trim();
-        if (!username || !password) return document.getElementById('reg-status').innerText = 'Заполните поля';
-        const phone = '+9' + Math.random().toString(36).substring(2, 11);
-        const doc = await db.collection('users').add({ phone, username, password, balance: 5000 });
-        currentUser = { id: doc.id, phone, username, balance: 5000 };
-        await initCounter();
-        afterLogin();
-    }
-
-    function afterLogin() {
-        document.getElementById('page-auth').style.display = 'none';
-        document.getElementById('app-content').classList.add('visible');
-        document.getElementById('profile-name').innerText = currentUser.username;
-        document.getElementById('profile-phone').innerText = currentUser.phone;
-        balance = currentUser.balance || 5000;
-        updateBalance();
-        loadChats();
-        renderMarket();
-        renderCollection();
-        const nav = document.querySelector('.nav-item:first-child');
-        switchTab('chats', nav);
-    }
-
-    // ============================
-    // SEARCH
-    // ============================
-    async function searchUser() {
-        const q = document.getElementById('search-input').value.trim();
-        const c = document.getElementById('search-results');
-        if (q.length < 3) return c.innerHTML = '';
-        const snap = await db.collection('users').where('phone', '==', q).get();
-        c.innerHTML = '';
-        snap.forEach(d => {
-            const data = d.data();
-            if (data.phone === currentUser.phone) return;
-            c.innerHTML += `
-                <div class="user-result" onclick="startChat('${d.id}','${data.username}','${data.phone}')">
-                    <div class="avatar">👤</div>
-                    <div><div style="font-weight:bold;">${data.username}</div><div style="color:#aaa;font-size:12px;">${data.phone}</div></div>
-                </div>
-            `;
-        });
-        if (c.innerHTML === '') c.innerHTML = '<div style="padding:20px;color:#aaa;text-align:center;">Ничего не найдено</div>';
-    }
-
-    // ============================
-    // CHATS
-    // ============================
-    async function loadChats() {
-        const c = document.getElementById('chat-list');
-        c.innerHTML = '<div style="padding:20px;color:#aaa;text-align:center;">Загрузка...</div>';
-        const snap = await db.collection('chats').where('participants', 'array-contains', currentUser.phone).get();
-        c.innerHTML = '';
-        if (snap.empty) return c.innerHTML = '<div style="padding:20px;color:#aaa;text-align:center;">Нет чатов</div>';
-        snap.forEach(d => {
-            const data = d.data();
-            const partner = data.participants.find(p => p !== currentUser.phone);
-            const name = data.participantNames?.[partner] || 'Неизвестно';
-            c.innerHTML += `
-                <div class="chat-list-item" onclick="openChat('${d.id}','${name}','${partner}')">
-                    <div class="avatar">👤</div>
-                    <div><div style="font-weight:bold;">${name}</div><div style="color:#aaa;font-size:12px;">${partner}</div></div>
-                </div>
-            `;
-        });
-    }
-
-    async function startChat(pid, pname, pphone) {
-        const snap = await db.collection('chats').where('participants', '==', [currentUser.phone, pphone]).get();
-        let id;
-        if (snap.empty) {
-            const ref = await db.collection('chats').add({
-                participants: [currentUser.phone, pphone],
-                participantNames: { [currentUser.phone]: currentUser.username, [pphone]: pname }
+        // ============================
+        // ФУНКЦИЯ ДЛЯ УНИЧТОЖЕНИЯ ПЛЕЕРОВ
+        // ============================
+        function destroyLottiePlayersInContainer(container) {
+            const players = container.querySelectorAll('lottie-player');
+            players.forEach(player => {
+                const index = activeLottiePlayers.indexOf(player);
+                if (index !== -1) activeLottiePlayers.splice(index, 1);
+                if (player.stop) player.stop();
+                player.remove();
             });
-            id = ref.id;
-        } else id = snap.docs[0].id;
-        openChat(id, pname, pphone);
-        loadChats();
-    }
+        }
 
-    function openChat(id, name, phone) {
-        currentChatId = id;
-        currentPartnerId = phone;
-        document.getElementById('chat-partner-name').innerText = name;
-        document.getElementById('chat-window').classList.add('open');
-        const c = document.getElementById('messages-container');
-        c.innerHTML = '';
-        if (chatUnsubscriber) chatUnsubscriber();
-        chatUnsubscriber = db.collection('chats').doc(id).collection('messages').orderBy('timestamp')
-            .onSnapshot(snap => {
-                c.innerHTML = '';
-                snap.forEach(doc => {
-                    const data = doc.data();
-                    const div = document.createElement('div');
-                    div.className = `msg ${data.sender === currentUser.phone ? 'sent' : 'received'}`;
-                    if (data.pinned) div.classList.add('pinned');
-                    div.dataset.id = doc.id;
-                    
-                    let content = '';
-                    if (data.text) content += `<div>${escapeHtml(data.text)}</div>`;
-                    if (data.imageUrl) content += `<img src="${data.imageUrl}" alt="Image">`;
-                    if (data.reactions) {
-                        content += `<div style="margin-top:5px;font-size:12px;">`;
-                        for (const [emoji, count] of Object.entries(data.reactions)) {
-                            content += `<span style="background:#2a2a2a;padding:2px 6px;border-radius:10px;margin-right:3px;">${emoji} ${count}</span>`;
-                        }
-                        content += `</div>`;
-                    }
-                    div.innerHTML = content;
-                    div.addEventListener('contextmenu', function(e) {
-                        e.preventDefault();
-                        showContextMenu(e.clientX, e.clientY, doc.id, this);
-                    });
-                    c.appendChild(div);
+        // ============================
+        // СОЗДАНИЕ ПЛЕЕРА — 1 РАЗ И ЗАСТЫВАЕТ
+        // ============================
+        function createOneShotLottiePlayer(url, container) {
+            const player = document.createElement('lottie-player');
+            player.setAttribute('src', url);
+            player.setAttribute('autoplay', '');
+            player.setAttribute('loop', 'false');
+            player.setAttribute('renderer', 'svg');
+            player.style.width = '100%';
+            player.style.height = '100%';
+            player.style.display = 'block';
+
+            // Останавливаем после завершения
+            player.addEventListener('complete', function() {
+                this.stop();
+            });
+
+            activeLottiePlayers.push(player);
+            container.appendChild(player);
+            return player;
+        }
+
+        // ============================
+        // ИНИЦИАЛИЗАЦИЯ СЧЁТЧИКА
+        // ============================
+        async function initCounter() {
+            const counterRef = db.collection('system').doc('counters');
+            const doc = await counterRef.get();
+            if (!doc.exists) {
+                await counterRef.set({ nftCounter: 0 });
+                console.log('✅ Счётчик NFT создан');
+            }
+        }
+
+        // ============================
+        // UI
+        // ============================
+        function showRegister() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'flex';
+        }
+
+        function showLogin() {
+            document.getElementById('login-form').style.display = 'flex';
+            document.getElementById('register-form').style.display = 'none';
+        }
+
+        function switchTab(tab, el) {
+            const allPlayers = document.querySelectorAll('lottie-player');
+            allPlayers.forEach(player => {
+                if (player.stop) player.stop();
+                player.remove();
+            });
+            activeLottiePlayers = [];
+
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + tab).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+
+            if (tab === 'market') renderMarket();
+            if (tab === 'profile') renderCollection();
+        }
+
+        function updateBalance() {
+            document.getElementById('bal-text').innerText = balance.toLocaleString();
+            document.getElementById('prof-bal').innerText = balance.toLocaleString();
+        }
+
+        function addStars() { balance += 100;
+            updateBalance(); if (currentUser) db.collection('users').doc(currentUser.id).update({ balance }); }
+
+        // ============================
+        // AUTH
+        // ============================
+        async function login() {
+            const phone = document.getElementById('login-phone').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            if (!phone || !password) return document.getElementById('auth-status').innerText = 'Заполните поля';
+            const snap = await db.collection('users').where('phone', '==', phone).get();
+            if (snap.empty) return document.getElementById('auth-status').innerText = 'Не найден';
+            const data = snap.docs[0].data();
+            if (data.password !== password) return document.getElementById('auth-status').innerText = 'Неверный пароль';
+            currentUser = { id: snap.docs[0].id, ...data };
+            await initCounter();
+            afterLogin();
+        }
+
+        async function register() {
+            const username = document.getElementById('reg-username').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+            if (!username || !password) return document.getElementById('reg-status').innerText = 'Заполните поля';
+            const phone = '+9' + Math.random().toString(36).substring(2, 11);
+            const doc = await db.collection('users').add({ phone, username, password, balance: 5000 });
+            currentUser = { id: doc.id, phone, username, balance: 5000 };
+            await initCounter();
+            afterLogin();
+        }
+
+        function afterLogin() {
+            document.getElementById('page-auth').style.display = 'none';
+            document.getElementById('app-content').classList.add('visible');
+            document.getElementById('profile-name').innerText = currentUser.username;
+            document.getElementById('profile-phone').innerText = currentUser.phone;
+            balance = currentUser.balance || 5000;
+            updateBalance();
+            loadChats();
+            renderMarket();
+            renderCollection();
+            const nav = document.querySelector('.nav-item:first-child');
+            switchTab('chats', nav);
+        }
+
+        // ============================
+        // SEARCH
+        // ============================
+        async function searchUser() {
+            const q = document.getElementById('search-input').value.trim();
+            const c = document.getElementById('search-results');
+            if (q.length < 3) return c.innerHTML = '';
+            const snap = await db.collection('users').where('phone', '==', q).get();
+            c.innerHTML = '';
+            snap.forEach(d => {
+                const data = d.data();
+                if (data.phone === currentUser.phone) return;
+                c.innerHTML += `
+                        <div class="user-result" onclick="startChat('${d.id}','${data.username}','${data.phone}')">
+                            <div class="avatar">👤</div>
+                            <div><div style="font-weight:bold;">${data.username}</div><div style="color:#aaa;font-size:12px;">${data.phone}</div></div>
+                        </div>
+                    `;
+            });
+            if (c.innerHTML === '') c.innerHTML = '<div style="padding:20px;color:#aaa;text-align:center;">Ничего не найдено</div>';
+        }
+
+        // ============================
+        // CHATS
+        // ============================
+        async function loadChats() {
+            const c = document.getElementById('chat-list');
+            c.innerHTML = '<div style="padding:20px;color:#aaa;text-align:center;">Загрузка...</div>';
+            const snap = await db.collection('chats').where('participants', 'array-contains', currentUser.phone).get();
+            c.innerHTML = '';
+            if (snap.empty) return c.innerHTML = '<div style="padding:20px;color:#aaa;text-align:center;">Нет чатов</div>';
+            snap.forEach(d => {
+                const data = d.data();
+                const partner = data.participants.find(p => p !== currentUser.phone);
+                const name = data.participantNames?.[partner] || 'Неизвестно';
+                c.innerHTML += `
+                        <div class="chat-list-item" onclick="openChat('${d.id}','${name}','${partner}')">
+                            <div class="avatar">👤</div>
+                            <div><div style="font-weight:bold;">${name}</div><div style="color:#aaa;font-size:12px;">${partner}</div></div>
+                        </div>
+                    `;
+            });
+        }
+
+        async function startChat(pid, pname, pphone) {
+            const snap = await db.collection('chats').where('participants', '==', [currentUser.phone, pphone]).get();
+            let id;
+            if (snap.empty) {
+                const ref = await db.collection('chats').add({
+                    participants: [currentUser.phone, pphone],
+                    participantNames: { [currentUser.phone]: currentUser.username, [pphone]: pname }
                 });
-                c.scrollTop = c.scrollHeight;
+                id = ref.id;
+            } else id = snap.docs[0].id;
+            openChat(id, pname, pphone);
+            loadChats();
+        }
+
+        function openChat(id, name, phone) {
+            currentChatId = id;
+            currentPartnerId = phone;
+            document.getElementById('chat-partner-name').innerText = name;
+            document.getElementById('chat-window').classList.add('open');
+            const c = document.getElementById('messages-container');
+            c.innerHTML = '';
+            if (chatUnsubscriber) chatUnsubscriber();
+            chatUnsubscriber = db.collection('chats').doc(id).collection('messages').orderBy('timestamp')
+                .onSnapshot(snap => {
+                    c.innerHTML = '';
+                    snap.forEach(doc => {
+                        const data = doc.data();
+                        const div = document.createElement('div');
+                        div.className = `msg ${data.sender === currentUser.phone ? 'sent' : 'received'}`;
+                        if (data.pinned) div.classList.add('pinned');
+                        div.dataset.id = doc.id;
+
+                        let content = '';
+                        if (data.text) content += `<div>${escapeHtml(data.text)}</div>`;
+                        if (data.imageUrl) content += `<img src="${data.imageUrl}" alt="Image">`;
+                        if (data.reactions) {
+                            content += `<div style="margin-top:5px;font-size:12px;">`;
+                            for (const [emoji, count] of Object.entries(data.reactions)) {
+                                content +=
+                                    `<span style="background:#2a2a2a;padding:2px 6px;border-radius:10px;margin-right:3px;">${emoji} ${count}</span>`;
+                            }
+                            content += `</div>`;
+                        }
+                        div.innerHTML = content;
+                        div.addEventListener('contextmenu', function(e) {
+                            e.preventDefault();
+                            showContextMenu(e.clientX, e.clientY, doc.id, this);
+                        });
+                        c.appendChild(div);
+                    });
+                    c.scrollTop = c.scrollHeight;
+                });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function closeChat() {
+            document.getElementById('chat-window').classList.remove('open');
+            if (chatUnsubscriber) { chatUnsubscriber();
+                chatUnsubscriber = null; }
+            const container = document.getElementById('partner-collection');
+            destroyLottiePlayersInContainer(container);
+            container.innerHTML = '';
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const text = input.value.trim();
+            if (!text || !currentChatId) return;
+            db.collection('chats').doc(currentChatId).collection('messages').add({
+                sender: currentUser.phone,
+                text: text,
+                timestamp: new Date()
             });
-    }
+            input.value = '';
+        }
 
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
+        async function uploadImage() {
+            const file = document.getElementById('image-input').files[0];
+            if (!file || !currentChatId) return;
+            const storageRef = storage.ref('chat_images/' + Date.now() + '_' + file.name);
+            await storageRef.put(file);
+            const url = await storageRef.getDownloadURL();
+            db.collection('chats').doc(currentChatId).collection('messages').add({
+                sender: currentUser.phone,
+                imageUrl: url,
+                timestamp: new Date()
+            });
+            document.getElementById('image-input').value = '';
+        }
 
-    function closeChat() {
-        document.getElementById('chat-window').classList.remove('open');
-        if (chatUnsubscriber) { chatUnsubscriber(); chatUnsubscriber = null; }
-        const container = document.getElementById('partner-collection');
-        destroyLottiePlayersInContainer(container);
-        container.innerHTML = '';
-    }
+        function showContextMenu(x, y, msgId, element) {
+            const menu = document.getElementById('context-menu');
+            menu.style.display = 'block';
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+            selectedMessageId = msgId;
+            selectedMessageElement = element;
+        }
 
-    function sendMessage() {
-        const input = document.getElementById('message-input');
-        const text = input.value.trim();
-        if (!text || !currentChatId) return;
-        db.collection('chats').doc(currentChatId).collection('messages').add({
-            sender: currentUser.phone,
-            text: text,
-            timestamp: new Date()
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#context-menu')) {
+                document.getElementById('context-menu').style.display = 'none';
+            }
         });
-        input.value = '';
-    }
 
-    async function uploadImage() {
-        const file = document.getElementById('image-input').files[0];
-        if (!file || !currentChatId) return;
-        const storageRef = storage.ref('chat_images/' + Date.now() + '_' + file.name);
-        await storageRef.put(file);
-        const url = await storageRef.getDownloadURL();
-        db.collection('chats').doc(currentChatId).collection('messages').add({
-            sender: currentUser.phone,
-            imageUrl: url,
-            timestamp: new Date()
-        });
-        document.getElementById('image-input').value = '';
-    }
-
-    function showContextMenu(x, y, msgId, element) {
-        const menu = document.getElementById('context-menu');
-        menu.style.display = 'block';
-        menu.style.left = x + 'px';
-        menu.style.top = y + 'px';
-        selectedMessageId = msgId;
-        selectedMessageElement = element;
-    }
-
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('#context-menu')) {
-            document.getElementById('context-menu').style.display = 'none';
+        async function editMessage() {
+            if (!selectedMessageId || !currentChatId) return;
+            const newText = prompt('Введите новый текст:');
+            if (newText !== null && newText.trim() !== '') {
+                await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).update({ text: newText
+                        .trim() });
+            }
         }
-    });
 
-    async function editMessage() {
-        if (!selectedMessageId || !currentChatId) return;
-        const newText = prompt('Введите новый текст:');
-        if (newText !== null && newText.trim() !== '') {
-            await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).update({ text: newText.trim() });
+        async function deleteMessage() {
+            if (!selectedMessageId || !currentChatId) return;
+            if (confirm('Удалить сообщение?')) {
+                await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).delete();
+            }
         }
-    }
 
-    async function deleteMessage() {
-        if (!selectedMessageId || !currentChatId) return;
-        if (confirm('Удалить сообщение?')) {
-            await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).delete();
+        async function pinMessage() {
+            if (!selectedMessageId || !currentChatId) return;
+            const doc = await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).get();
+            const data = doc.data();
+            await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).update({ pinned: !data
+                    .pinned });
         }
-    }
 
-    async function pinMessage() {
-        if (!selectedMessageId || !currentChatId) return;
-        const doc = await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).get();
-        const data = doc.data();
-        await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).update({ pinned: !data.pinned });
-    }
-
-    async function reactMessage() {
-        if (!selectedMessageId || !currentChatId) return;
-        const doc = await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).get();
-        const data = doc.data();
-        const reactions = data.reactions || {};
-        reactions['👍'] = (reactions['👍'] || 0) + 1;
-        await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).update({ reactions });
-    }
-
-    function toggleEmojiPicker() {
-        const picker = document.getElementById('emoji-picker');
-        picker.style.display = picker.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function addEmoji(emoji) {
-        const input = document.getElementById('message-input');
-        input.value += emoji;
-        input.focus();
-        document.getElementById('emoji-picker').style.display = 'none';
-    }
-
-    // ============================
-    // PARTNER PROFILE
-    // ============================
-    async function openPartnerProfile() {
-        if (!currentPartnerId) return;
-        document.getElementById('partner-profile').classList.add('open');
-        
-        const container = document.getElementById('partner-collection');
-        destroyLottiePlayersInContainer(container);
-        container.innerHTML = '';
-        
-        const snap = await db.collection('users').where('phone', '==', currentPartnerId).get();
-        if (snap.empty) return;
-        const data = snap.docs[0].data();
-        document.getElementById('partner-username').innerText = data.username || 'Пользователь';
-        document.getElementById('partner-phone').innerText = data.phone || '---';
-        
-        const invSnap = await snap.docs[0].ref.collection('inventory').get();
-        if (invSnap.empty) {
-            container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">NFT отсутствуют</div>';
-            return;
+        async function reactMessage() {
+            if (!selectedMessageId || !currentChatId) return;
+            const doc = await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).get();
+            const data = doc.data();
+            const reactions = data.reactions || {};
+            reactions['👍'] = (reactions['👍'] || 0) + 1;
+            await db.collection('chats').doc(currentChatId).collection('messages').doc(selectedMessageId).update({ reactions });
         }
-        
-        invSnap.forEach(doc => {
-            const item = doc.data();
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'collected-item';
-            
-            if (item.isLottie && item.lottieUrl) {
-                createOneShotLottiePlayer(item.lottieUrl, itemDiv);
-            } else if (item.img) {
+
+        function toggleEmojiPicker() {
+            const picker = document.getElementById('emoji-picker');
+            picker.style.display = picker.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function addEmoji(emoji) {
+            const input = document.getElementById('message-input');
+            input.value += emoji;
+            input.focus();
+            document.getElementById('emoji-picker').style.display = 'none';
+        }
+
+        // ============================
+        // PARTNER PROFILE
+        // ============================
+        async function openPartnerProfile() {
+            if (!currentPartnerId) return;
+            document.getElementById('partner-profile').classList.add('open');
+
+            const container = document.getElementById('partner-collection');
+            destroyLottiePlayersInContainer(container);
+            container.innerHTML = '';
+
+            const snap = await db.collection('users').where('phone', '==', currentPartnerId).get();
+            if (snap.empty) return;
+            const data = snap.docs[0].data();
+            document.getElementById('partner-username').innerText = data.username || 'Пользователь';
+            document.getElementById('partner-phone').innerText = data.phone || '---';
+
+            const invSnap = await snap.docs[0].ref.collection('inventory').get();
+            if (invSnap.empty) {
+                container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">NFT отсутствуют</div>';
+                return;
+            }
+
+            invSnap.forEach(doc => {
+                const item = doc.data();
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'collected-item';
+
+                if (item.isLottie && item.lottieUrl) {
+                    createOneShotLottiePlayer(item.lottieUrl, itemDiv);
+                } else if (item.img) {
+                    const img = document.createElement('img');
+                    img.src = item.img;
+                    img.alt = item.name;
+                    itemDiv.appendChild(img);
+                }
+                container.appendChild(itemDiv);
+            });
+        }
+
+        function closePartnerProfile() {
+            const container = document.getElementById('partner-collection');
+            destroyLottiePlayersInContainer(container);
+            container.innerHTML = '';
+            document.getElementById('partner-profile').classList.remove('open');
+        }
+
+        // ============================
+        // NFT MARKET — ТОЛЬКО КАРТИНКИ (БЕЗ НОМЕРОВ)
+        // ============================
+        function renderMarket() {
+            const container = document.getElementById('nft-list');
+            destroyLottiePlayersInContainer(container);
+            container.innerHTML = '';
+
+            nftCatalog.forEach((n) => {
+                const card = document.createElement('div');
+                card.className = 'nft-card';
+                card.onclick = () => openDetail(n.id);
+
+                // ⬅️ УБРАЛИ НОМЕР
+
+                // ВСЕГДА КАРТИНКА
                 const img = document.createElement('img');
-                img.src = item.img;
-                img.alt = item.name;
-                itemDiv.appendChild(img);
-            }
-            container.appendChild(itemDiv);
-        });
-    }
+                img.src = n.img || 'пустая_картинка.jpg';
+                img.alt = n.name;
+                card.appendChild(img);
 
-    function closePartnerProfile() {
-        const container = document.getElementById('partner-collection');
-        destroyLottiePlayersInContainer(container);
-        container.innerHTML = '';
-        document.getElementById('partner-profile').classList.remove('open');
-    }
+                // Бейджик "Anim" для анимированных
+                if (n.isLottie) {
+                    const badge = document.createElement('div');
+                    badge.className = 'lottie-badge';
+                    badge.innerHTML = '<i class="fas fa-play"></i> Anim';
+                    card.appendChild(badge);
+                }
 
-    // ============================
-    // NFT MARKET — ТОЛЬКО КАРТИНКИ
-    // ============================
-    function renderMarket() {
-        const container = document.getElementById('nft-list');
-        destroyLottiePlayersInContainer(container);
-        container.innerHTML = '';
-        
-        nftCatalog.forEach((n, index) => {
-            const card = document.createElement('div');
-            card.className = 'nft-card';
-            card.onclick = () => openDetail(n.id);
-            
-            // Номер в маркете
-            const numberBadge = document.createElement('div');
-            numberBadge.className = 'collected-number';
-            numberBadge.innerText = '#' + (index + 1);
-            card.appendChild(numberBadge);
-            
-            // ⬅️ ВСЕГДА КАРТИНКА
-            const img = document.createElement('img');
-            img.src = n.img || 'пустая_картинка.jpg';
-            img.alt = n.name;
-            card.appendChild(img);
-            
-            // Бейджик "Anim" для анимированных
-            if (n.isLottie) {
-                const badge = document.createElement('div');
-                badge.className = 'lottie-badge';
-                badge.innerHTML = '<i class="fas fa-play"></i> Anim';
-                card.appendChild(badge);
-            }
-            
-            container.appendChild(card);
-        });
-    }
-
-    let currentNFT = null;
-
-    // ============================
-    // ДЕТАЛЬНЫЙ ПРОСМОТР — АНИМАЦИЯ 1 РАЗ
-    // ============================
-    function openDetail(id) {
-        const n = nftCatalog.find(x => x.id === id);
-        if (!n) return;
-        currentNFT = n;
-        document.getElementById('detail-screen').classList.add('open');
-        document.getElementById('detail-name').innerText = n.name;
-        document.getElementById('detail-title').innerText = n.name;
-        document.getElementById('detail-price').innerText = n.price.toLocaleString();
-        
-        const imgArea = document.getElementById('detail-main-img');
-        const imgContainer = imgArea.parentElement;
-        
-        // Удаляем старые плееры
-        const oldPlayers = imgContainer.querySelectorAll('lottie-player');
-        oldPlayers.forEach(p => {
-            const index = activeLottiePlayers.indexOf(p);
-            if (index !== -1) activeLottiePlayers.splice(index, 1);
-            if (p.stop) p.stop();
-            p.remove();
-        });
-        
-        if (n.isLottie && n.lottieUrl) {
-            imgArea.style.display = 'none';
-            // ⬅️ АНИМАЦИЯ 1 РАЗ
-            const player = createOneShotLottiePlayer(n.lottieUrl, imgContainer);
-            player.style.width = '90%';
-            player.style.height = '90%';
-        } else {
-            imgArea.style.display = 'block';
-            imgArea.src = n.img;
+                container.appendChild(card);
+            });
         }
-    }
 
-    function closeDetail() { 
-        document.getElementById('detail-screen').classList.remove('open');
-        const imgContainer = document.getElementById('detail-main-img').parentElement;
-        const players = imgContainer.querySelectorAll('lottie-player');
-        players.forEach(p => {
-            const index = activeLottiePlayers.indexOf(p);
-            if (index !== -1) activeLottiePlayers.splice(index, 1);
-            if (p.stop) p.stop();
-            p.remove();
-        });
-        const img = document.getElementById('detail-main-img');
-        if (img) img.style.display = 'block';
-    }
+        let currentNFT = null;
 
-    // ============================
-    // ⭐ ПОКУПКА С УНИКАЛЬНЫМ НОМЕРОМ (МГНОВЕННО)
-    // ============================
-    async function buyDetailNFT() {
-        if (!currentNFT) return;
-        if (balance < currentNFT.price) return alert('Недостаточно звёзд!');
-        
-        // Мгновенно списываем баланс
-        balance -= currentNFT.price;
-        updateBalance();
-        
-        // Получаем следующий номер
-        const counterRef = db.collection('system').doc('counters');
-        let newNumber = 0;
-        
-        try {
-            await db.runTransaction(async (transaction) => {
-                const doc = await transaction.get(counterRef);
+        // ============================
+        // ДЕТАЛЬНЫЙ ПРОСМОТР — АНИМАЦИЯ 1 РАЗ
+        // ============================
+        function openDetail(id) {
+            const n = nftCatalog.find(x => x.id === id);
+            if (!n) return;
+            currentNFT = n;
+            document.getElementById('detail-screen').classList.add('open');
+            document.getElementById('detail-name').innerText = n.name;
+            document.getElementById('detail-title').innerText = n.name;
+            document.getElementById('detail-price').innerText = n.price.toLocaleString();
+
+            const imgArea = document.getElementById('detail-main-img');
+            const imgContainer = imgArea.parentElement;
+
+            // Удаляем старые плееры
+            const oldPlayers = imgContainer.querySelectorAll('lottie-player');
+            oldPlayers.forEach(p => {
+                const index = activeLottiePlayers.indexOf(p);
+                if (index !== -1) activeLottiePlayers.splice(index, 1);
+                if (p.stop) p.stop();
+                p.remove();
+            });
+
+            if (n.isLottie && n.lottieUrl) {
+                imgArea.style.display = 'none';
+                // АНИМАЦИЯ 1 РАЗ
+                const player = createOneShotLottiePlayer(n.lottieUrl, imgContainer);
+                player.style.width = '90%';
+                player.style.height = '90%';
+            } else {
+                imgArea.style.display = 'block';
+                imgArea.src = n.img;
+            }
+        }
+
+        function closeDetail() {
+            document.getElementById('detail-screen').classList.remove('open');
+            const imgContainer = document.getElementById('detail-main-img').parentElement;
+            const players = imgContainer.querySelectorAll('lottie-player');
+            players.forEach(p => {
+                const index = activeLottiePlayers.indexOf(p);
+                if (index !== -1) activeLottiePlayers.splice(index, 1);
+                if (p.stop) p.stop();
+                p.remove();
+            });
+            const img = document.getElementById('detail-main-img');
+            if (img) img.style.display = 'block';
+        }
+
+        // ============================
+        // ⭐ ПОКУПКА С УНИКАЛЬНЫМ НОМЕРОМ (МГНОВЕННО)
+        // ============================
+        async function buyDetailNFT() {
+            if (!currentNFT) return;
+            if (balance < currentNFT.price) return alert('Недостаточно звёзд!');
+
+            // Мгновенно списываем баланс
+            balance -= currentNFT.price;
+            updateBalance();
+
+            // Получаем следующий номер
+            const counterRef = db.collection('system').doc('counters');
+            let newNumber = 0;
+
+            try {
+                await db.runTransaction(async (transaction) => {
+                    const doc = await transaction.get(counterRef);
+                    const currentCount = doc.data()?.nftCounter || 0;
+                    newNumber = currentCount + 1;
+                    transaction.set(counterRef, { nftCounter: newNumber });
+                });
+            } catch (e) {
+                const doc = await counterRef.get();
                 const currentCount = doc.data()?.nftCounter || 0;
                 newNumber = currentCount + 1;
-                transaction.set(counterRef, { nftCounter: newNumber });
-            });
-        } catch (e) {
-            const doc = await counterRef.get();
-            const currentCount = doc.data()?.nftCounter || 0;
-            newNumber = currentCount + 1;
-            await counterRef.set({ nftCounter: newNumber });
-        }
-        
-        // Сохраняем NFT
-        await db.collection('users').doc(currentUser.id).collection('inventory').add({
-            name: currentNFT.name,
-            price: currentNFT.price,
-            img: currentNFT.img || '',
-            isLottie: currentNFT.isLottie || false,
-            lottieUrl: currentNFT.lottieUrl || null,
-            number: newNumber,
-            purchasedAt: new Date()
-        });
-        
-        await db.collection('users').doc(currentUser.id).update({ balance });
-        await renderCollection();
-        closeDetail();
-        alert(`🎉 Куплено! Ваш NFT #${newNumber}`);
-    }
-
-    // ============================
-    // COLLECTION — АНИМАЦИЯ 1 РАЗ И ЗАСТЫВАЕТ
-    // ============================
-    async function renderCollection() {
-        const container = document.getElementById('my-collection');
-        container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Загрузка...</div>';
-        
-        if (!currentUser) {
-            container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Войдите чтобы видеть коллекцию</div>';
-            return;
-        }
-        
-        destroyLottiePlayersInContainer(container);
-        
-        const snap = await db.collection('users').doc(currentUser.id).collection('inventory')
-            .orderBy('number', 'asc')
-            .get();
-        
-        container.innerHTML = '';
-        
-        if (snap.empty) {
-            container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Коллекция пуста</div>';
-            return;
-        }
-        
-        snap.forEach(doc => {
-            const data = doc.data();
-            const item = document.createElement('div');
-            item.className = 'collected-item';
-            
-            // Номер
-            const numberBadge = document.createElement('div');
-            numberBadge.className = 'collected-number';
-            numberBadge.innerText = '#' + (data.number || '?');
-            item.appendChild(numberBadge);
-            
-            if (data.isLottie && data.lottieUrl) {
-                // ⬅️ АНИМАЦИЯ 1 РАЗ И ЗАСТЫВАЕТ
-                createOneShotLottiePlayer(data.lottieUrl, item);
-            } else if (data.img) {
-                const img = document.createElement('img');
-                img.src = data.img;
-                img.alt = data.name;
-                item.appendChild(img);
+                await counterRef.set({ nftCounter: newNumber });
             }
-            container.appendChild(item);
-        });
-    }
 
-    // ============================
-    // START
-    // ============================
-    renderMarket();
-    updateBalance();
-</script>
+            // Сохраняем NFT
+            await db.collection('users').doc(currentUser.id).collection('inventory').add({
+                name: currentNFT.name,
+                price: currentNFT.price,
+                img: currentNFT.img || '',
+                isLottie: currentNFT.isLottie || false,
+                lottieUrl: currentNFT.lottieUrl || null,
+                number: newNumber,
+                purchasedAt: new Date()
+            });
+
+            await db.collection('users').doc(currentUser.id).update({ balance });
+            await renderCollection();
+            closeDetail();
+            alert(`🎉 Куплено! Ваш NFT #${newNumber}`);
+        }
+
+        // ============================
+        // COLLECTION — АНИМАЦИЯ 1 РАЗ И ЗАСТЫВАЕТ
+        // ============================
+        async function renderCollection() {
+            const container = document.getElementById('my-collection');
+            container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Загрузка...</div>';
+
+            if (!currentUser) {
+                container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Войдите чтобы видеть коллекцию</div>';
+                return;
+            }
+
+            destroyLottiePlayersInContainer(container);
+
+            const snap = await db.collection('users').doc(currentUser.id).collection('inventory')
+                .orderBy('number', 'asc')
+                .get();
+
+            container.innerHTML = '';
+
+            if (snap.empty) {
+                container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Коллекция пуста</div>';
+                return;
+            }
+
+            snap.forEach(doc => {
+                const data = doc.data();
+                const item = document.createElement('div');
+                item.className = 'collected-item';
+
+                // Номер
+                const numberBadge = document.createElement('div');
+                numberBadge.className = 'collected-number';
+                numberBadge.innerText = '#' + (data.number || '?');
+                item.appendChild(numberBadge);
+
+                if (data.isLottie && data.lottieUrl) {
+                    // АНИМАЦИЯ 1 РАЗ И ЗАСТЫВАЕТ
+                    createOneShotLottiePlayer(data.lottieUrl, item);
+                } else if (data.img) {
+                    const img = document.createElement('img');
+                    img.src = data.img;
+                    img.alt = data.name;
+                    item.appendChild(img);
+                }
+                container.appendChild(item);
+            });
+        }
+
+        // ============================
+        // START
+        // ============================
+        renderMarket();
+        updateBalance();
+    </script>
 
 </body>
 </html>
