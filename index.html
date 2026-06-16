@@ -545,19 +545,6 @@
             width: 100%;
             height: 100%;
         }
-        /* Стиль для затемненных карточек (очередь) */
-        .collected-item.queued {
-            opacity: 0.5;
-        }
-        .collected-item.playing {
-            opacity: 1;
-            animation: glow 0.5s ease-in-out;
-        }
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px rgba(106, 178, 228, 0.3); }
-            50% { box-shadow: 0 0 20px rgba(106, 178, 228, 0.8); }
-            100% { box-shadow: 0 0 5px rgba(106, 178, 228, 0.3); }
-        }
 
         #partner-profile {
             position: absolute;
@@ -646,7 +633,6 @@
             transform: translateZ(0);
         }
 
-        /* Стили для детального просмотра NFT из коллекции */
         #collection-detail-screen {
             position: absolute;
             top: 0;
@@ -789,7 +775,7 @@
                 </div>
             </div>
 
-            <!-- COLLECTION DETAIL (Из коллекции) -->
+            <!-- COLLECTION DETAIL -->
             <div id="collection-detail-screen">
                 <div class="header">
                     <i class="fas fa-arrow-left back-btn" onclick="closeCollectionDetail()"></i>
@@ -920,15 +906,11 @@
         let selectedMessageId = null;
         let selectedMessageElement = null;
         let activeLottiePlayers = [];
-        let animationQueue = [];
-        let isAnimating = false;
-        let animationTimer = null;
 
         // ============================
         // ⭐ NFT DATA
         // ============================
         const nftCatalog = [
-            // ===== ОБЫЧНЫЕ NFT =====
             {
                 id: 'nft1',
                 name: 'Синий Пепе',
@@ -957,8 +939,6 @@
                 img: 'ССЫЛКА_НА_КАРТИНКУ_4',
                 isLottie: false
             },
-
-            // ===== АНИМИРОВАННЫЕ NFT =====
             {
                 id: 'lowrider_9738',
                 name: 'Low Rider #9738',
@@ -1071,56 +1051,7 @@
         }
 
         // ============================
-        // УПРАВЛЕНИЕ ОЧЕРЕДЬЮ АНИМАЦИЙ (ПО 2 ЗА РАЗ)
-        // ============================
-        function processAnimationQueue() {
-            if (isAnimating || animationQueue.length === 0) return;
-            
-            isAnimating = true;
-            const batch = animationQueue.splice(0, 2); // Берем по 2
-            
-            batch.forEach(item => {
-                item.element.classList.remove('queued');
-                item.element.classList.add('playing');
-                
-                // Создаем плеер для этого элемента
-                const player = createOneShotLottiePlayer(item.url, item.element);
-                
-                // После завершения анимации убираем подсветку
-                setTimeout(() => {
-                    item.element.classList.remove('playing');
-                }, 3100);
-            });
-            
-            // Ждем окончания анимации и запускаем следующую партию
-            clearTimeout(animationTimer);
-            animationTimer = setTimeout(() => {
-                isAnimating = false;
-                processAnimationQueue();
-            }, 3200);
-        }
-
-        function addToAnimationQueue(element, url) {
-            // Проверяем, есть ли уже этот элемент в очереди
-            const exists = animationQueue.some(item => item.element === element);
-            if (exists) return;
-            
-            element.classList.add('queued');
-            animationQueue.push({ element, url });
-            processAnimationQueue();
-        }
-
-        function clearAnimationQueue() {
-            clearTimeout(animationTimer);
-            animationQueue.forEach(item => {
-                item.element.classList.remove('queued', 'playing');
-            });
-            animationQueue = [];
-            isAnimating = false;
-        }
-
-        // ============================
-        // ИНИЦИАЛИЗАЦИЯ СЧЁТЧИКОВ ДЛЯ КАЖДОГО NFT
+        // ИНИЦИАЛИЗАЦИЯ СЧЁТЧИКОВ
         // ============================
         async function initCounters() {
             const countersRef = db.collection('system').doc('nftCounters');
@@ -1174,9 +1105,6 @@
         }
 
         function switchTab(tab, el) {
-            // Очищаем очередь анимаций
-            clearAnimationQueue();
-            
             const allPlayers = document.querySelectorAll('lottie-player');
             allPlayers.forEach(player => {
                 try {
@@ -1473,9 +1401,8 @@
             const ownerName = data.username || 'Пользователь';
             const ownerPhone = data.phone || '---';
 
-            // Собираем все анимированные NFT в очередь
+            // Собираем все анимированные NFT
             const animatedItems = [];
-            const staticItems = [];
 
             invSnap.forEach(doc => {
                 const item = doc.data();
@@ -1490,13 +1417,13 @@
                 itemDiv.appendChild(numberBadge);
 
                 if (item.isLottie && item.lottieUrl) {
-                    // Анимированные - добавляем в очередь
-                    animatedItems.push({ element: itemDiv, url: item.lottieUrl });
-                    // Показываем заглушку (первый кадр)
+                    // Анимированные - сохраняем для очереди
+                    animatedItems.push({ element: itemDiv, url: item.lottieUrl, data: item });
+                    // Показываем картинку-заглушку
                     const img = document.createElement('img');
                     img.src = item.img || 'пустая_картинка.jpg';
                     img.alt = item.name;
-                    img.style.opacity = '0.5';
+                    img.style.opacity = '0.7';
                     itemDiv.appendChild(img);
                 } else if (item.img) {
                     const img = document.createElement('img');
@@ -1507,23 +1434,44 @@
                 container.appendChild(itemDiv);
             });
 
-            // Запускаем анимации по очереди (по 2 за раз)
+            // Запускаем анимации по очереди - по 2 за раз
             if (animatedItems.length > 0) {
-                // Ждем рендеринга и запускаем
                 setTimeout(() => {
-                    animatedItems.forEach(({ element, url }) => {
-                        addToAnimationQueue(element, url);
-                    });
+                    playAnimationsInBatches(animatedItems);
                 }, 500);
             }
         }
 
         function closePartnerProfile() {
-            clearAnimationQueue();
             const container = document.getElementById('partner-collection');
             destroyLottiePlayersInContainer(container);
             container.innerHTML = '';
             document.getElementById('partner-profile').classList.remove('open');
+        }
+
+        // ============================
+        // ВОСПРОИЗВЕДЕНИЕ АНИМАЦИЙ ПО 2 ШТУКИ
+        // ============================
+        function playAnimationsInBatches(items, startIndex = 0) {
+            if (startIndex >= items.length) return;
+            
+            // Берем 2 элемента
+            const batch = items.slice(startIndex, startIndex + 2);
+            
+            // Запускаем анимацию для каждого
+            batch.forEach(({ element, url }) => {
+                // Удаляем старые плееры
+                const oldPlayers = element.querySelectorAll('lottie-player');
+                oldPlayers.forEach(p => p.remove());
+                
+                // Создаем новый плеер
+                createOneShotLottiePlayer(url, element);
+            });
+            
+            // Ждем 3.2 секунды и запускаем следующую партию
+            setTimeout(() => {
+                playAnimationsInBatches(items, startIndex + 2);
+            }, 3200);
         }
 
         // ============================
@@ -1707,7 +1655,7 @@
         }
 
         // ============================
-        // COLLECTION — С ОЧЕРЕДЬЮ АНИМАЦИЙ (ПО 2 ЗА РАЗ)
+        // COLLECTION — С ОЧЕРЕДЬЮ АНИМАЦИЙ
         // ============================
         async function renderCollection() {
             const container = document.getElementById('my-collection');
@@ -1718,8 +1666,6 @@
                 return;
             }
 
-            // Очищаем очередь перед рендером
-            clearAnimationQueue();
             destroyLottiePlayersInContainer(container);
 
             const snap = await db.collection('users').doc(currentUser.id).collection('inventory')
@@ -1734,7 +1680,6 @@
             }
 
             const animatedItems = [];
-            const staticItems = [];
 
             snap.forEach(doc => {
                 const data = doc.data();
@@ -1749,13 +1694,11 @@
                 item.appendChild(numberBadge);
 
                 if (data.isLottie && data.lottieUrl) {
-                    // Анимированные - добавляем в очередь
                     animatedItems.push({ element: item, url: data.lottieUrl });
-                    // Показываем заглушку (первый кадр)
                     const img = document.createElement('img');
                     img.src = data.img || 'пустая_картинка.jpg';
                     img.alt = data.name;
-                    img.style.opacity = '0.5';
+                    img.style.opacity = '0.7';
                     item.appendChild(img);
                 } else if (data.img) {
                     const img = document.createElement('img');
@@ -1766,13 +1709,10 @@
                 container.appendChild(item);
             });
 
-            // Запускаем анимации по очереди (по 2 за раз)
+            // Запускаем анимации по очереди - по 2 за раз
             if (animatedItems.length > 0) {
-                // Ждем рендеринга и запускаем
                 setTimeout(() => {
-                    animatedItems.forEach(({ element, url }) => {
-                        addToAnimationQueue(element, url);
-                    });
+                    playAnimationsInBatches(animatedItems);
                 }, 500);
             }
         }
