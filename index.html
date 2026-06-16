@@ -545,6 +545,19 @@
             width: 100%;
             height: 100%;
         }
+        /* Стиль для затемненных карточек (очередь) */
+        .collected-item.queued {
+            opacity: 0.5;
+        }
+        .collected-item.playing {
+            opacity: 1;
+            animation: glow 0.5s ease-in-out;
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(106, 178, 228, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(106, 178, 228, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(106, 178, 228, 0.3); }
+        }
 
         #partner-profile {
             position: absolute;
@@ -695,10 +708,15 @@
             font-size: 13px;
             margin-bottom: 8px;
         }
+        .collection-detail-owner {
+            color: #6ab2e4;
+            font-size: 14px;
+            margin-top: 8px;
+            padding-top: 12px;
+            border-top: 1px solid #222;
+        }
         .collection-detail-id {
-            color: #666;
-            font-size: 11px;
-            word-break: break-all;
+            display: none;
         }
     </style>
 </head>
@@ -785,7 +803,8 @@
                     <div class="collection-detail-number" id="collection-detail-number">#123</div>
                     <div class="collection-detail-price">⭐ <span id="collection-detail-price">0</span></div>
                     <div class="collection-detail-date" id="collection-detail-date">Куплено: 01.01.2024</div>
-                    <div class="collection-detail-id" id="collection-detail-id">ID: ...</div>
+                    <div class="collection-detail-owner" id="collection-detail-owner">Владелец: ...</div>
+                    <div class="collection-detail-id" id="collection-detail-id"></div>
                 </div>
             </div>
 
@@ -897,9 +916,13 @@
         let currentChatId = null;
         let chatUnsubscriber = null;
         let currentPartnerId = null;
+        let currentPartnerUsername = null;
         let selectedMessageId = null;
         let selectedMessageElement = null;
         let activeLottiePlayers = [];
+        let animationQueue = [];
+        let isAnimating = false;
+        let animationTimer = null;
 
         // ============================
         // ⭐ NFT DATA
@@ -941,7 +964,7 @@
                 name: 'Low Rider #9738',
                 price: 20000,
                 img: 'https://i.getgems.io/4GsJBBY_lnkL6gS1bj-iy-LkCesk0idWThI-mgger2w/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvYjE5ZjI3YTA1YTgzMzkzYQ.jpg',
-                lottieUrl: 'lottie/lowrider2.json',
+                lottieUrl: 'lottie/lowrider1.json',
                 isLottie: true
             },
             {
@@ -949,7 +972,7 @@
                 name: 'Low Rider #20764',
                 price: 20000,
                 img: 'https://i.getgems.io/Hz9860DzuZHiqGlq8IMIJl2sfWeetRRaZ1mw_1nPfsA/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvNzAxM2E1YzE4MmMzMDAwZg.jpg',
-                lottieUrl: 'lottie/lowrider1.json',
+                lottieUrl: 'lottie/lowrider2.json',
                 isLottie: true
             },
             {
@@ -1010,7 +1033,7 @@
         }
 
         // ============================
-        // СОЗДАНИЕ ПЛЕЕРА — 1 РАЗ И ЗАСТЫВАЕТ
+        // СОЗДАНИЕ ПЛЕЕРА — 3.1 СЕКУНДЫ И ЗАСТЫВАЕТ
         // ============================
         function createOneShotLottiePlayer(url, container) {
             const player = document.createElement('lottie-player');
@@ -1045,6 +1068,55 @@
             activeLottiePlayers.push(player);
             container.appendChild(player);
             return player;
+        }
+
+        // ============================
+        // УПРАВЛЕНИЕ ОЧЕРЕДЬЮ АНИМАЦИЙ (ПО 2 ЗА РАЗ)
+        // ============================
+        function processAnimationQueue() {
+            if (isAnimating || animationQueue.length === 0) return;
+            
+            isAnimating = true;
+            const batch = animationQueue.splice(0, 2); // Берем по 2
+            
+            batch.forEach(item => {
+                item.element.classList.remove('queued');
+                item.element.classList.add('playing');
+                
+                // Создаем плеер для этого элемента
+                const player = createOneShotLottiePlayer(item.url, item.element);
+                
+                // После завершения анимации убираем подсветку
+                setTimeout(() => {
+                    item.element.classList.remove('playing');
+                }, 3100);
+            });
+            
+            // Ждем окончания анимации и запускаем следующую партию
+            clearTimeout(animationTimer);
+            animationTimer = setTimeout(() => {
+                isAnimating = false;
+                processAnimationQueue();
+            }, 3200);
+        }
+
+        function addToAnimationQueue(element, url) {
+            // Проверяем, есть ли уже этот элемент в очереди
+            const exists = animationQueue.some(item => item.element === element);
+            if (exists) return;
+            
+            element.classList.add('queued');
+            animationQueue.push({ element, url });
+            processAnimationQueue();
+        }
+
+        function clearAnimationQueue() {
+            clearTimeout(animationTimer);
+            animationQueue.forEach(item => {
+                item.element.classList.remove('queued', 'playing');
+            });
+            animationQueue = [];
+            isAnimating = false;
         }
 
         // ============================
@@ -1102,6 +1174,9 @@
         }
 
         function switchTab(tab, el) {
+            // Очищаем очередь анимаций
+            clearAnimationQueue();
+            
             const allPlayers = document.querySelectorAll('lottie-player');
             allPlayers.forEach(player => {
                 try {
@@ -1233,6 +1308,7 @@
         function openChat(id, name, phone) {
             currentChatId = id;
             currentPartnerId = phone;
+            currentPartnerUsername = name;
             document.getElementById('chat-partner-name').innerText = name;
             document.getElementById('chat-window').classList.add('open');
             const c = document.getElementById('messages-container');
@@ -1394,13 +1470,34 @@
                 return;
             }
 
+            const ownerName = data.username || 'Пользователь';
+            const ownerPhone = data.phone || '---';
+
+            // Собираем все анимированные NFT в очередь
+            const animatedItems = [];
+            const staticItems = [];
+
             invSnap.forEach(doc => {
                 const item = doc.data();
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'collected-item';
+                
+                itemDiv.onclick = () => openCollectionDetail(item, ownerName, ownerPhone);
+
+                const numberBadge = document.createElement('div');
+                numberBadge.className = 'collected-number';
+                numberBadge.innerText = '#' + (item.number || '?');
+                itemDiv.appendChild(numberBadge);
 
                 if (item.isLottie && item.lottieUrl) {
-                    createOneShotLottiePlayer(item.lottieUrl, itemDiv);
+                    // Анимированные - добавляем в очередь
+                    animatedItems.push({ element: itemDiv, url: item.lottieUrl });
+                    // Показываем заглушку (первый кадр)
+                    const img = document.createElement('img');
+                    img.src = item.img || 'пустая_картинка.jpg';
+                    img.alt = item.name;
+                    img.style.opacity = '0.5';
+                    itemDiv.appendChild(img);
                 } else if (item.img) {
                     const img = document.createElement('img');
                     img.src = item.img;
@@ -1409,9 +1506,20 @@
                 }
                 container.appendChild(itemDiv);
             });
+
+            // Запускаем анимации по очереди (по 2 за раз)
+            if (animatedItems.length > 0) {
+                // Ждем рендеринга и запускаем
+                setTimeout(() => {
+                    animatedItems.forEach(({ element, url }) => {
+                        addToAnimationQueue(element, url);
+                    });
+                }, 500);
+            }
         }
 
         function closePartnerProfile() {
+            clearAnimationQueue();
             const container = document.getElementById('partner-collection');
             destroyLottiePlayersInContainer(container);
             container.innerHTML = '';
@@ -1439,7 +1547,7 @@
                 if (n.isLottie) {
                     const badge = document.createElement('div');
                     badge.className = 'lottie-badge';
-                    badge.innerHTML = '<i class="fas fa-play"></i>';
+                    badge.innerHTML = '<i class="fas fa-play"></i> Anim';
                     card.appendChild(badge);
                 }
 
@@ -1502,7 +1610,7 @@
         }
 
         // ============================
-        // ПОКУПКА С УНИКАЛЬНЫМ НОМЕРОМ ДЛЯ КАЖДОГО NFT
+        // ПОКУПКА
         // ============================
         async function buyDetailNFT() {
             if (!currentNFT) return;
@@ -1533,7 +1641,7 @@
         // ============================
         // ДЕТАЛЬНЫЙ ПРОСМОТР ИЗ КОЛЛЕКЦИИ
         // ============================
-        function openCollectionDetail(nftData) {
+        function openCollectionDetail(nftData, ownerName, ownerPhone) {
             const screen = document.getElementById('collection-detail-screen');
             screen.classList.add('open');
             
@@ -1544,7 +1652,15 @@
             
             const date = nftData.purchasedAt ? new Date(nftData.purchasedAt.toDate()).toLocaleDateString('ru-RU') : 'Неизвестно';
             document.getElementById('collection-detail-date').innerText = 'Куплено: ' + date;
-            document.getElementById('collection-detail-id').innerText = 'ID: ' + (nftData.nftId || 'unknown');
+            
+            document.getElementById('collection-detail-id').innerText = '';
+            
+            if (ownerName) {
+                document.getElementById('collection-detail-owner').innerText = '👤 Владелец: ' + ownerName + ' (' + (ownerPhone || '---') + ')';
+                document.getElementById('collection-detail-owner').style.display = 'block';
+            } else {
+                document.getElementById('collection-detail-owner').style.display = 'none';
+            }
 
             const imgArea = document.getElementById('collection-detail-img-area');
             const img = document.getElementById('collection-detail-img');
@@ -1591,7 +1707,7 @@
         }
 
         // ============================
-        // COLLECTION — С КЛИКАБЕЛЬНЫМИ КАРТОЧКАМИ
+        // COLLECTION — С ОЧЕРЕДЬЮ АНИМАЦИЙ (ПО 2 ЗА РАЗ)
         // ============================
         async function renderCollection() {
             const container = document.getElementById('my-collection');
@@ -1602,6 +1718,8 @@
                 return;
             }
 
+            // Очищаем очередь перед рендером
+            clearAnimationQueue();
             destroyLottiePlayersInContainer(container);
 
             const snap = await db.collection('users').doc(currentUser.id).collection('inventory')
@@ -1615,12 +1733,14 @@
                 return;
             }
 
+            const animatedItems = [];
+            const staticItems = [];
+
             snap.forEach(doc => {
                 const data = doc.data();
                 const item = document.createElement('div');
                 item.className = 'collected-item';
                 
-                // Клик для открытия деталей
                 item.onclick = () => openCollectionDetail(data);
 
                 const numberBadge = document.createElement('div');
@@ -1629,7 +1749,14 @@
                 item.appendChild(numberBadge);
 
                 if (data.isLottie && data.lottieUrl) {
-                    createOneShotLottiePlayer(data.lottieUrl, item);
+                    // Анимированные - добавляем в очередь
+                    animatedItems.push({ element: item, url: data.lottieUrl });
+                    // Показываем заглушку (первый кадр)
+                    const img = document.createElement('img');
+                    img.src = data.img || 'пустая_картинка.jpg';
+                    img.alt = data.name;
+                    img.style.opacity = '0.5';
+                    item.appendChild(img);
                 } else if (data.img) {
                     const img = document.createElement('img');
                     img.src = data.img;
@@ -1638,6 +1765,16 @@
                 }
                 container.appendChild(item);
             });
+
+            // Запускаем анимации по очереди (по 2 за раз)
+            if (animatedItems.length > 0) {
+                // Ждем рендеринга и запускаем
+                setTimeout(() => {
+                    animatedItems.forEach(({ element, url }) => {
+                        addToAnimationQueue(element, url);
+                    });
+                }, 500);
+            }
         }
 
         // ============================
