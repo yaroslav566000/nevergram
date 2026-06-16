@@ -530,6 +530,11 @@
             overflow: hidden;
             border: none;
             position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .collected-item:active {
+            transform: scale(0.95);
         }
         .collected-item img {
             width: 100%;
@@ -627,6 +632,74 @@
             -webkit-transform: translateZ(0);
             transform: translateZ(0);
         }
+
+        /* Стили для детального просмотра NFT из коллекции */
+        #collection-detail-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f0f0f;
+            z-index: 400;
+            display: none;
+            flex-direction: column;
+        }
+        #collection-detail-screen.open {
+            display: flex;
+        }
+        .collection-detail-img-area {
+            height: 45%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+            position: relative;
+            margin: 20px;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+        .collection-detail-img-area img {
+            max-height: 90%;
+            max-width: 90%;
+            object-fit: contain;
+            border-radius: 16px;
+        }
+        .collection-detail-img-area lottie-player {
+            width: 90%;
+            height: 90%;
+        }
+        .collection-detail-info {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .collection-detail-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .collection-detail-number {
+            color: #ffd700;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        .collection-detail-price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 12px;
+        }
+        .collection-detail-date {
+            color: #aaa;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        .collection-detail-id {
+            color: #666;
+            font-size: 11px;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -681,7 +754,7 @@
                 <div class="nft-list" id="nft-list"></div>
             </div>
 
-            <!-- DETAIL -->
+            <!-- DETAIL (Маркет) -->
             <div id="detail-screen">
                 <div class="header">
                     <i class="fas fa-arrow-left back-btn" onclick="closeDetail()"></i>
@@ -695,6 +768,24 @@
                         <i class="fas fa-star"></i> <span id="detail-price">0</span>
                     </div>
                     <button class="detail-buy-btn" onclick="buyDetailNFT()">Купить</button>
+                </div>
+            </div>
+
+            <!-- COLLECTION DETAIL (Из коллекции) -->
+            <div id="collection-detail-screen">
+                <div class="header">
+                    <i class="fas fa-arrow-left back-btn" onclick="closeCollectionDetail()"></i>
+                    <h2 id="collection-detail-name">NFT</h2>
+                </div>
+                <div class="collection-detail-img-area" id="collection-detail-img-area">
+                    <img id="collection-detail-img" src="" alt="NFT" style="display:none;">
+                </div>
+                <div class="collection-detail-info">
+                    <div class="collection-detail-title" id="collection-detail-title">NFT</div>
+                    <div class="collection-detail-number" id="collection-detail-number">#123</div>
+                    <div class="collection-detail-price">⭐ <span id="collection-detail-price">0</span></div>
+                    <div class="collection-detail-date" id="collection-detail-date">Куплено: 01.01.2024</div>
+                    <div class="collection-detail-id" id="collection-detail-id">ID: ...</div>
                 </div>
             </div>
 
@@ -919,7 +1010,7 @@
         }
 
         // ============================
-        // СОЗДАНИЕ ПЛЕЕРА — 1 РАЗ И ЗАСТЫВАЕТ (НАДЕЖНАЯ ВЕРСИЯ)
+        // СОЗДАНИЕ ПЛЕЕРА — 1 РАЗ И ЗАСТЫВАЕТ
         // ============================
         function createOneShotLottiePlayer(url, container) {
             const player = document.createElement('lottie-player');
@@ -931,24 +1022,18 @@
             player.style.height = '100%';
             player.style.display = 'block';
 
-            // Останавливаем через setTimeout (более надежный способ)
-            // Ждем пока анимация загрузится и начнет играть
             setTimeout(() => {
                 try {
-                    if (player.stop) {
-                        player.stop();
-                    }
+                    if (player.stop) player.stop();
                 } catch (e) {}
             }, 1500);
 
-            // Дополнительная остановка по событию complete
             player.addEventListener('complete', function() {
                 try {
                     this.stop();
                 } catch (e) {}
             });
 
-            // Еще один таймер на случай если complete не сработал
             player.addEventListener('load', function() {
                 setTimeout(() => {
                     try {
@@ -963,15 +1048,44 @@
         }
 
         // ============================
-        // ИНИЦИАЛИЗАЦИЯ СЧЁТЧИКА
+        // ИНИЦИАЛИЗАЦИЯ СЧЁТЧИКОВ ДЛЯ КАЖДОГО NFT
         // ============================
-        async function initCounter() {
-            const counterRef = db.collection('system').doc('counters');
-            const doc = await counterRef.get();
+        async function initCounters() {
+            const countersRef = db.collection('system').doc('nftCounters');
+            const doc = await countersRef.get();
             if (!doc.exists) {
-                await counterRef.set({ nftCounter: 0 });
-                console.log('✅ Счётчик NFT создан');
+                const initialCounters = {};
+                nftCatalog.forEach(nft => {
+                    initialCounters[nft.id] = 0;
+                });
+                await countersRef.set(initialCounters);
+                console.log('✅ Счётчики NFT созданы');
             }
+        }
+
+        async function getNextNumber(nftId) {
+            const countersRef = db.collection('system').doc('nftCounters');
+            let newNumber = 0;
+            
+            try {
+                await db.runTransaction(async (transaction) => {
+                    const doc = await transaction.get(countersRef);
+                    const data = doc.data() || {};
+                    const currentCount = data[nftId] || 0;
+                    newNumber = currentCount + 1;
+                    data[nftId] = newNumber;
+                    transaction.set(countersRef, data);
+                });
+            } catch (e) {
+                const doc = await countersRef.get();
+                const data = doc.data() || {};
+                const currentCount = data[nftId] || 0;
+                newNumber = currentCount + 1;
+                data[nftId] = newNumber;
+                await countersRef.set(data);
+            }
+            
+            return newNumber;
         }
 
         // ============================
@@ -988,7 +1102,6 @@
         }
 
         function switchTab(tab, el) {
-            // Останавливаем все плееры
             const allPlayers = document.querySelectorAll('lottie-player');
             allPlayers.forEach(player => {
                 try {
@@ -1012,8 +1125,11 @@
             document.getElementById('prof-bal').innerText = balance.toLocaleString();
         }
 
-        function addStars() { balance += 100;
-            updateBalance(); if (currentUser) db.collection('users').doc(currentUser.id).update({ balance }); }
+        function addStars() { 
+            balance += 100;
+            updateBalance(); 
+            if (currentUser) db.collection('users').doc(currentUser.id).update({ balance }); 
+        }
 
         // ============================
         // AUTH
@@ -1027,7 +1143,7 @@
             const data = snap.docs[0].data();
             if (data.password !== password) return document.getElementById('auth-status').innerText = 'Неверный пароль';
             currentUser = { id: snap.docs[0].id, ...data };
-            await initCounter();
+            await initCounters();
             afterLogin();
         }
 
@@ -1038,7 +1154,7 @@
             const phone = '+9' + Math.random().toString(36).substring(2, 11);
             const doc = await db.collection('users').add({ phone, username, password, balance: 5000 });
             currentUser = { id: doc.id, phone, username, balance: 5000 };
-            await initCounter();
+            await initCounters();
             afterLogin();
         }
 
@@ -1303,7 +1419,7 @@
         }
 
         // ============================
-        // NFT MARKET — ТОЛЬКО КАРТИНКИ (БЕЗ НОМЕРОВ)
+        // NFT MARKET
         // ============================
         function renderMarket() {
             const container = document.getElementById('nft-list');
@@ -1315,13 +1431,11 @@
                 card.className = 'nft-card';
                 card.onclick = () => openDetail(n.id);
 
-                // ВСЕГДА КАРТИНКА
                 const img = document.createElement('img');
                 img.src = n.img || 'пустая_картинка.jpg';
                 img.alt = n.name;
                 card.appendChild(img);
 
-                // Бейджик "Anim" для анимированных
                 if (n.isLottie) {
                     const badge = document.createElement('div');
                     badge.className = 'lottie-badge';
@@ -1336,7 +1450,7 @@
         let currentNFT = null;
 
         // ============================
-        // ДЕТАЛЬНЫЙ ПРОСМОТР — АНИМАЦИЯ 1 РАЗ
+        // ДЕТАЛЬНЫЙ ПРОСМОТР (МАРКЕТ)
         // ============================
         function openDetail(id) {
             const n = nftCatalog.find(x => x.id === id);
@@ -1350,7 +1464,6 @@
             const imgArea = document.getElementById('detail-main-img');
             const imgContainer = imgArea.parentElement;
 
-            // Удаляем старые плееры
             const oldPlayers = imgContainer.querySelectorAll('lottie-player');
             oldPlayers.forEach(p => {
                 const index = activeLottiePlayers.indexOf(p);
@@ -1363,7 +1476,6 @@
 
             if (n.isLottie && n.lottieUrl) {
                 imgArea.style.display = 'none';
-                // АНИМАЦИЯ 1 РАЗ
                 const player = createOneShotLottiePlayer(n.lottieUrl, imgContainer);
                 player.style.width = '90%';
                 player.style.height = '90%';
@@ -1390,36 +1502,19 @@
         }
 
         // ============================
-        // ⭐ ПОКУПКА С УНИКАЛЬНЫМ НОМЕРОМ (МГНОВЕННО)
+        // ПОКУПКА С УНИКАЛЬНЫМ НОМЕРОМ ДЛЯ КАЖДОГО NFT
         // ============================
         async function buyDetailNFT() {
             if (!currentNFT) return;
             if (balance < currentNFT.price) return alert('Недостаточно звёзд!');
 
-            // Мгновенно списываем баланс
             balance -= currentNFT.price;
             updateBalance();
 
-            // Получаем следующий номер
-            const counterRef = db.collection('system').doc('counters');
-            let newNumber = 0;
+            const newNumber = await getNextNumber(currentNFT.id);
 
-            try {
-                await db.runTransaction(async (transaction) => {
-                    const doc = await transaction.get(counterRef);
-                    const currentCount = doc.data()?.nftCounter || 0;
-                    newNumber = currentCount + 1;
-                    transaction.set(counterRef, { nftCounter: newNumber });
-                });
-            } catch (e) {
-                const doc = await counterRef.get();
-                const currentCount = doc.data()?.nftCounter || 0;
-                newNumber = currentCount + 1;
-                await counterRef.set({ nftCounter: newNumber });
-            }
-
-            // Сохраняем NFT
             await db.collection('users').doc(currentUser.id).collection('inventory').add({
+                nftId: currentNFT.id,
                 name: currentNFT.name,
                 price: currentNFT.price,
                 img: currentNFT.img || '',
@@ -1432,11 +1527,71 @@
             await db.collection('users').doc(currentUser.id).update({ balance });
             await renderCollection();
             closeDetail();
-            alert(`🎉 Куплено! Ваш NFT #${newNumber}`);
+            alert(`🎉 Куплено! ${currentNFT.name} #${newNumber}`);
         }
 
         // ============================
-        // COLLECTION — АНИМАЦИЯ 1 РАЗ И ЗАСТЫВАЕТ
+        // ДЕТАЛЬНЫЙ ПРОСМОТР ИЗ КОЛЛЕКЦИИ
+        // ============================
+        function openCollectionDetail(nftData) {
+            const screen = document.getElementById('collection-detail-screen');
+            screen.classList.add('open');
+            
+            document.getElementById('collection-detail-name').innerText = nftData.name;
+            document.getElementById('collection-detail-title').innerText = nftData.name;
+            document.getElementById('collection-detail-number').innerText = '#' + (nftData.number || '?');
+            document.getElementById('collection-detail-price').innerText = nftData.price.toLocaleString();
+            
+            const date = nftData.purchasedAt ? new Date(nftData.purchasedAt.toDate()).toLocaleDateString('ru-RU') : 'Неизвестно';
+            document.getElementById('collection-detail-date').innerText = 'Куплено: ' + date;
+            document.getElementById('collection-detail-id').innerText = 'ID: ' + (nftData.nftId || 'unknown');
+
+            const imgArea = document.getElementById('collection-detail-img-area');
+            const img = document.getElementById('collection-detail-img');
+            
+            const oldPlayers = imgArea.querySelectorAll('lottie-player');
+            oldPlayers.forEach(p => {
+                const index = activeLottiePlayers.indexOf(p);
+                if (index !== -1) activeLottiePlayers.splice(index, 1);
+                try {
+                    if (p.stop) p.stop();
+                } catch (e) {}
+                p.remove();
+            });
+
+            if (nftData.isLottie && nftData.lottieUrl) {
+                img.style.display = 'none';
+                const player = createOneShotLottiePlayer(nftData.lottieUrl, imgArea);
+                player.style.width = '90%';
+                player.style.height = '90%';
+            } else {
+                img.style.display = 'block';
+                img.src = nftData.img || 'пустая_картинка.jpg';
+            }
+        }
+
+        function closeCollectionDetail() {
+            const screen = document.getElementById('collection-detail-screen');
+            screen.classList.remove('open');
+            
+            const imgArea = document.getElementById('collection-detail-img-area');
+            const players = imgArea.querySelectorAll('lottie-player');
+            players.forEach(p => {
+                const index = activeLottiePlayers.indexOf(p);
+                if (index !== -1) activeLottiePlayers.splice(index, 1);
+                try {
+                    if (p.stop) p.stop();
+                } catch (e) {}
+                p.remove();
+            });
+            
+            const img = document.getElementById('collection-detail-img');
+            img.style.display = 'block';
+            img.src = '';
+        }
+
+        // ============================
+        // COLLECTION — С КЛИКАБЕЛЬНЫМИ КАРТОЧКАМИ
         // ============================
         async function renderCollection() {
             const container = document.getElementById('my-collection');
@@ -1464,15 +1619,16 @@
                 const data = doc.data();
                 const item = document.createElement('div');
                 item.className = 'collected-item';
+                
+                // Клик для открытия деталей
+                item.onclick = () => openCollectionDetail(data);
 
-                // Номер
                 const numberBadge = document.createElement('div');
                 numberBadge.className = 'collected-number';
                 numberBadge.innerText = '#' + (data.number || '?');
                 item.appendChild(numberBadge);
 
                 if (data.isLottie && data.lottieUrl) {
-                    // АНИМАЦИЯ 1 РАЗ И ЗАСТЫВАЕТ
                     createOneShotLottiePlayer(data.lottieUrl, item);
                 } else if (data.img) {
                     const img = document.createElement('img');
