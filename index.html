@@ -911,13 +911,15 @@
             players.forEach(player => {
                 const index = activeLottiePlayers.indexOf(player);
                 if (index !== -1) activeLottiePlayers.splice(index, 1);
-                if (player.stop) player.stop();
+                try {
+                    if (player.stop) player.stop();
+                } catch (e) {}
                 player.remove();
             });
         }
 
         // ============================
-        // СОЗДАНИЕ ПЛЕЕРА — 1 РАЗ И ЗАСТЫВАЕТ
+        // СОЗДАНИЕ ПЛЕЕРА — 1 РАЗ И ЗАСТЫВАЕТ (НАДЕЖНАЯ ВЕРСИЯ)
         // ============================
         function createOneShotLottiePlayer(url, container) {
             const player = document.createElement('lottie-player');
@@ -929,9 +931,30 @@
             player.style.height = '100%';
             player.style.display = 'block';
 
-            // Останавливаем после завершения
+            // Останавливаем через setTimeout (более надежный способ)
+            // Ждем пока анимация загрузится и начнет играть
+            setTimeout(() => {
+                try {
+                    if (player.stop) {
+                        player.stop();
+                    }
+                } catch (e) {}
+            }, 1500);
+
+            // Дополнительная остановка по событию complete
             player.addEventListener('complete', function() {
-                this.stop();
+                try {
+                    this.stop();
+                } catch (e) {}
+            });
+
+            // Еще один таймер на случай если complete не сработал
+            player.addEventListener('load', function() {
+                setTimeout(() => {
+                    try {
+                        this.stop();
+                    } catch (e) {}
+                }, 2000);
             });
 
             activeLottiePlayers.push(player);
@@ -965,9 +988,12 @@
         }
 
         function switchTab(tab, el) {
+            // Останавливаем все плееры
             const allPlayers = document.querySelectorAll('lottie-player');
             allPlayers.forEach(player => {
-                if (player.stop) player.stop();
+                try {
+                    if (player.stop) player.stop();
+                } catch (e) {}
                 player.remove();
             });
             activeLottiePlayers = [];
@@ -1289,8 +1315,6 @@
                 card.className = 'nft-card';
                 card.onclick = () => openDetail(n.id);
 
-                // ⬅️ УБРАЛИ НОМЕР
-
                 // ВСЕГДА КАРТИНКА
                 const img = document.createElement('img');
                 img.src = n.img || 'пустая_картинка.jpg';
@@ -1331,7 +1355,9 @@
             oldPlayers.forEach(p => {
                 const index = activeLottiePlayers.indexOf(p);
                 if (index !== -1) activeLottiePlayers.splice(index, 1);
-                if (p.stop) p.stop();
+                try {
+                    if (p.stop) p.stop();
+                } catch (e) {}
                 p.remove();
             });
 
@@ -1354,7 +1380,9 @@
             players.forEach(p => {
                 const index = activeLottiePlayers.indexOf(p);
                 if (index !== -1) activeLottiePlayers.splice(index, 1);
-                if (p.stop) p.stop();
+                try {
+                    if (p.stop) p.stop();
+                } catch (e) {}
                 p.remove();
             });
             const img = document.getElementById('detail-main-img');
