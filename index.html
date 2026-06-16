@@ -446,7 +446,7 @@
             font-weight: bold;
             padding: 2px 8px;
             border-radius: 12px;
-            z-index: 2;
+            z-index: 10;
             border: 1px solid rgba(255, 215, 0, 0.3);
         }
 
@@ -544,6 +544,20 @@
         .collected-item lottie-player {
             width: 100%;
             height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 5;
+        }
+        /* Фоновое изображение для анимированных NFT */
+        .collected-item .nft-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
         }
 
         #partner-profile {
@@ -633,6 +647,7 @@
             transform: translateZ(0);
         }
 
+        /* Стили для детального просмотра NFT из коллекции */
         #collection-detail-screen {
             position: absolute;
             top: 0;
@@ -701,6 +716,7 @@
             padding-top: 12px;
             border-top: 1px solid #222;
         }
+        /* Скрываем ID */
         .collection-detail-id {
             display: none;
         }
@@ -775,7 +791,7 @@
                 </div>
             </div>
 
-            <!-- COLLECTION DETAIL -->
+            <!-- COLLECTION DETAIL (Из коллекции) - ID скрыт -->
             <div id="collection-detail-screen">
                 <div class="header">
                     <i class="fas fa-arrow-left back-btn" onclick="closeCollectionDetail()"></i>
@@ -790,6 +806,7 @@
                     <div class="collection-detail-price">⭐ <span id="collection-detail-price">0</span></div>
                     <div class="collection-detail-date" id="collection-detail-date">Куплено: 01.01.2024</div>
                     <div class="collection-detail-owner" id="collection-detail-owner">Владелец: ...</div>
+                    <!-- ID скрыт через CSS display:none -->
                     <div class="collection-detail-id" id="collection-detail-id"></div>
                 </div>
             </div>
@@ -906,11 +923,14 @@
         let selectedMessageId = null;
         let selectedMessageElement = null;
         let activeLottiePlayers = [];
+        let rotationInterval = null;
+        let animationItems = [];
 
         // ============================
         // ⭐ NFT DATA
         // ============================
         const nftCatalog = [
+            // ===== ОБЫЧНЫЕ NFT =====
             {
                 id: 'nft1',
                 name: 'Синий Пепе',
@@ -939,6 +959,8 @@
                 img: 'ССЫЛКА_НА_КАРТИНКУ_4',
                 isLottie: false
             },
+
+            // ===== АНИМИРОВАННЫЕ NFT =====
             {
                 id: 'lowrider_9738',
                 name: 'Low Rider #9738',
@@ -1024,7 +1046,12 @@
             player.style.width = '100%';
             player.style.height = '100%';
             player.style.display = 'block';
+            player.style.position = 'absolute';
+            player.style.top = '0';
+            player.style.left = '0';
+            player.style.zIndex = '5';
 
+            // Останавливаем через 3.1 секунды
             setTimeout(() => {
                 try {
                     if (player.stop) player.stop();
@@ -1037,6 +1064,7 @@
                 } catch (e) {}
             });
 
+            // Дополнительная остановка через 3.1 секунды после загрузки
             player.addEventListener('load', function() {
                 setTimeout(() => {
                     try {
@@ -1051,7 +1079,7 @@
         }
 
         // ============================
-        // ИНИЦИАЛИЗАЦИЯ СЧЁТЧИКОВ
+        // ИНИЦИАЛИЗАЦИЯ СЧЁТЧИКОВ ДЛЯ КАЖДОГО NFT
         // ============================
         async function initCounters() {
             const countersRef = db.collection('system').doc('nftCounters');
@@ -1105,6 +1133,9 @@
         }
 
         function switchTab(tab, el) {
+            // Останавливаем ротацию анимаций при переключении вкладок
+            stopRotation();
+            
             const allPlayers = document.querySelectorAll('lottie-player');
             allPlayers.forEach(player => {
                 try {
@@ -1234,6 +1265,9 @@
         }
 
         function openChat(id, name, phone) {
+            // Останавливаем ротацию при открытии чата
+            stopRotation();
+            
             currentChatId = id;
             currentPartnerId = phone;
             currentPartnerUsername = name;
@@ -1287,6 +1321,10 @@
             const container = document.getElementById('partner-collection');
             destroyLottiePlayersInContainer(container);
             container.innerHTML = '';
+            // Запускаем ротацию снова, если на вкладке профиля
+            if (document.getElementById('page-profile').classList.contains('active')) {
+                startRotation();
+            }
         }
 
         function sendMessage() {
@@ -1401,9 +1439,6 @@
             const ownerName = data.username || 'Пользователь';
             const ownerPhone = data.phone || '---';
 
-            // Собираем все анимированные NFT
-            const animatedItems = [];
-
             invSnap.forEach(doc => {
                 const item = doc.data();
                 const itemDiv = document.createElement('div');
@@ -1417,14 +1452,7 @@
                 itemDiv.appendChild(numberBadge);
 
                 if (item.isLottie && item.lottieUrl) {
-                    // Анимированные - сохраняем для очереди
-                    animatedItems.push({ element: itemDiv, url: item.lottieUrl, data: item });
-                    // Показываем картинку-заглушку
-                    const img = document.createElement('img');
-                    img.src = item.img || 'пустая_картинка.jpg';
-                    img.alt = item.name;
-                    img.style.opacity = '0.7';
-                    itemDiv.appendChild(img);
+                    createOneShotLottiePlayer(item.lottieUrl, itemDiv);
                 } else if (item.img) {
                     const img = document.createElement('img');
                     img.src = item.img;
@@ -1433,13 +1461,6 @@
                 }
                 container.appendChild(itemDiv);
             });
-
-            // Запускаем анимации по очереди - по 2 за раз
-            if (animatedItems.length > 0) {
-                setTimeout(() => {
-                    playAnimationsInBatches(animatedItems);
-                }, 500);
-            }
         }
 
         function closePartnerProfile() {
@@ -1447,31 +1468,6 @@
             destroyLottiePlayersInContainer(container);
             container.innerHTML = '';
             document.getElementById('partner-profile').classList.remove('open');
-        }
-
-        // ============================
-        // ВОСПРОИЗВЕДЕНИЕ АНИМАЦИЙ ПО 2 ШТУКИ
-        // ============================
-        function playAnimationsInBatches(items, startIndex = 0) {
-            if (startIndex >= items.length) return;
-            
-            // Берем 2 элемента
-            const batch = items.slice(startIndex, startIndex + 2);
-            
-            // Запускаем анимацию для каждого
-            batch.forEach(({ element, url }) => {
-                // Удаляем старые плееры
-                const oldPlayers = element.querySelectorAll('lottie-player');
-                oldPlayers.forEach(p => p.remove());
-                
-                // Создаем новый плеер
-                createOneShotLottiePlayer(url, element);
-            });
-            
-            // Ждем 3.2 секунды и запускаем следующую партию
-            setTimeout(() => {
-                playAnimationsInBatches(items, startIndex + 2);
-            }, 3200);
         }
 
         // ============================
@@ -1535,6 +1531,7 @@
                 const player = createOneShotLottiePlayer(n.lottieUrl, imgContainer);
                 player.style.width = '90%';
                 player.style.height = '90%';
+                player.style.position = 'relative';
             } else {
                 imgArea.style.display = 'block';
                 imgArea.src = n.img;
@@ -1558,7 +1555,7 @@
         }
 
         // ============================
-        // ПОКУПКА
+        // ПОКУПКА С УНИКАЛЬНЫМ НОМЕРОМ ДЛЯ КАЖДОГО NFT
         // ============================
         async function buyDetailNFT() {
             if (!currentNFT) return;
@@ -1587,7 +1584,7 @@
         }
 
         // ============================
-        // ДЕТАЛЬНЫЙ ПРОСМОТР ИЗ КОЛЛЕКЦИИ
+        // ДЕТАЛЬНЫЙ ПРОСМОТР ИЗ КОЛЛЕКЦИИ (ID СКРЫТ)
         // ============================
         function openCollectionDetail(nftData, ownerName, ownerPhone) {
             const screen = document.getElementById('collection-detail-screen');
@@ -1601,6 +1598,7 @@
             const date = nftData.purchasedAt ? new Date(nftData.purchasedAt.toDate()).toLocaleDateString('ru-RU') : 'Неизвестно';
             document.getElementById('collection-detail-date').innerText = 'Куплено: ' + date;
             
+            // ID скрыт - не показываем
             document.getElementById('collection-detail-id').innerText = '';
             
             if (ownerName) {
@@ -1628,6 +1626,7 @@
                 const player = createOneShotLottiePlayer(nftData.lottieUrl, imgArea);
                 player.style.width = '90%';
                 player.style.height = '90%';
+                player.style.position = 'relative';
             } else {
                 img.style.display = 'block';
                 img.src = nftData.img || 'пустая_картинка.jpg';
@@ -1655,7 +1654,113 @@
         }
 
         // ============================
-        // COLLECTION — С ОЧЕРЕДЬЮ АНИМАЦИЙ
+        // РОТАЦИЯ АНИМАЦИЙ (ПО 2 ШТУКИ) - БЕЗ ЗАТЕМНЕНИЯ
+        // ============================
+        function startRotation() {
+            stopRotation();
+            if (!animationItems.length) return;
+            
+            // Перемешиваем массив
+            const shuffled = [...animationItems];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            
+            let index = 0;
+            
+            function playNextPair() {
+                // Останавливаем все текущие плееры, но НЕ удаляем их
+                const container = document.getElementById('my-collection');
+                const players = container.querySelectorAll('lottie-player');
+                players.forEach(p => {
+                    try {
+                        if (p.stop) p.stop();
+                    } catch (e) {}
+                });
+                
+                // Выбираем 2 NFT для воспроизведения
+                const pair = [];
+                for (let i = 0; i < 2 && index < shuffled.length; i++) {
+                    pair.push(shuffled[index]);
+                    index++;
+                }
+                
+                // Если дошли до конца, перемешиваем заново
+                if (index >= shuffled.length) {
+                    for (let i = shuffled.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                    }
+                    index = 0;
+                    // Берем первую пару из нового перемешанного массива
+                    pair.length = 0;
+                    for (let i = 0; i < 2 && i < shuffled.length; i++) {
+                        pair.push(shuffled[i]);
+                        index = 2;
+                    }
+                }
+                
+                // Запускаем анимации для выбранных NFT
+                pair.forEach(item => {
+                    const containerElement = item.element;
+                    
+                    // Удаляем старый плеер, если есть
+                    const oldPlayers = containerElement.querySelectorAll('lottie-player');
+                    oldPlayers.forEach(p => {
+                        try {
+                            if (p.stop) p.stop();
+                        } catch (e) {}
+                        p.remove();
+                    });
+                    
+                    // Создаем новый плеер поверх фонового изображения
+                    const player = document.createElement('lottie-player');
+                    player.setAttribute('src', item.lottieUrl);
+                    player.setAttribute('autoplay', '');
+                    player.setAttribute('loop', 'false');
+                    player.setAttribute('renderer', 'svg');
+                    player.style.width = '100%';
+                    player.style.height = '100%';
+                    player.style.display = 'block';
+                    player.style.position = 'absolute';
+                    player.style.top = '0';
+                    player.style.left = '0';
+                    player.style.zIndex = '5';
+                    
+                    // Останавливаем через 3.1 секунды
+                    setTimeout(() => {
+                        try {
+                            if (player.stop) player.stop();
+                        } catch (e) {}
+                    }, 3100);
+                    
+                    player.addEventListener('complete', function() {
+                        try {
+                            this.stop();
+                        } catch (e) {}
+                    });
+                    
+                    containerElement.appendChild(player);
+                });
+                
+                // Запускаем следующую пару через 3.5 секунды
+                rotationInterval = setTimeout(playNextPair, 3500);
+            }
+            
+            // Запускаем первую пару через небольшую задержку
+            setTimeout(playNextPair, 300);
+        }
+
+        function stopRotation() {
+            if (rotationInterval) {
+                clearTimeout(rotationInterval);
+                rotationInterval = null;
+            }
+        }
+
+        // ============================
+        // COLLECTION — С КЛИКАБЕЛЬНЫМИ КАРТОЧКАМИ
         // ============================
         async function renderCollection() {
             const container = document.getElementById('my-collection');
@@ -1667,6 +1772,8 @@
             }
 
             destroyLottiePlayersInContainer(container);
+            stopRotation();
+            animationItems = [];
 
             const snap = await db.collection('users').doc(currentUser.id).collection('inventory')
                 .orderBy('number', 'asc')
@@ -1679,12 +1786,13 @@
                 return;
             }
 
-            const animatedItems = [];
-
             snap.forEach(doc => {
                 const data = doc.data();
                 const item = document.createElement('div');
                 item.className = 'collected-item';
+                item.style.backgroundColor = '#1a1a1a';
+                item.style.position = 'relative';
+                item.style.overflow = 'hidden';
                 
                 item.onclick = () => openCollectionDetail(data);
 
@@ -1694,26 +1802,41 @@
                 item.appendChild(numberBadge);
 
                 if (data.isLottie && data.lottieUrl) {
-                    animatedItems.push({ element: item, url: data.lottieUrl });
-                    const img = document.createElement('img');
-                    img.src = data.img || 'пустая_картинка.jpg';
-                    img.alt = data.name;
-                    img.style.opacity = '0.7';
-                    item.appendChild(img);
+                    // Сохраняем элемент для ротации
+                    animationItems.push({
+                        element: item,
+                        lottieUrl: data.lottieUrl
+                    });
+                    
+                    // Фоновое изображение (всегда видно)
+                    const bgImg = document.createElement('img');
+                    bgImg.src = data.img || '';
+                    bgImg.alt = data.name;
+                    bgImg.className = 'nft-background';
+                    bgImg.style.position = 'absolute';
+                    bgImg.style.top = '0';
+                    bgImg.style.left = '0';
+                    bgImg.style.width = '100%';
+                    bgImg.style.height = '100%';
+                    bgImg.style.objectFit = 'cover';
+                    bgImg.style.zIndex = '1';
+                    item.appendChild(bgImg);
+                    
+                    // Плеер будет добавлен позже через ротацию
                 } else if (data.img) {
                     const img = document.createElement('img');
                     img.src = data.img;
                     img.alt = data.name;
+                    img.style.position = 'relative';
+                    img.style.zIndex = '1';
                     item.appendChild(img);
                 }
                 container.appendChild(item);
             });
 
-            // Запускаем анимации по очереди - по 2 за раз
-            if (animatedItems.length > 0) {
-                setTimeout(() => {
-                    playAnimationsInBatches(animatedItems);
-                }, 500);
+            // Запускаем ротацию, если есть анимированные NFT
+            if (animationItems.length > 0) {
+                startRotation();
             }
         }
 
@@ -1722,6 +1845,13 @@
         // ============================
         renderMarket();
         updateBalance();
+
+        // Останавливаем ротацию при переключении вкладок
+        const originalSwitchTab = switchTab;
+        switchTab = function(tab, el) {
+            stopRotation();
+            originalSwitchTab(tab, el);
+        };
     </script>
 
 </body>
