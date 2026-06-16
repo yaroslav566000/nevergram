@@ -450,7 +450,7 @@
     function createOneShotLottiePlayer(url, container) {
         const player = document.createElement('lottie-player');
     
-    // Основные настройки
+        // Основные настройки
         player.setAttribute('src', url);
         player.setAttribute('autoplay', '');
         player.setAttribute('loop', 'false');
@@ -466,7 +466,7 @@
     
     // ⬅️ СТРАХОВКА — ЕСЛИ АНИМАЦИЯ ЗАВИСЛА
         player.addEventListener('load', function() {
-        // Примерное время анимации 3-5 секунд, останавливаем принудительно
+            // Примерное время анимации 3-5 секунд, останавливаем принудительно
             setTimeout(() => {
                 if (this.isPlaying) {
                     this.stop();
