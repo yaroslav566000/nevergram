@@ -309,15 +309,9 @@
             background: #4caf50;
             color: #fff;
         }
-        .msg.sell-offer .sell-offer-buttons .btn-accept:hover {
-            background: #388e3c;
-        }
         .msg.sell-offer .sell-offer-buttons .btn-reject {
             background: #f44336;
             color: #fff;
-        }
-        .msg.sell-offer .sell-offer-buttons .btn-reject:hover {
-            background: #c62828;
         }
         .msg.sell-offer .sell-offer-status {
             color: #aaa;
@@ -388,7 +382,7 @@
             padding: 8px 0;
             z-index: 1000;
             display: none;
-            min-width: 160px;
+            min-width: 180px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
         #context-menu .menu-item {
@@ -402,6 +396,12 @@
         }
         #context-menu .menu-item:hover {
             background: #2a2a2a;
+        }
+        #context-menu .menu-item .pin-icon {
+            color: #ffd700;
+        }
+        #context-menu .menu-item .unpin-icon {
+            color: #f44336;
         }
 
         #emoji-picker {
@@ -477,28 +477,6 @@
             font-size: 14px;
             cursor: pointer;
         }
-        .btn-green {
-            flex: 1;
-            background: #4caf50;
-            color: #fff;
-            border: none;
-            border-radius: 30px;
-            padding: 12px 0;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        .btn-red {
-            flex: 1;
-            background: #f44336;
-            color: #fff;
-            border: none;
-            border-radius: 30px;
-            padding: 12px 0;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-        }
 
         .nft-list {
             display: grid;
@@ -546,6 +524,96 @@
             border-radius: 12px;
             z-index: 10;
             border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .profile-header {
+            padding: 16px 20px 10px 20px;
+            text-align: center;
+            position: relative;
+            overflow: visible;
+            min-height: 160px;
+        }
+        .profile-avatar-wrapper {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+        }
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            position: relative;
+            z-index: 2;
+            border: 3px solid #1a1a1a;
+        }
+        .profile-pinned-nfts {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: 130px;
+            height: 130px;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .profile-pinned-nfts .pinned-nft {
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            object-fit: cover;
+            pointer-events: auto;
+            cursor: pointer;
+            background: #1a1a1a;
+            transition: transform 0.2s;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        .profile-pinned-nfts .pinned-nft:hover {
+            transform: scale(1.15);
+            z-index: 10;
+        }
+
+        .profile-nick-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .profile-username {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .profile-main-nft {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            object-fit: cover;
+            cursor: pointer;
+            flex-shrink: 0;
+            background: #1a1a1a;
+            transition: transform 0.2s;
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
+            border: none;
+        }
+        .profile-main-nft:hover {
+            transform: scale(1.1);
+        }
+        .profile-phone {
+            color: #aaa;
+            font-size: 13px;
+        }
+        .profile-balance {
+            color: #ffd700;
+            margin-top: 8px;
+            font-size: 15px;
         }
 
         #detail-screen {
@@ -656,6 +724,22 @@
             object-fit: cover;
             z-index: 1;
         }
+        .collected-item .pin-indicator {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: #ffd700;
+            color: #000;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            z-index: 15;
+            font-weight: 600;
+            border: 1px solid #1a1a1a;
+        }
+        .collected-item.pinned-item {
+            border: 2px solid #ffd700;
+        }
 
         #partner-profile {
             position: absolute;
@@ -672,26 +756,84 @@
             display: flex;
         }
         .partner-header {
-            padding: 30px 20px;
+            padding: 20px 20px 15px 20px;
             text-align: center;
             border-bottom: 1px solid #222;
             flex-shrink: 0;
+            position: relative;
+        }
+        .partner-avatar-wrapper {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
         }
         .partner-avatar {
             width: 80px;
             height: 80px;
             border-radius: 50%;
             background: #444;
-            margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
+            font-size: 32px;
+            position: relative;
+            z-index: 2;
+            border: 3px solid #1a1a1a;
+            margin: 0 auto;
+        }
+        .partner-pinned-nfts {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: 130px;
+            height: 130px;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .partner-pinned-nfts .pinned-nft {
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            object-fit: cover;
+            pointer-events: auto;
+            cursor: pointer;
+            background: #1a1a1a;
+            transition: transform 0.2s;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        .partner-pinned-nfts .pinned-nft:hover {
+            transform: scale(1.15);
+            z-index: 10;
+        }
+        .partner-nick-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 4px;
         }
         .partner-username {
             font-size: 20px;
             font-weight: bold;
-            margin-bottom: 5px;
+        }
+        .partner-main-nft {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            object-fit: cover;
+            cursor: pointer;
+            flex-shrink: 0;
+            background: #1a1a1a;
+            transition: transform 0.2s;
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
+            border: none;
+        }
+        .partner-main-nft:hover {
+            transform: scale(1.1);
         }
         .partner-phone {
             color: #aaa;
@@ -721,16 +863,6 @@
         }
         ::-webkit-scrollbar {
             width: 0;
-        }
-
-        .profile-username {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        .profile-phone {
-            color: #aaa;
-            font-size: 13px;
         }
 
         lottie-player {
@@ -816,7 +948,6 @@
             display: none;
         }
 
-        /* Стили для вкладки Продажа */
         .sell-container {
             padding: 15px;
             flex: 1;
@@ -889,29 +1020,17 @@
             background: #4caf50;
             color: #fff;
         }
-        .btn-sell:hover {
-            background: #388e3c;
-        }
         .btn-cancel-sell {
             background: #f44336;
             color: #fff;
-        }
-        .btn-cancel-sell:hover {
-            background: #c62828;
         }
         .btn-accept-offer {
             background: #4caf50;
             color: #fff;
         }
-        .btn-accept-offer:hover {
-            background: #388e3c;
-        }
         .btn-reject-offer {
             background: #f44336;
             color: #fff;
-        }
-        .btn-reject-offer:hover {
-            background: #c62828;
         }
         .sell-status-pending {
             color: #ffd700;
@@ -950,8 +1069,7 @@
             margin-bottom: 16px;
             text-align: center;
         }
-        .modal-content input,
-        .modal-content select {
+        .modal-content input {
             width: 100%;
             padding: 12px;
             background: #0f0f0f;
@@ -960,9 +1078,6 @@
             color: #fff;
             margin-bottom: 10px;
             font-size: 14px;
-        }
-        .modal-content select option {
-            background: #1f1f1f;
         }
         .modal-content .modal-buttons {
             display: flex;
@@ -1139,7 +1254,7 @@
                 <div class="nft-list" id="nft-list"></div>
             </div>
 
-            <!-- SELL (Продажа) -->
+            <!-- SELL -->
             <div id="page-sell" class="page">
                 <div class="header"><h2>Продажа NFT</h2></div>
                 <div class="sell-container" id="sell-container">
@@ -1147,7 +1262,7 @@
                 </div>
             </div>
 
-            <!-- DETAIL (Маркет) -->
+            <!-- DETAIL -->
             <div id="detail-screen">
                 <div class="header">
                     <i class="fas fa-arrow-left back-btn" onclick="closeDetail()"></i>
@@ -1164,7 +1279,7 @@
                 </div>
             </div>
 
-            <!-- COLLECTION DETAIL (Из коллекции) -->
+            <!-- COLLECTION DETAIL -->
             <div id="collection-detail-screen">
                 <div class="header">
                     <i class="fas fa-arrow-left back-btn" onclick="closeCollectionDetail()"></i>
@@ -1186,11 +1301,17 @@
             <!-- PROFILE -->
             <div id="page-profile" class="page">
                 <div class="header"><h2>Профиль</h2></div>
-                <div style="padding:20px; text-align:center;">
-                    <div style="width:80px; height:80px; border-radius:50%; background:#444; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:40px;">👤</div>
-                    <div class="profile-username" id="profile-name">Гость</div>
+                <div class="profile-header" id="profile-header">
+                    <div class="profile-avatar-wrapper">
+                        <div class="profile-avatar" id="profile-avatar">👤</div>
+                        <div class="profile-pinned-nfts" id="profile-pinned-nfts"></div>
+                    </div>
+                    <div class="profile-nick-wrapper">
+                        <span class="profile-username" id="profile-name">Гость</span>
+                        <img class="profile-main-nft" id="profile-main-nft" style="display:none;" alt="Main NFT">
+                    </div>
                     <div class="profile-phone" id="profile-phone">---</div>
-                    <div style="color:#ffd700; margin-top:12px; font-size:16px;">⭐ <span id="prof-bal">5000</span></div>
+                    <div class="profile-balance">⭐ <span id="prof-bal">5000</span></div>
                 </div>
                 <h4 style="padding-left:12px; margin-bottom:4px; font-size:14px; color:#aaa;">Мои NFT</h4>
                 <div class="collection-grid" id="my-collection"></div>
@@ -1203,8 +1324,14 @@
                     <h2>Профиль</h2>
                 </div>
                 <div class="partner-header">
-                    <div class="partner-avatar" id="partner-avatar">👤</div>
-                    <div class="partner-username" id="partner-username">Пользователь</div>
+                    <div class="partner-avatar-wrapper">
+                        <div class="partner-avatar" id="partner-avatar">👤</div>
+                        <div class="partner-pinned-nfts" id="partner-pinned-nfts"></div>
+                    </div>
+                    <div class="partner-nick-wrapper">
+                        <span class="partner-username" id="partner-username">Пользователь</span>
+                        <img class="partner-main-nft" id="partner-main-nft" style="display:none;" alt="Main NFT">
+                    </div>
                     <div class="partner-phone" id="partner-phone">---</div>
                 </div>
                 <div class="partner-collection-wrapper">
@@ -1273,9 +1400,15 @@
 
     <!-- Context Menu -->
     <div id="context-menu">
+        <div class="menu-item" id="pin-menu-item" onclick="pinNFT()">
+            <i class="fas fa-thumbtack pin-icon"></i> Закрепить
+        </div>
+        <div class="menu-item" id="unpin-menu-item" onclick="unpinNFT()" style="display:none;">
+            <i class="fas fa-thumbtack unpin-icon"></i> Открепить
+        </div>
         <div class="menu-item" onclick="editMessage()"><i class="fas fa-edit"></i> Редактировать</div>
         <div class="menu-item" onclick="deleteMessage()"><i class="fas fa-trash"></i> Удалить</div>
-        <div class="menu-item" onclick="pinMessage()"><i class="fas fa-thumbtack"></i> Закрепить</div>
+        <div class="menu-item" onclick="pinMessage()"><i class="fas fa-thumbtack"></i> Закрепить сообщение</div>
         <div class="menu-item" onclick="reactMessage()"><i class="fas fa-thumbs-up"></i> 👍</div>
     </div>
 
@@ -1329,10 +1462,12 @@
         let watchedItems = new Set();
         let sellModalNFT = null;
         let sellModalUser = null;
-        let sellOffersListener = null;
+        let selectedNFTDocId = null;
+        let selectedNFTData = null;
+        let isLoadingCollection = false;
 
         // ============================
-        // ⭐ NFT DATA
+        // ⭐ NFT DATA - ОБНОВЛЕННЫЙ КАТАЛОГ
         // ============================
         const nftCatalog = [
             {
@@ -1434,7 +1569,7 @@
         ];
 
         // ============================
-        // ФУНКЦИЯ ДЛЯ УНИЧТОЖЕНИЯ ПЛЕЕРОВ
+        // ФУНКЦИИ
         // ============================
         function destroyLottiePlayersInContainer(container) {
             const players = container.querySelectorAll('lottie-player');
@@ -1448,9 +1583,6 @@
             });
         }
 
-        // ============================
-        // СОЗДАНИЕ ПЛЕЕРА
-        // ============================
         function createOneShotLottiePlayer(url, container) {
             const player = document.createElement('lottie-player');
             player.setAttribute('src', url);
@@ -1490,9 +1622,6 @@
             return player;
         }
 
-        // ============================
-        // ИНИЦИАЛИЗАЦИЯ СЧЁТЧИКОВ
-        // ============================
         async function initCounters() {
             const countersRef = db.collection('system').doc('nftCounters');
             const doc = await countersRef.get();
@@ -1502,14 +1631,12 @@
                     initialCounters[nft.id] = 0;
                 });
                 await countersRef.set(initialCounters);
-                console.log('✅ Счётчики NFT созданы');
             }
         }
 
         async function getNextNumber(nftId) {
             const countersRef = db.collection('system').doc('nftCounters');
             let newNumber = 0;
-            
             try {
                 await db.runTransaction(async (transaction) => {
                     const doc = await transaction.get(countersRef);
@@ -1527,13 +1654,9 @@
                 data[nftId] = newNumber;
                 await countersRef.set(data);
             }
-            
             return newNumber;
         }
 
-        // ============================
-        // UI
-        // ============================
         function showRegister() {
             document.getElementById('login-form').style.display = 'none';
             document.getElementById('register-form').style.display = 'flex';
@@ -1546,7 +1669,6 @@
 
         function switchTab(tab, el) {
             stopRotation();
-            
             const allPlayers = document.querySelectorAll('lottie-player');
             allPlayers.forEach(player => {
                 try {
@@ -1571,10 +1693,10 @@
             document.getElementById('prof-bal').innerText = balance.toLocaleString();
         }
 
-        function addStars() { 
+        function addStars() {
             balance += 100;
-            updateBalance(); 
-            if (currentUser) db.collection('users').doc(currentUser.id).update({ balance }); 
+            updateBalance();
+            if (currentUser) db.collection('users').doc(currentUser.id).update({ balance });
         }
 
         // ============================
@@ -1650,22 +1772,12 @@
             const snap = await db.collection('chats').where('participants', 'array-contains', currentUser.phone).get();
             c.innerHTML = '';
             if (snap.empty) return c.innerHTML = '<div style="padding:20px;color:#aaa;text-align:center;">Нет чатов</div>';
-            
+
             snap.forEach(d => {
                 const data = d.data();
                 const partner = data.participants.find(p => p !== currentUser.phone);
                 const name = data.participantNames?.[partner] || 'Неизвестно';
-                
-                // Проверяем, есть ли активное предложение о продаже в этом чате
-                let sellTag = '';
-                db.collection('chats').doc(d.id).collection('messages')
-                    .where('isSellOffer', '==', true)
-                    .where('sellStatus', '==', 'pending')
-                    .get()
-                    .then(snap => {
-                        // Не ждем, просто обновляем при рендере
-                    });
-                
+
                 c.innerHTML += `
                         <div class="chat-list-item" onclick="openChat('${d.id}','${name}','${partner}')">
                             <div class="avatar">👤</div>
@@ -1679,8 +1791,7 @@
                             </div>
                         </div>
                     `;
-                    
-                // Добавляем слушатель последнего сообщения
+
                 db.collection('chats').doc(d.id).collection('messages')
                     .orderBy('timestamp', 'desc')
                     .limit(1)
@@ -1718,9 +1829,6 @@
             return div.innerHTML;
         }
 
-        // ============================
-        // CHAT WINDOW
-        // ============================
         async function startChat(pid, pname, pphone) {
             const snap = await db.collection('chats').where('participants', '==', [currentUser.phone, pphone]).get();
             let id;
@@ -1737,12 +1845,11 @@
 
         function openChat(id, name, phone) {
             stopRotation();
-            
+
             currentChatId = id;
             currentPartnerId = phone;
             currentPartnerUsername = name;
-            
-            // Проверяем, есть ли активное предложение о продаже
+
             db.collection('chats').doc(id).collection('messages')
                 .where('isSellOffer', '==', true)
                 .where('sellStatus', '==', 'pending')
@@ -1754,7 +1861,7 @@
                         document.getElementById('chat-partner-name').innerHTML = escapeHtml(name);
                     }
                 });
-            
+
             document.getElementById('chat-window').classList.add('open');
             const c = document.getElementById('messages-container');
             c.innerHTML = '';
@@ -1765,7 +1872,7 @@
                     snap.forEach(doc => {
                         const data = doc.data();
                         let div = document.createElement('div');
-                        
+
                         if (data.isSystem) {
                             div.className = 'msg system';
                             div.textContent = data.text || '';
@@ -1785,16 +1892,15 @@
                                 }
                                 content += `</div>`;
                             }
-                            
-                            // Проверяем, является ли сообщение предложением о продаже
+
                             if (data.isSellOffer && data.nftData) {
                                 div.classList.add('sell-offer');
                                 const nft = data.nftData;
-                                const statusText = data.sellStatus === 'accepted' ? '✅ ПРИНЯТО' : 
-                                                  data.sellStatus === 'rejected' ? '❌ ОТКЛОНЕНО' : '⏳ Ожидает ответа';
-                                const statusClass = data.sellStatus === 'accepted' ? 'accepted' : 
-                                                   data.sellStatus === 'rejected' ? 'rejected' : 'pending';
-                                
+                                const statusText = data.sellStatus === 'accepted' ? '✅ ПРИНЯТО' :
+                                    data.sellStatus === 'rejected' ? '❌ ОТКЛОНЕНО' : '⏳ Ожидает ответа';
+                                const statusClass = data.sellStatus === 'accepted' ? 'accepted' :
+                                    data.sellStatus === 'rejected' ? 'rejected' : 'pending';
+
                                 let buttonsHtml = '';
                                 if (!data.sellStatus || data.sellStatus === 'pending') {
                                     if (data.sender !== currentUser.phone) {
@@ -1812,7 +1918,7 @@
                                         `;
                                     }
                                 }
-                                
+
                                 content = `
                                     <div class="sell-offer-title">💰 ПРЕДЛОЖЕНИЕ О ПОКУПКЕ</div>
                                     <div style="margin:6px 0;">
@@ -1827,7 +1933,7 @@
                             }
                             div.innerHTML = content;
                         }
-                        
+
                         div.addEventListener('contextmenu', function(e) {
                             if (!div.classList.contains('system')) {
                                 e.preventDefault();
@@ -1885,6 +1991,8 @@
             menu.style.top = y + 'px';
             selectedMessageId = msgId;
             selectedMessageElement = element;
+            document.getElementById('pin-menu-item').style.display = 'none';
+            document.getElementById('unpin-menu-item').style.display = 'none';
         }
 
         document.addEventListener('click', function(e) {
@@ -1939,33 +2047,253 @@
         }
 
         // ============================
-        // ОБРАБОТКА ПРЕДЛОЖЕНИЙ О ПОКУПКЕ
+        // ЗАКРЕПЛЕНИЕ NFT (МАКСИМУМ 7 - 1 ПОСЛЕ НИКА + 6 ВОКРУГ)
+        // ============================
+        function showNFTPinMenu(element, docId, nftData) {
+            const menu = document.getElementById('context-menu');
+            menu.style.display = 'block';
+            const rect = element.getBoundingClientRect();
+            const x = Math.min(rect.right - 180, window.innerWidth - 190);
+            const y = Math.min(rect.top - 10, window.innerHeight - 200);
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+
+            selectedNFTDocId = docId;
+            selectedNFTData = nftData;
+
+            const pinItem = document.getElementById('pin-menu-item');
+            const unpinItem = document.getElementById('unpin-menu-item');
+
+            if (nftData.pinned) {
+                pinItem.style.display = 'none';
+                unpinItem.style.display = 'flex';
+            } else {
+                pinItem.style.display = 'flex';
+                unpinItem.style.display = 'none';
+            }
+
+            document.querySelectorAll('#context-menu .menu-item:not(#pin-menu-item):not(#unpin-menu-item)').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+
+        function hideNFTPinMenu() {
+            document.getElementById('context-menu').style.display = 'none';
+            document.querySelectorAll('#context-menu .menu-item').forEach(el => {
+                el.style.display = 'flex';
+            });
+        }
+
+        async function pinNFT() {
+            if (!selectedNFTDocId || !selectedNFTData) return;
+
+            try {
+                const allNFTs = await db.collection('users').doc(currentUser.id).collection('inventory').get();
+                let pinnedCount = 0;
+                let pinnedDocIds = [];
+
+                allNFTs.forEach(doc => {
+                    if (doc.data().pinned) {
+                        pinnedCount++;
+                        pinnedDocIds.push(doc.id);
+                    }
+                });
+
+                // Максимум 7 закреплённых (1 после ника + 6 вокруг)
+                if (pinnedCount >= 7) {
+                    // Открепляем самый старый (первый в списке)
+                    await db.collection('users').doc(currentUser.id).collection('inventory').doc(pinnedDocIds[0]).update({
+                        pinned: false
+                    });
+                }
+
+                await db.collection('users').doc(currentUser.id).collection('inventory').doc(selectedNFTDocId).update({
+                    pinned: true
+                });
+
+                hideNFTPinMenu();
+                await renderCollection();
+
+            } catch (e) {
+                console.error('Ошибка закрепления:', e);
+                hideNFTPinMenu();
+            }
+        }
+
+        async function unpinNFT() {
+            if (!selectedNFTDocId) return;
+
+            try {
+                await db.collection('users').doc(currentUser.id).collection('inventory').doc(selectedNFTDocId).update({
+                    pinned: false
+                });
+
+                hideNFTPinMenu();
+                await renderCollection();
+
+            } catch (e) {
+                console.error('Ошибка открепления:', e);
+                hideNFTPinMenu();
+            }
+        }
+
+        // ============================
+        // ОТОБРАЖЕНИЕ ЗАКРЕПЛЁННЫХ NFT (1 ПОСЛЕ НИКА + 6 ВОКРУГ)
+        // ============================
+        function renderPinnedNFTs() {
+            const container = document.getElementById('profile-pinned-nfts');
+            container.innerHTML = '';
+            const mainNftEl = document.getElementById('profile-main-nft');
+
+            if (!currentUser) return;
+
+            db.collection('users').doc(currentUser.id).collection('inventory')
+                .where('pinned', '==', true)
+                .get()
+                .then(snap => {
+                    const pinnedNFTs = [];
+                    snap.forEach(doc => {
+                        pinnedNFTs.push({ ...doc.data(), docId: doc.id });
+                    });
+
+                    pinnedNFTs.sort((a, b) => (a.number || 0) - (b.number || 0));
+
+                    // Первый NFT - после ника (без ободка)
+                    if (pinnedNFTs.length > 0) {
+                        const mainNft = pinnedNFTs[0];
+                        mainNftEl.src = mainNft.img || '';
+                        mainNftEl.style.display = 'block';
+                        mainNftEl.title = `${mainNft.name} #${mainNft.number}`;
+                        mainNftEl.onclick = () => openCollectionDetail(mainNft);
+                    } else {
+                        mainNftEl.style.display = 'none';
+                    }
+
+                    // Остальные 6 NFT - вокруг аватарки (3 слева, 3 справа) - ДАЛЕКО И ХАОТИЧНО
+                    const aroundNfts = pinnedNFTs.slice(1, 7);
+
+                    // Хаотичные позиции (с поворотами и разными отступами)
+                    const positions = [
+                        // Слева (3 шт) - далеко и хаотично
+                        { top: 2, left: -32, rotate: -12 },
+                        { top: 34, left: -36, rotate: 8 },
+                        { top: 66, left: -30, rotate: -18 },
+                        // Справа (3 шт) - далеко и хаотично
+                        { top: 2, left: 86, rotate: 15 },
+                        { top: 34, left: 90, rotate: -8 },
+                        { top: 66, left: 84, rotate: 22 }
+                    ];
+
+                    aroundNfts.forEach((nft, index) => {
+                        if (index >= positions.length) return;
+                        const pos = positions[index];
+                        const img = document.createElement('img');
+                        img.className = 'pinned-nft';
+                        img.src = nft.img || '';
+                        img.alt = nft.name;
+                        img.title = `${nft.name} #${nft.number}`;
+                        img.style.top = pos.top + 'px';
+                        img.style.left = pos.left + 'px';
+                        img.style.transform = `rotate(${pos.rotate}deg)`;
+                        img.onclick = () => openCollectionDetail(nft);
+                        container.appendChild(img);
+                    });
+                });
+        }
+
+        function renderPartnerPinnedNFTs(partnerId) {
+            const container = document.getElementById('partner-pinned-nfts');
+            container.innerHTML = '';
+            const mainNftEl = document.getElementById('partner-main-nft');
+
+            if (!partnerId) return;
+
+            db.collection('users').where('phone', '==', partnerId).get()
+                .then(snap => {
+                    if (snap.empty) return;
+                    const userId = snap.docs[0].id;
+                    return db.collection('users').doc(userId).collection('inventory')
+                        .where('pinned', '==', true)
+                        .get();
+                })
+                .then(snap => {
+                    if (!snap || snap.empty) {
+                        mainNftEl.style.display = 'none';
+                        return;
+                    }
+
+                    const pinnedNFTs = [];
+                    snap.forEach(doc => {
+                        pinnedNFTs.push({ ...doc.data(), docId: doc.id });
+                    });
+
+                    pinnedNFTs.sort((a, b) => (a.number || 0) - (b.number || 0));
+
+                    if (pinnedNFTs.length > 0) {
+                        const mainNft = pinnedNFTs[0];
+                        mainNftEl.src = mainNft.img || '';
+                        mainNftEl.style.display = 'block';
+                        mainNftEl.title = `${mainNft.name} #${mainNft.number}`;
+                        mainNftEl.onclick = () => openCollectionDetail(mainNft);
+                    } else {
+                        mainNftEl.style.display = 'none';
+                    }
+
+                    const aroundNfts = pinnedNFTs.slice(1, 7);
+
+                    // Хаотичные позиции
+                    const positions = [
+                        { top: 2, left: -32, rotate: -12 },
+                        { top: 34, left: -36, rotate: 8 },
+                        { top: 66, left: -30, rotate: -18 },
+                        { top: 2, left: 86, rotate: 15 },
+                        { top: 34, left: 90, rotate: -8 },
+                        { top: 66, left: 84, rotate: 22 }
+                    ];
+
+                    aroundNfts.forEach((nft, index) => {
+                        if (index >= positions.length) return;
+                        const pos = positions[index];
+                        const img = document.createElement('img');
+                        img.className = 'pinned-nft';
+                        img.src = nft.img || '';
+                        img.alt = nft.name;
+                        img.title = `${nft.name} #${nft.number}`;
+                        img.style.top = pos.top + 'px';
+                        img.style.left = pos.left + 'px';
+                        img.style.transform = `rotate(${pos.rotate}deg)`;
+                        img.onclick = () => openCollectionDetail(nft);
+                        container.appendChild(img);
+                    });
+                });
+        }
+
+        // ============================
+        // ОБРАБОТКА ПРЕДЛОЖЕНИЙ
         // ============================
         async function acceptSellOffer(messageId, chatId) {
             if (!confirm('Купить этот NFT за указанную цену?')) return;
-            
+
             try {
                 const msgDoc = await db.collection('chats').doc(chatId).collection('messages').doc(messageId).get();
                 const data = msgDoc.data();
-                
+
                 if (!data.nftData) {
                     alert('Ошибка: данные NFT не найдены');
                     return;
                 }
-                
+
                 const price = data.nftData.price;
                 const nftDocId = data.nftData.nftDocId;
-                
-                // Проверяем баланс покупателя
+
                 const userDoc = await db.collection('users').doc(currentUser.id).get();
                 const userBalance = userDoc.data().balance || 0;
-                
+
                 if (userBalance < price) {
                     alert(`Недостаточно звёзд! Нужно: ${price}, у вас: ${userBalance}`);
                     return;
                 }
-                
-                // Получаем данные продавца
+
                 const sellerPhone = data.sender;
                 const sellerSnap = await db.collection('users').where('phone', '==', sellerPhone).get();
                 if (sellerSnap.empty) {
@@ -1974,32 +2302,28 @@
                 }
                 const sellerData = sellerSnap.docs[0].data();
                 const sellerId = sellerSnap.docs[0].id;
-                
-                // Получаем NFT продавца
+
                 const nftQuery = await db.collection('users').doc(sellerId).collection('inventory')
                     .where('nftId', '==', data.nftData.nftId)
                     .where('number', '==', data.nftData.number)
                     .get();
-                
+
                 if (nftQuery.empty) {
                     alert('NFT уже продан или не найден');
                     return;
                 }
-                
+
                 const nftDoc = nftQuery.docs[0];
                 const nftData = nftDoc.data();
-                
-                // Списываем звёзды у покупателя
+
                 await db.collection('users').doc(currentUser.id).update({
                     balance: userBalance - price
                 });
-                
-                // Добавляем звёзды продавцу
+
                 await db.collection('users').doc(sellerId).update({
                     balance: (sellerData.balance || 0) + price
                 });
-                
-                // Создаём NFT для покупателя
+
                 await db.collection('users').doc(currentUser.id).collection('inventory').add({
                     nftId: nftData.nftId,
                     name: nftData.name,
@@ -2010,36 +2334,32 @@
                     number: nftData.number,
                     purchasedAt: new Date(),
                     fromUser: sellerPhone,
-                    fromUsername: sellerData.username || 'Пользователь'
+                    fromUsername: sellerData.username || 'Пользователь',
+                    pinned: false
                 });
-                
-                // Удаляем NFT у продавца
+
                 await db.collection('users').doc(sellerId).collection('inventory').doc(nftDoc.id).delete();
-                
-                // Обновляем статус сообщения
+
                 await db.collection('chats').doc(chatId).collection('messages').doc(messageId).update({
                     sellStatus: 'accepted'
                 });
-                
-                // Обновляем баланс в интерфейсе
+
                 balance = userBalance - price;
                 updateBalance();
-                
-                // Отправляем уведомление
+
                 await db.collection('chats').doc(chatId).collection('messages').add({
                     sender: 'system',
                     text: `✅ ${currentUser.username} купил NFT "${nftData.name}" #${nftData.number} за ${price} ⭐`,
                     timestamp: new Date(),
                     isSystem: true
                 });
-                
+
                 alert(`✅ NFT "${nftData.name}" #${nftData.number} успешно куплен!`);
-                
-                // Обновляем страницы
+
                 await renderCollection();
                 await renderSellPage();
                 loadChats();
-                
+
             } catch (e) {
                 console.error('Ошибка при покупке:', e);
                 alert('Ошибка при покупке NFT');
@@ -2048,12 +2368,11 @@
 
         async function rejectSellOffer(messageId, chatId) {
             if (!confirm('Отклонить предложение о покупке?')) return;
-            
+
             try {
                 await db.collection('chats').doc(chatId).collection('messages').doc(messageId).update({
                     sellStatus: 'rejected'
                 });
-                
                 alert('❌ Предложение отклонено');
                 loadChats();
             } catch (e) {
@@ -2064,13 +2383,12 @@
 
         async function cancelSellOffer(messageId, chatId) {
             if (!confirm('Отменить своё предложение о продаже?')) return;
-            
+
             try {
                 const msgDoc = await db.collection('chats').doc(chatId).collection('messages').doc(messageId).get();
                 const data = msgDoc.data();
-                
+
                 if (data.nftData && data.nftData.nftDocId) {
-                    // Снимаем пометку о продаже с NFT
                     await db.collection('users').doc(currentUser.id).collection('inventory').doc(data.nftData.nftDocId).update({
                         forSale: false,
                         sellPrice: null,
@@ -2079,15 +2397,15 @@
                         sellDate: null
                     });
                 }
-                
+
                 await db.collection('chats').doc(chatId).collection('messages').doc(messageId).update({
                     sellStatus: 'rejected'
                 });
-                
+
                 await renderSellPage();
                 loadChats();
                 alert('❌ Предложение отменено');
-                
+
             } catch (e) {
                 console.error('Ошибка:', e);
                 alert('Ошибка при отмене');
@@ -2112,6 +2430,8 @@
             document.getElementById('partner-username').innerText = data.username || 'Пользователь';
             document.getElementById('partner-phone').innerText = data.phone || '---';
 
+            renderPartnerPinnedNFTs(currentPartnerId);
+
             const invSnap = await snap.docs[0].ref.collection('inventory').get();
             if (invSnap.empty) {
                 container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">NFT отсутствуют</div>';
@@ -2129,7 +2449,7 @@
                 itemDiv.style.backgroundColor = '#1a1a1a';
                 itemDiv.style.position = 'relative';
                 itemDiv.style.overflow = 'hidden';
-                
+
                 itemDiv.onclick = () => openCollectionDetail(item, ownerName, ownerPhone);
 
                 const numberBadge = document.createElement('div');
@@ -2171,9 +2491,9 @@
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
-            
+
             let partnerInterval = null;
-            
+
             function playNextPair() {
                 const players = container.querySelectorAll('lottie-player');
                 players.forEach(p => {
@@ -2181,9 +2501,9 @@
                         if (p.stop) p.stop();
                     } catch (e) {}
                 });
-                
+
                 const available = shuffled.filter(item => !watchedSet.has(item.id));
-                
+
                 if (available.length === 0) {
                     if (partnerInterval) {
                         clearTimeout(partnerInterval);
@@ -2191,7 +2511,7 @@
                     }
                     return;
                 }
-                
+
                 const pair = [];
                 for (let i = 0; i < 2 && pair.length < available.length; i++) {
                     const randomIndex = Math.floor(Math.random() * available.length);
@@ -2199,10 +2519,10 @@
                     pair.push(selected);
                     watchedSet.add(selected.id);
                 }
-                
+
                 pair.forEach(item => {
                     const containerElement = item.element;
-                    
+
                     const oldPlayers = containerElement.querySelectorAll('lottie-player');
                     oldPlayers.forEach(p => {
                         try {
@@ -2210,7 +2530,7 @@
                         } catch (e) {}
                         p.remove();
                     });
-                    
+
                     const player = document.createElement('lottie-player');
                     player.setAttribute('src', item.lottieUrl);
                     player.setAttribute('autoplay', '');
@@ -2223,25 +2543,25 @@
                     player.style.top = '0';
                     player.style.left = '0';
                     player.style.zIndex = '5';
-                    
+
                     setTimeout(() => {
                         try {
                             if (player.stop) player.stop();
                         } catch (e) {}
                     }, 3100);
-                    
+
                     player.addEventListener('complete', function() {
                         try {
                             this.stop();
                         } catch (e) {}
                     });
-                    
+
                     containerElement.appendChild(player);
                 });
-                
+
                 partnerInterval = setTimeout(playNextPair, 3500);
             }
-            
+
             setTimeout(playNextPair, 300);
             window._partnerInterval = partnerInterval;
         }
@@ -2255,6 +2575,8 @@
                 clearTimeout(window._partnerInterval);
                 window._partnerInterval = null;
             }
+            document.getElementById('partner-pinned-nfts').innerHTML = '';
+            document.getElementById('partner-main-nft').style.display = 'none';
         }
 
         // ============================
@@ -2281,9 +2603,6 @@
 
         let currentNFT = null;
 
-        // ============================
-        // ДЕТАЛЬНЫЙ ПРОСМОТР (МАРКЕТ)
-        // ============================
         function openDetail(id) {
             const n = nftCatalog.find(x => x.id === id);
             if (!n) return;
@@ -2334,9 +2653,6 @@
             if (img) img.style.display = 'block';
         }
 
-        // ============================
-        // ПОКУПКА В МАРКЕТЕ
-        // ============================
         async function buyDetailNFT() {
             if (!currentNFT) return;
             if (balance < currentNFT.price) return alert('Недостаточно звёзд!');
@@ -2354,7 +2670,8 @@
                 isLottie: currentNFT.isLottie || false,
                 lottieUrl: currentNFT.lottieUrl || null,
                 number: newNumber,
-                purchasedAt: new Date()
+                purchasedAt: new Date(),
+                pinned: false
             });
 
             await db.collection('users').doc(currentUser.id).update({ balance });
@@ -2364,25 +2681,23 @@
             alert(`🎉 Куплено! ${currentNFT.name} #${newNumber}`);
         }
 
-        // ============================
-        // ДЕТАЛЬНЫЙ ПРОСМОТР ИЗ КОЛЛЕКЦИИ
-        // ============================
         function openCollectionDetail(nftData, ownerName, ownerPhone) {
             const screen = document.getElementById('collection-detail-screen');
             screen.classList.add('open');
-            
+
             document.getElementById('collection-detail-name').innerText = nftData.name;
             document.getElementById('collection-detail-title').innerText = nftData.name;
             document.getElementById('collection-detail-number').innerText = '#' + (nftData.number || '?');
             document.getElementById('collection-detail-price').innerText = nftData.price.toLocaleString();
-            
+
             const date = nftData.purchasedAt ? new Date(nftData.purchasedAt.toDate()).toLocaleDateString('ru-RU') : 'Неизвестно';
             document.getElementById('collection-detail-date').innerText = 'Куплено: ' + date;
-            
+
             document.getElementById('collection-detail-id').innerText = '';
-            
+
             if (ownerName) {
-                document.getElementById('collection-detail-owner').innerText = '👤 Владелец: ' + ownerName + ' (' + (ownerPhone || '---') + ')';
+                document.getElementById('collection-detail-owner').innerText = '👤 Владелец: ' + ownerName + ' (' + (ownerPhone ||
+                    '---') + ')';
                 document.getElementById('collection-detail-owner').style.display = 'block';
             } else {
                 document.getElementById('collection-detail-owner').style.display = 'none';
@@ -2390,7 +2705,7 @@
 
             const imgArea = document.getElementById('collection-detail-img-area');
             const img = document.getElementById('collection-detail-img');
-            
+
             const oldPlayers = imgArea.querySelectorAll('lottie-player');
             oldPlayers.forEach(p => {
                 const index = activeLottiePlayers.indexOf(p);
@@ -2416,7 +2731,7 @@
         function closeCollectionDetail() {
             const screen = document.getElementById('collection-detail-screen');
             screen.classList.remove('open');
-            
+
             const imgArea = document.getElementById('collection-detail-img-area');
             const players = imgArea.querySelectorAll('lottie-player');
             players.forEach(p => {
@@ -2427,7 +2742,7 @@
                 } catch (e) {}
                 p.remove();
             });
-            
+
             const img = document.getElementById('collection-detail-img');
             img.style.display = 'block';
             img.src = '';
@@ -2439,13 +2754,13 @@
         function startRotation() {
             stopRotation();
             if (!animationItems.length) return;
-            
+
             const shuffled = [...animationItems];
             for (let i = shuffled.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
-            
+
             function playNextPair() {
                 const container = document.getElementById('my-collection');
                 const players = container.querySelectorAll('lottie-player');
@@ -2454,14 +2769,14 @@
                         if (p.stop) p.stop();
                     } catch (e) {}
                 });
-                
+
                 const available = shuffled.filter(item => !watchedItems.has(item.id));
-                
+
                 if (available.length === 0) {
                     stopRotation();
                     return;
                 }
-                
+
                 const pair = [];
                 for (let i = 0; i < 2 && pair.length < available.length; i++) {
                     const randomIndex = Math.floor(Math.random() * available.length);
@@ -2469,10 +2784,10 @@
                     pair.push(selected);
                     watchedItems.add(selected.id);
                 }
-                
+
                 pair.forEach(item => {
                     const containerElement = item.element;
-                    
+
                     const oldPlayers = containerElement.querySelectorAll('lottie-player');
                     oldPlayers.forEach(p => {
                         try {
@@ -2480,7 +2795,7 @@
                         } catch (e) {}
                         p.remove();
                     });
-                    
+
                     const player = document.createElement('lottie-player');
                     player.setAttribute('src', item.lottieUrl);
                     player.setAttribute('autoplay', '');
@@ -2493,25 +2808,25 @@
                     player.style.top = '0';
                     player.style.left = '0';
                     player.style.zIndex = '5';
-                    
+
                     setTimeout(() => {
                         try {
                             if (player.stop) player.stop();
                         } catch (e) {}
                     }, 3100);
-                    
+
                     player.addEventListener('complete', function() {
                         try {
                             this.stop();
                         } catch (e) {}
                     });
-                    
+
                     containerElement.appendChild(player);
                 });
-                
+
                 rotationInterval = setTimeout(playNextPair, 3500);
             }
-            
+
             setTimeout(playNextPair, 300);
         }
 
@@ -2526,11 +2841,15 @@
         // COLLECTION
         // ============================
         async function renderCollection() {
+            if (isLoadingCollection) return;
+            isLoadingCollection = true;
+
             const container = document.getElementById('my-collection');
             container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Загрузка...</div>';
 
             if (!currentUser) {
                 container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Войдите чтобы видеть коллекцию</div>';
+                isLoadingCollection = false;
                 return;
             }
 
@@ -2539,67 +2858,101 @@
             animationItems = [];
             watchedItems = new Set();
 
-            const snap = await db.collection('users').doc(currentUser.id).collection('inventory')
-                .orderBy('number', 'asc')
-                .get();
+            try {
+                const snap = await db.collection('users').doc(currentUser.id).collection('inventory')
+                    .orderBy('number', 'asc')
+                    .get();
 
-            container.innerHTML = '';
+                container.innerHTML = '';
 
-            if (snap.empty) {
-                container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Коллекция пуста</div>';
-                return;
-            }
-
-            snap.forEach(doc => {
-                const data = doc.data();
-                const item = document.createElement('div');
-                item.className = 'collected-item';
-                item.style.backgroundColor = '#1a1a1a';
-                item.style.position = 'relative';
-                item.style.overflow = 'hidden';
-                
-                item.onclick = () => openCollectionDetail(data);
-
-                const numberBadge = document.createElement('div');
-                numberBadge.className = 'collected-number';
-                numberBadge.innerText = '#' + (data.number || '?');
-                item.appendChild(numberBadge);
-
-                const img = document.createElement('img');
-                img.src = data.img || '';
-                img.alt = data.name;
-                img.style.position = 'absolute';
-                img.style.top = '0';
-                img.style.left = '0';
-                img.style.width = '100%';
-                img.style.height = '100%';
-                img.style.objectFit = 'cover';
-                img.style.zIndex = '1';
-                item.appendChild(img);
-
-                if (data.isLottie && data.lottieUrl) {
-                    const itemId = data.nftId + '_' + data.number;
-                    
-                    animationItems.push({
-                        element: item,
-                        lottieUrl: data.lottieUrl,
-                        id: itemId
-                    });
+                if (snap.empty) {
+                    container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Коллекция пуста</div>';
+                    isLoadingCollection = false;
+                    return;
                 }
-                container.appendChild(item);
-            });
 
-            if (animationItems.length > 0) {
-                startRotation();
+                const nfts = [];
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    nfts.push({ ...data, docId: doc.id });
+                });
+
+                nfts.sort((a, b) => {
+                    if (a.pinned && !b.pinned) return -1;
+                    if (!a.pinned && b.pinned) return 1;
+                    return (a.number || 0) - (b.number || 0);
+                });
+
+                nfts.forEach(data => {
+                    const item = document.createElement('div');
+                    item.className = 'collected-item';
+                    if (data.pinned) item.classList.add('pinned-item');
+                    item.style.backgroundColor = '#1a1a1a';
+                    item.style.position = 'relative';
+                    item.style.overflow = 'hidden';
+
+                    item.onclick = () => openCollectionDetail(data);
+
+                    const numberBadge = document.createElement('div');
+                    numberBadge.className = 'collected-number';
+                    numberBadge.innerText = '#' + (data.number || '?');
+                    item.appendChild(numberBadge);
+
+                    const img = document.createElement('img');
+                    img.src = data.img || '';
+                    img.alt = data.name;
+                    img.style.position = 'absolute';
+                    img.style.top = '0';
+                    img.style.left = '0';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.zIndex = '1';
+                    item.appendChild(img);
+
+                    if (data.pinned) {
+                        const pinIndicator = document.createElement('div');
+                        pinIndicator.className = 'pin-indicator';
+                        pinIndicator.textContent = '📌';
+                        item.appendChild(pinIndicator);
+                    }
+
+                    if (data.isLottie && data.lottieUrl) {
+                        const itemId = data.nftId + '_' + data.number;
+                        animationItems.push({
+                            element: item,
+                            lottieUrl: data.lottieUrl,
+                            id: itemId
+                        });
+                    }
+                    container.appendChild(item);
+
+                    item.addEventListener('contextmenu', function(e) {
+                        e.preventDefault();
+                        showNFTPinMenu(this, data.docId, data);
+                    });
+                });
+
+                if (animationItems.length > 0) {
+                    startRotation();
+                }
+
+                renderPinnedNFTs();
+
+            } catch (e) {
+                console.error('Ошибка загрузки коллекции:', e);
+                container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Ошибка загрузки</div>';
             }
+
+            isLoadingCollection = false;
         }
 
         // ============================
-        // SELL PAGE - ПРОДАЖА NFT
+        // SELL PAGE
         // ============================
         async function renderSellPage() {
             const container = document.getElementById('sell-container');
-            
+
             if (!currentUser) {
                 container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Войдите чтобы продавать NFT</div>';
                 return;
@@ -2616,12 +2969,12 @@
                 const chatsSnap = await db.collection('chats')
                     .where('participants', 'array-contains', currentUser.phone)
                     .get();
-                
+
                 for (const chatDoc of chatsSnap.docs) {
                     const msgsSnap = await chatDoc.ref.collection('messages')
                         .where('isSellOffer', '==', true)
                         .get();
-                    
+
                     msgsSnap.forEach(msgDoc => {
                         const data = msgDoc.data();
                         if (data.nftData) {
@@ -2650,11 +3003,10 @@
                     title.className = 'sell-section-title';
                     title.innerText = '📌 Мои NFT в продаже';
                     container.appendChild(title);
-                    
+
                     snap.forEach(doc => {
                         const data = doc.data();
                         if (!data.forSale) return;
-                        
                         const div = createSellItem(doc.id, data);
                         container.appendChild(div);
                     });
@@ -2673,11 +3025,10 @@
                     title.className = 'sell-section-title';
                     title.innerText = '📦 Доступные для продажи';
                     container.appendChild(title);
-                    
+
                     snap.forEach(doc => {
                         const data = doc.data();
                         if (data.forSale) return;
-                        
                         const div = createSellItem(doc.id, data);
                         container.appendChild(div);
                     });
@@ -2689,17 +3040,17 @@
                     title.className = 'sell-section-title';
                     title.innerText = '📩 Входящие предложения';
                     container.appendChild(title);
-                    
+
                     for (const offer of incomingOffers) {
                         const div = document.createElement('div');
                         div.className = 'sell-nft-item';
                         div.style.borderColor = '#ffd700';
-                        
+
                         const img = document.createElement('img');
                         img.className = 'sell-nft-img';
                         img.src = offer.nftData.img || '';
                         img.alt = offer.nftData.name;
-                        
+
                         const infoDiv = document.createElement('div');
                         infoDiv.className = 'sell-nft-info';
                         infoDiv.innerHTML = `
@@ -2709,14 +3060,14 @@
                             <div class="sell-offer-from">От: ${offer.sender === currentUser.phone ? 'Вы' : offer.sender}</div>
                             <div class="sell-status sell-status-pending">⏳ Ожидает ответа</div>
                         `;
-                        
+
                         const actionsDiv = document.createElement('div');
                         actionsDiv.className = 'sell-nft-actions';
                         actionsDiv.innerHTML = `
                             <button class="btn-accept-offer" onclick="acceptSellFromOffer('${offer.messageId}', '${offer.chatId}')">Принять</button>
                             <button class="btn-reject-offer" onclick="rejectSellOffer('${offer.messageId}', '${offer.chatId}')">Отклонить</button>
                         `;
-                        
+
                         div.appendChild(img);
                         div.appendChild(infoDiv);
                         div.appendChild(actionsDiv);
@@ -2730,16 +3081,16 @@
                     title.className = 'sell-section-title';
                     title.innerText = '📤 Мои предложения';
                     container.appendChild(title);
-                    
+
                     for (const offer of outgoingOffers) {
                         const div = document.createElement('div');
                         div.className = 'sell-nft-item';
-                        
+
                         const img = document.createElement('img');
                         img.className = 'sell-nft-img';
                         img.src = offer.nftData.img || '';
                         img.alt = offer.nftData.name;
-                        
+
                         const infoDiv = document.createElement('div');
                         infoDiv.className = 'sell-nft-info';
                         infoDiv.innerHTML = `
@@ -2749,13 +3100,13 @@
                             <div class="sell-offer-from">Кому: ${offer.sellToName || offer.sellTo || 'Пользователь'}</div>
                             <div class="sell-status sell-status-pending">⏳ Ожидает ответа</div>
                         `;
-                        
+
                         const actionsDiv = document.createElement('div');
                         actionsDiv.className = 'sell-nft-actions';
                         actionsDiv.innerHTML = `
                             <button class="btn-reject-offer" onclick="cancelSellOffer('${offer.messageId}', '${offer.chatId}')">Отменить</button>
                         `;
-                        
+
                         div.appendChild(img);
                         div.appendChild(infoDiv);
                         div.appendChild(actionsDiv);
@@ -2769,20 +3120,21 @@
                     title.className = 'sell-section-title';
                     title.innerText = '📋 История предложений';
                     container.appendChild(title);
-                    
+
                     for (const offer of completedOffers) {
                         const div = document.createElement('div');
                         div.className = 'sell-nft-item';
                         div.style.opacity = '0.7';
-                        
+
                         const img = document.createElement('img');
                         img.className = 'sell-nft-img';
                         img.src = offer.nftData.img || '';
                         img.alt = offer.nftData.name;
-                        
+
                         const statusText = offer.sellStatus === 'accepted' ? '✅ Принято' : '❌ Отклонено';
-                        const statusClass = offer.sellStatus === 'accepted' ? 'sell-status-accepted' : 'sell-status-rejected';
-                        
+                        const statusClass = offer.sellStatus === 'accepted' ? 'sell-status-accepted' :
+                            'sell-status-rejected';
+
                         const infoDiv = document.createElement('div');
                         infoDiv.className = 'sell-nft-info';
                         infoDiv.innerHTML = `
@@ -2792,7 +3144,7 @@
                             <div class="sell-offer-from">${offer.fromMe ? 'Вы → ' + (offer.sellToName || offer.sellTo || '') : 'От ' + (offer.sender || '')}</div>
                             <div class="sell-status ${statusClass}">${statusText}</div>
                         `;
-                        
+
                         div.appendChild(img);
                         div.appendChild(infoDiv);
                         container.appendChild(div);
@@ -2800,7 +3152,8 @@
                 }
 
                 if (container.innerHTML === '') {
-                    container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Нет NFT для продажи и нет предложений</div>';
+                    container.innerHTML =
+                        '<div style="color:#aaa;text-align:center;padding:20px;">Нет NFT для продажи и нет предложений</div>';
                 }
 
             } catch (e) {
@@ -2812,15 +3165,15 @@
         function createSellItem(docId, data) {
             const div = document.createElement('div');
             div.className = 'sell-nft-item';
-            
+
             const img = document.createElement('img');
             img.className = 'sell-nft-img';
             img.src = data.img || '';
             img.alt = data.name;
-            
+
             const infoDiv = document.createElement('div');
             infoDiv.className = 'sell-nft-info';
-            
+
             let statusHtml = '';
             if (data.forSale) {
                 statusHtml = `
@@ -2828,17 +3181,17 @@
                     <div class="sell-offer-from">Покупатель: ${data.sellToName || data.sellTo || '...'}</div>
                 `;
             }
-            
+
             infoDiv.innerHTML = `
                 <div class="sell-nft-name">${data.name}</div>
                 <div class="sell-nft-number">#${data.number || '?'}</div>
                 <div class="sell-nft-price">⭐ ${data.price || 0}</div>
                 ${statusHtml}
             `;
-            
+
             const actionsDiv = document.createElement('div');
             actionsDiv.className = 'sell-nft-actions';
-            
+
             if (data.forSale) {
                 actionsDiv.innerHTML = `
                     <button class="btn-cancel-sell" onclick="cancelSell('${docId}')">Отменить</button>
@@ -2848,7 +3201,7 @@
                     <button class="btn-sell" onclick="openSellModal('${docId}')">Продать</button>
                 `;
             }
-            
+
             div.appendChild(img);
             div.appendChild(infoDiv);
             div.appendChild(actionsDiv);
@@ -2864,26 +3217,26 @@
         async function openSellModal(nftDocId) {
             selectedSellNFTId = nftDocId;
             selectedSellUserData = null;
-            
+
             const doc = await db.collection('users').doc(currentUser.id).collection('inventory').doc(nftDocId).get();
             const data = doc.data();
-            
+
             if (!data) {
                 alert('NFT не найден');
                 return;
             }
-            
+
             sellModalNFT = data;
-            
+
             document.getElementById('modal-nft-img').src = data.img || '';
             document.getElementById('modal-nft-name').innerText = data.name;
             document.getElementById('modal-nft-number').innerText = '#' + (data.number || '?');
-            
+
             document.getElementById('modal-selected-user').style.display = 'none';
             document.getElementById('modal-user-results').innerHTML = '';
             document.getElementById('modal-search-user').value = '';
             document.getElementById('modal-sell-price').value = '';
-            
+
             document.getElementById('sell-modal').classList.add('active');
         }
 
@@ -2897,28 +3250,28 @@
         async function searchUserForSell() {
             const q = document.getElementById('modal-search-user').value.trim();
             const container = document.getElementById('modal-user-results');
-            
+
             if (q.length < 3) {
                 container.innerHTML = '';
                 return;
             }
-            
+
             try {
                 const snap = await db.collection('users').where('phone', '==', q).get();
                 container.innerHTML = '';
-                
+
                 if (snap.empty) {
                     container.innerHTML = '<div style="color:#aaa;font-size:12px;padding:8px;">Пользователь не найден</div>';
                     return;
                 }
-                
+
                 snap.forEach(doc => {
                     const data = doc.data();
                     if (data.phone === currentUser.phone) {
                         container.innerHTML = '<div style="color:#aaa;font-size:12px;padding:8px;">Это вы</div>';
                         return;
                     }
-                    
+
                     const resultDiv = document.createElement('div');
                     resultDiv.className = 'search-result-item';
                     resultDiv.innerHTML = `
@@ -2931,7 +3284,7 @@
                     resultDiv.onclick = () => selectSellUser(data);
                     container.appendChild(resultDiv);
                 });
-                
+
             } catch (e) {
                 console.error('Ошибка поиска:', e);
             }
@@ -2939,7 +3292,7 @@
 
         function selectSellUser(userData) {
             selectedSellUserData = userData;
-            
+
             document.getElementById('modal-selected-user').style.display = 'flex';
             document.getElementById('modal-selected-name').innerText = userData.username || 'Пользователь';
             document.getElementById('modal-selected-phone').innerText = userData.phone || '---';
@@ -2952,20 +3305,20 @@
                 alert('Выберите NFT');
                 return;
             }
-            
+
             if (!selectedSellUserData) {
                 alert('Выберите пользователя');
                 return;
             }
-            
+
             const priceInput = document.getElementById('modal-sell-price');
             const price = parseInt(priceInput.value);
-            
+
             if (!price || price < 1) {
                 alert('Введите корректную цену (минимум 1 звезда)');
                 return;
             }
-            
+
             try {
                 await db.collection('users').doc(currentUser.id).collection('inventory').doc(selectedSellNFTId).update({
                     forSale: true,
@@ -2974,25 +3327,25 @@
                     sellToName: selectedSellUserData.username || 'Пользователь',
                     sellDate: new Date()
                 });
-                
+
                 const chatSnap = await db.collection('chats')
                     .where('participants', '==', [currentUser.phone, selectedSellUserData.phone])
                     .get();
-                
+
                 let chatId;
                 if (chatSnap.empty) {
                     const ref = await db.collection('chats').add({
                         participants: [currentUser.phone, selectedSellUserData.phone],
-                        participantNames: { 
-                            [currentUser.phone]: currentUser.username, 
-                            [selectedSellUserData.phone]: selectedSellUserData.username || 'Пользователь' 
+                        participantNames: {
+                            [currentUser.phone]: currentUser.username,
+                            [selectedSellUserData.phone]: selectedSellUserData.username || 'Пользователь'
                         }
                     });
                     chatId = ref.id;
                 } else {
                     chatId = chatSnap.docs[0].id;
                 }
-                
+
                 await db.collection('chats').doc(chatId).collection('messages').add({
                     sender: currentUser.phone,
                     text: `💰 Предложение о покупке NFT "${sellModalNFT.name}" #${sellModalNFT.number} за ${price} ⭐`,
@@ -3010,13 +3363,13 @@
                     sellTo: selectedSellUserData.phone,
                     sellToName: selectedSellUserData.username || 'Пользователь'
                 });
-                
+
                 alert(`✅ NFT "${sellModalNFT.name}" выставлен на продажу пользователю ${selectedSellUserData.username} за ${price} ⭐`);
-                
+
                 closeSellModal();
                 await renderSellPage();
                 loadChats();
-                
+
             } catch (e) {
                 console.error('Ошибка продажи:', e);
                 alert('Ошибка при выставлении NFT на продажу');
@@ -3025,7 +3378,7 @@
 
         async function cancelSell(nftDocId) {
             if (!confirm('Отменить продажу этого NFT?')) return;
-            
+
             try {
                 await db.collection('users').doc(currentUser.id).collection('inventory').doc(nftDocId).update({
                     forSale: false,
@@ -3034,10 +3387,10 @@
                     sellToName: null,
                     sellDate: null
                 });
-                
+
                 await renderSellPage();
                 alert('Продажа отменена');
-                
+
             } catch (e) {
                 console.error('Ошибка отмены:', e);
                 alert('Ошибка при отмене продажи');
