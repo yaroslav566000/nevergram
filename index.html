@@ -195,6 +195,36 @@
             justify-content: center;
             font-size: 24px;
         }
+        .chat-list-item .chat-info {
+            flex: 1;
+        }
+        .chat-list-item .chat-info .chat-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .chat-list-item .chat-info .chat-name .sell-tag {
+            color: #ffd700;
+            font-size: 11px;
+            font-weight: 400;
+            background: rgba(255, 215, 0, 0.15);
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-left: 6px;
+        }
+        .chat-list-item .chat-info .chat-phone {
+            color: #aaa;
+            font-size: 12px;
+        }
+        .chat-list-item .chat-info .chat-last-msg {
+            color: #888;
+            font-size: 12px;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
         #chat-window {
             position: absolute;
             top: 0;
@@ -243,6 +273,75 @@
             max-width: 100%;
             border-radius: 12px;
             margin-top: 5px;
+        }
+        .msg.sell-offer {
+            background: #1a2a1a;
+            border: 1px solid #ffd700;
+            align-self: center;
+            text-align: center;
+            max-width: 90%;
+        }
+        .msg.sell-offer .sell-offer-title {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .msg.sell-offer .sell-offer-price {
+            color: #ffd700;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .msg.sell-offer .sell-offer-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .msg.sell-offer .sell-offer-buttons button {
+            padding: 6px 20px;
+            border: none;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .msg.sell-offer .sell-offer-buttons .btn-accept {
+            background: #4caf50;
+            color: #fff;
+        }
+        .msg.sell-offer .sell-offer-buttons .btn-accept:hover {
+            background: #388e3c;
+        }
+        .msg.sell-offer .sell-offer-buttons .btn-reject {
+            background: #f44336;
+            color: #fff;
+        }
+        .msg.sell-offer .sell-offer-buttons .btn-reject:hover {
+            background: #c62828;
+        }
+        .msg.sell-offer .sell-offer-status {
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+        .msg.sell-offer .sell-offer-status.accepted {
+            color: #4caf50;
+        }
+        .msg.sell-offer .sell-offer-status.rejected {
+            color: #f44336;
+        }
+        .msg.sell-offer .sell-offer-status.pending {
+            color: #ffd700;
+        }
+        .msg.system {
+            background: #1a1a2a;
+            color: #888;
+            font-size: 13px;
+            align-self: center;
+            max-width: 90%;
+            text-align: center;
+            border-radius: 12px;
+            padding: 6px 14px;
         }
 
         .input-area {
@@ -371,6 +470,28 @@
             flex: 1;
             background: #6ab2e4;
             color: #000;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 0;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-green {
+            flex: 1;
+            background: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 0;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-red {
+            flex: 1;
+            background: #f44336;
+            color: #fff;
             border: none;
             border-radius: 30px;
             padding: 12px 0;
@@ -526,7 +647,6 @@
             left: 0;
             z-index: 5;
         }
-        /* Фоновое изображение для анимированных NFT */
         .collected-item .nft-background {
             position: absolute;
             top: 0;
@@ -624,7 +744,6 @@
             transform: translateZ(0);
         }
 
-        /* Стили для детального просмотра NFT из коллекции */
         #collection-detail-screen {
             position: absolute;
             top: 0;
@@ -693,9 +812,278 @@
             padding-top: 12px;
             border-top: 1px solid #222;
         }
-        /* Скрываем ID */
         .collection-detail-id {
             display: none;
+        }
+
+        /* Стили для вкладки Продажа */
+        .sell-container {
+            padding: 15px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .sell-section-title {
+            color: #aaa;
+            font-size: 13px;
+            margin: 16px 0 8px 0;
+            padding-left: 4px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .sell-nft-item {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid #333;
+        }
+        .sell-nft-item .sell-nft-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .sell-nft-item .sell-nft-info {
+            flex: 1;
+        }
+        .sell-nft-item .sell-nft-info .sell-nft-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .sell-nft-item .sell-nft-info .sell-nft-number {
+            color: #ffd700;
+            font-size: 12px;
+        }
+        .sell-nft-item .sell-nft-info .sell-nft-price {
+            color: #aaa;
+            font-size: 12px;
+        }
+        .sell-nft-item .sell-nft-info .sell-status {
+            font-size: 11px;
+            color: #ffd700;
+            margin-top: 2px;
+        }
+        .sell-nft-item .sell-nft-info .sell-offer-from {
+            font-size: 11px;
+            color: #6ab2e4;
+            margin-top: 2px;
+        }
+        .sell-nft-item .sell-nft-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .sell-nft-item .sell-nft-actions button {
+            padding: 4px 12px;
+            border-radius: 12px;
+            border: none;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-sell {
+            background: #4caf50;
+            color: #fff;
+        }
+        .btn-sell:hover {
+            background: #388e3c;
+        }
+        .btn-cancel-sell {
+            background: #f44336;
+            color: #fff;
+        }
+        .btn-cancel-sell:hover {
+            background: #c62828;
+        }
+        .btn-accept-offer {
+            background: #4caf50;
+            color: #fff;
+        }
+        .btn-accept-offer:hover {
+            background: #388e3c;
+        }
+        .btn-reject-offer {
+            background: #f44336;
+            color: #fff;
+        }
+        .btn-reject-offer:hover {
+            background: #c62828;
+        }
+        .sell-status-pending {
+            color: #ffd700;
+        }
+        .sell-status-accepted {
+            color: #4caf50;
+        }
+        .sell-status-rejected {
+            color: #f44336;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #1f1f1f;
+            border-radius: 20px;
+            padding: 24px;
+            width: 90%;
+            max-width: 360px;
+            border: 1px solid #333;
+        }
+        .modal-content h3 {
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .modal-content input,
+        .modal-content select {
+            width: 100%;
+            padding: 12px;
+            background: #0f0f0f;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .modal-content select option {
+            background: #1f1f1f;
+        }
+        .modal-content .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .modal-content .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .modal-content .modal-buttons .btn-confirm {
+            background: #4caf50;
+            color: #fff;
+        }
+        .modal-content .modal-buttons .btn-cancel {
+            background: #f44336;
+            color: #fff;
+        }
+        .modal-content .selected-user {
+            padding: 8px 12px;
+            background: #0f0f0f;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #333;
+        }
+        .modal-content .selected-user .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .modal-content .selected-user .user-name {
+            font-weight: 500;
+            font-size: 13px;
+        }
+        .modal-content .selected-user .user-phone {
+            color: #aaa;
+            font-size: 11px;
+        }
+        .modal-content .search-user-input {
+            width: 100%;
+            padding: 10px;
+            background: #0f0f0f;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        .modal-content .user-search-results {
+            max-height: 120px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .modal-content .user-search-results .search-result-item {
+            padding: 8px 10px;
+            background: #0f0f0f;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #2a2a2a;
+        }
+        .modal-content .user-search-results .search-result-item:hover {
+            background: #2a2a2a;
+        }
+        .modal-content .user-search-results .search-result-item .result-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .modal-content .user-search-results .search-result-item .result-name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .modal-content .user-search-results .search-result-item .result-phone {
+            font-size: 11px;
+            color: #aaa;
+        }
+        .modal-content .selected-nft-info {
+            padding: 10px;
+            background: #0f0f0f;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #333;
+        }
+        .modal-content .selected-nft-info .nft-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+        .modal-content .selected-nft-info .nft-name {
+            font-weight: 500;
+            font-size: 13px;
+        }
+        .modal-content .selected-nft-info .nft-number {
+            color: #ffd700;
+            font-size: 11px;
         }
     </style>
 </head>
@@ -751,6 +1139,14 @@
                 <div class="nft-list" id="nft-list"></div>
             </div>
 
+            <!-- SELL (Продажа) -->
+            <div id="page-sell" class="page">
+                <div class="header"><h2>Продажа NFT</h2></div>
+                <div class="sell-container" id="sell-container">
+                    <div style="color:#aaa;text-align:center;padding:20px;">Загрузка...</div>
+                </div>
+            </div>
+
             <!-- DETAIL (Маркет) -->
             <div id="detail-screen">
                 <div class="header">
@@ -768,7 +1164,7 @@
                 </div>
             </div>
 
-            <!-- COLLECTION DETAIL (Из коллекции) - ID скрыт -->
+            <!-- COLLECTION DETAIL (Из коллекции) -->
             <div id="collection-detail-screen">
                 <div class="header">
                     <i class="fas fa-arrow-left back-btn" onclick="closeCollectionDetail()"></i>
@@ -783,7 +1179,6 @@
                     <div class="collection-detail-price">⭐ <span id="collection-detail-price">0</span></div>
                     <div class="collection-detail-date" id="collection-detail-date">Куплено: 01.01.2024</div>
                     <div class="collection-detail-owner" id="collection-detail-owner">Владелец: ...</div>
-                    <!-- ID скрыт через CSS display:none -->
                     <div class="collection-detail-id" id="collection-detail-id"></div>
                 </div>
             </div>
@@ -823,6 +1218,7 @@
                 <div class="nav-item active" onclick="switchTab('chats', this)"><i class="fas fa-comments"></i><span>Чаты</span></div>
                 <div class="nav-item" onclick="switchTab('search', this)"><i class="fas fa-search"></i><span>Поиск</span></div>
                 <div class="nav-item" onclick="switchTab('market', this)"><i class="fas fa-store"></i><span>Маркет</span></div>
+                <div class="nav-item" onclick="switchTab('sell', this)"><i class="fas fa-tag"></i><span>Продажа</span></div>
                 <div class="nav-item" onclick="switchTab('profile', this)"><i class="fas fa-user"></i><span>Профиль</span></div>
             </nav>
 
@@ -845,6 +1241,34 @@
 
         </div>
 
+    </div>
+
+    <!-- Modal для продажи -->
+    <div class="modal-overlay" id="sell-modal">
+        <div class="modal-content">
+            <h3>Продажа NFT</h3>
+            <div class="selected-nft-info" id="modal-nft-info">
+                <img class="nft-preview" id="modal-nft-img" src="" alt="">
+                <div>
+                    <div class="nft-name" id="modal-nft-name">NFT</div>
+                    <div class="nft-number" id="modal-nft-number">#123</div>
+                </div>
+            </div>
+            <input class="search-user-input" id="modal-search-user" placeholder="Поиск пользователя по номеру..." oninput="searchUserForSell()">
+            <div class="user-search-results" id="modal-user-results"></div>
+            <div class="selected-user" id="modal-selected-user" style="display:none;">
+                <div class="user-avatar">👤</div>
+                <div>
+                    <div class="user-name" id="modal-selected-name">Имя</div>
+                    <div class="user-phone" id="modal-selected-phone">Телефон</div>
+                </div>
+            </div>
+            <input id="modal-sell-price" type="number" placeholder="Цена в звёздах ⭐" min="1">
+            <div class="modal-buttons">
+                <button class="btn-confirm" onclick="confirmSell()">Продать</button>
+                <button class="btn-cancel" onclick="closeSellModal()">Отмена</button>
+            </div>
+        </div>
     </div>
 
     <!-- Context Menu -->
@@ -903,6 +1327,9 @@
         let rotationInterval = null;
         let animationItems = [];
         let watchedItems = new Set();
+        let sellModalNFT = null;
+        let sellModalUser = null;
+        let sellOffersListener = null;
 
         // ============================
         // ⭐ NFT DATA
@@ -912,44 +1339,44 @@
                 id: 'nft1',
                 name: 'Синий Пепе',
                 price: 500,
-                img: 'ССЫЛКА_НА_КАРТИНКУ_1',
+                img: 'https://i.getgems.io/4GsJBBY_lnkL6gS1bj-iy-LkCesk0idWThI-mgger2w/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvYjE5ZjI3YTA1YTgzMzkzYQ.jpg',
                 isLottie: false
             },
             {
                 id: 'nft2',
                 name: 'Тёмный Пепе',
                 price: 600,
-                img: 'ССЫЛКА_НА_КАРТИНКУ_2',
+                img: 'https://i.getgems.io/Hz9860DzuZHiqGlq8IMIJl2sfWeetRRaZ1mw_1nPfsA/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvNzAxM2E1YzE4MmMzMDAwZg.jpg',
                 isLottie: false
             },
             {
                 id: 'nft3',
                 name: 'Огненный Пепе',
                 price: 700,
-                img: 'ССЫЛКА_НА_КАРТИНКУ_3',
+                img: 'https://i.getgems.io/V_7pZVoj_JKltBw2_g8hr0ggFpuWXfiLbZiyjbrpvvM/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvMTNlMGZhMWY1ZmUzYjFiYw.jpg',
                 isLottie: false
             },
             {
                 id: 'nft4',
                 name: 'Ледяной Пепе',
                 price: 800,
-                img: 'ССЫЛКА_НА_КАРТИНКУ_4',
+                img: 'https://i.getgems.io/54zOgq_vDTOAHisi7zts8QrNtYVYuTsiLKgcLVy1GeI/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUJJMDdQWGV3OTRZUXo3R3dONzJuUE5HRjZodFNUT0prdVU0S3hfYmpUWnYzMlUvMmJmYjhiMzg2OTk2MjM5Ng.jpg',
                 isLottie: false
             },
             {
                 id: 'lowrider_9738',
-                name: 'Low Rider',
+                name: 'Low Rider #9738',
                 price: 20000,
                 img: 'https://i.getgems.io/4GsJBBY_lnkL6gS1bj-iy-LkCesk0idWThI-mgger2w/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvYjE5ZjI3YTA1YTgzMzkzYQ.jpg',
-                lottieUrl: 'lottie/lowrider2.json',
+                lottieUrl: 'lottie/lowrider1.json',
                 isLottie: true
             },
             {
                 id: 'lowrider_20764',
-                name: 'Low Rider',
+                name: 'Low Rider #20764',
                 price: 20000,
                 img: 'https://i.getgems.io/Hz9860DzuZHiqGlq8IMIJl2sfWeetRRaZ1mw_1nPfsA/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvNzAxM2E1YzE4MmMzMDAwZg.jpg',
-                lottieUrl: 'lottie/lowrider1.json',
+                lottieUrl: 'lottie/lowrider2.json',
                 isLottie: true
             },
             {
@@ -978,7 +1405,7 @@
             },
             {
                 id: 'low_rider_8808',
-                name: 'Low Rider',
+                name: 'Low Rider #8808',
                 price: 1000,
                 img: 'https://i.getgems.io/vnamktaD8dh0HiWt13p1NVE8JrIiuo6sGrsEUMsV-Mk/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvNzcyYWNjYTQ5NzBjY2E2ZA.jpg',
                 lottieUrl: 'lottie/lowridermoney.json',
@@ -986,37 +1413,12 @@
             },
             {
                 id: 'pepe_animated',
-                name: 'Plush Pepe (Unical Black)',
+                name: 'Анимированный Пепе',
                 price: 30000000,
                 img: 'https://i.getgems.io/Ms7WU-h18ys6IR2vgnodlddEDOwaDIKoe3JjAsUYSCQ/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUJHLWc2YWhrQVVHV3BlZldieC1EXzlzUThvV2J2eTZwdXVxNzhVMmM0TlVERlMvYTk2YmNjYjgzYjA2ZjAyMA.jpg',
                 lottieUrl: 'lottie/pepe.json',
                 isLottie: true
-            },
-            {
-                id: 'peach_2863',
-                name: 'Previous Peach',
-                price: 25000,
-                img: 'https://i.getgems.io/qumTivy-U9nhrWnNMtf7hq0kNNIzpu429SY1hhBexi8/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUE0aTU4aXVTOURVWVJ0VVo5N3NabzVtbmtiaVlVQnBXWFFPZTNkRVVDY1AxVzgvMTc5NDY3ODI5NTdhNjE5Zg.jpg',
-                lottieUrl: 'lottie/peach_2863.json',
-                isLottie: true
-            },
-            {
-                id: 'peach_1649',
-                name: 'Previous Peach',
-                price: 25000,
-                img: 'https://i.getgems.io/xYZKHO0pveIHznWmsrnOjxADFdpS5P0JaCIAHwGGxNY/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUE0aTU4aXVTOURVWVJ0VVo5N3NabzVtbmtiaVlVQnBXWFFPZTNkRVVDY1AxVzgvYjQwOGYyMGY2ZWY1MDVhNw.jpg',
-                lottieUrl: 'lottie/peach_1649.json',
-                isLottie: true
-            },
-            {
-                id: 'Snoop_539952',
-                name: 'Snoop Dogg',
-                price: 1000,
-                img: 'https://i.getgems.io/wTIZloN7ibEUvKTQHr2oQS7wpyH_IC1G_OecNEX9NPU/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUFvSnc3QnBPY0JEM3k5dm9NdUVRLXFoUzNLNGd0TS02RWVQTHhrems4aVNpZlgvOTg5MGY2NzkzNGY0MmY1NA.jpg',
-                lottieUrl: 'lottie/snoop_539952.json',
-                isLottie: true
             }
-            
         ];
 
         // ============================
@@ -1145,10 +1547,11 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + tab).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            el.classList.add('active');
+            if (el) el.classList.add('active');
 
             if (tab === 'market') renderMarket();
             if (tab === 'profile') renderCollection();
+            if (tab === 'sell') renderSellPage();
         }
 
         function updateBalance() {
@@ -1199,6 +1602,7 @@
             loadChats();
             renderMarket();
             renderCollection();
+            renderSellPage();
             const nav = document.querySelector('.nav-item:first-child');
             switchTab('chats', nav);
         }
@@ -1234,19 +1638,77 @@
             const snap = await db.collection('chats').where('participants', 'array-contains', currentUser.phone).get();
             c.innerHTML = '';
             if (snap.empty) return c.innerHTML = '<div style="padding:20px;color:#aaa;text-align:center;">Нет чатов</div>';
+            
             snap.forEach(d => {
                 const data = d.data();
                 const partner = data.participants.find(p => p !== currentUser.phone);
                 const name = data.participantNames?.[partner] || 'Неизвестно';
+                
+                // Проверяем, есть ли активное предложение о продаже в этом чате
+                let sellTag = '';
+                db.collection('chats').doc(d.id).collection('messages')
+                    .where('isSellOffer', '==', true)
+                    .where('sellStatus', '==', 'pending')
+                    .get()
+                    .then(snap => {
+                        // Не ждем, просто обновляем при рендере
+                    });
+                
                 c.innerHTML += `
                         <div class="chat-list-item" onclick="openChat('${d.id}','${name}','${partner}')">
                             <div class="avatar">👤</div>
-                            <div><div style="font-weight:bold;">${name}</div><div style="color:#aaa;font-size:12px;">${partner}</div></div>
+                            <div class="chat-info">
+                                <div class="chat-name">
+                                    ${escapeHtml(name)}
+                                    <span class="sell-tag" id="sell-tag-${d.id}" style="display:none;">💎 покупка NFT</span>
+                                </div>
+                                <div class="chat-phone">${partner}</div>
+                                <div class="chat-last-msg" id="last-msg-${d.id}">...</div>
+                            </div>
                         </div>
                     `;
+                    
+                // Добавляем слушатель последнего сообщения
+                db.collection('chats').doc(d.id).collection('messages')
+                    .orderBy('timestamp', 'desc')
+                    .limit(1)
+                    .onSnapshot(snap => {
+                        if (!snap.empty) {
+                            const msg = snap.docs[0].data();
+                            const lastMsgEl = document.getElementById('last-msg-' + d.id);
+                            if (lastMsgEl) {
+                                if (msg.isSellOffer && msg.sellStatus === 'pending') {
+                                    lastMsgEl.textContent = '💎 Предложение о покупке NFT';
+                                    const tagEl = document.getElementById('sell-tag-' + d.id);
+                                    if (tagEl) tagEl.style.display = 'inline';
+                                } else if (msg.isSellOffer && msg.sellStatus === 'accepted') {
+                                    lastMsgEl.textContent = '✅ NFT куплен';
+                                    const tagEl = document.getElementById('sell-tag-' + d.id);
+                                    if (tagEl) tagEl.style.display = 'none';
+                                } else if (msg.isSellOffer && msg.sellStatus === 'rejected') {
+                                    lastMsgEl.textContent = '❌ Предложение отклонено';
+                                    const tagEl = document.getElementById('sell-tag-' + d.id);
+                                    if (tagEl) tagEl.style.display = 'none';
+                                } else if (msg.text) {
+                                    lastMsgEl.textContent = msg.text.length > 40 ? msg.text.slice(0, 40) + '...' : msg.text;
+                                    const tagEl = document.getElementById('sell-tag-' + d.id);
+                                    if (tagEl) tagEl.style.display = 'none';
+                                }
+                            }
+                        }
+                    });
             });
         }
 
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ============================
+        // CHAT WINDOW
+        // ============================
         async function startChat(pid, pname, pphone) {
             const snap = await db.collection('chats').where('participants', '==', [currentUser.phone, pphone]).get();
             let id;
@@ -1267,7 +1729,20 @@
             currentChatId = id;
             currentPartnerId = phone;
             currentPartnerUsername = name;
-            document.getElementById('chat-partner-name').innerText = name;
+            
+            // Проверяем, есть ли активное предложение о продаже
+            db.collection('chats').doc(id).collection('messages')
+                .where('isSellOffer', '==', true)
+                .where('sellStatus', '==', 'pending')
+                .get()
+                .then(snap => {
+                    if (!snap.empty) {
+                        document.getElementById('chat-partner-name').innerHTML = `${escapeHtml(name)} <span style="color:#ffd700;font-size:12px;font-weight:400;">(покупка NFT)</span>`;
+                    } else {
+                        document.getElementById('chat-partner-name').innerHTML = escapeHtml(name);
+                    }
+                });
+            
             document.getElementById('chat-window').classList.add('open');
             const c = document.getElementById('messages-container');
             c.innerHTML = '';
@@ -1277,37 +1752,80 @@
                     c.innerHTML = '';
                     snap.forEach(doc => {
                         const data = doc.data();
-                        const div = document.createElement('div');
-                        div.className = `msg ${data.sender === currentUser.phone ? 'sent' : 'received'}`;
-                        if (data.pinned) div.classList.add('pinned');
-                        div.dataset.id = doc.id;
+                        let div = document.createElement('div');
+                        
+                        if (data.isSystem) {
+                            div.className = 'msg system';
+                            div.textContent = data.text || '';
+                        } else {
+                            div.className = `msg ${data.sender === currentUser.phone ? 'sent' : 'received'}`;
+                            if (data.pinned) div.classList.add('pinned');
+                            div.dataset.id = doc.id;
 
-                        let content = '';
-                        if (data.text) content += `<div>${escapeHtml(data.text)}</div>`;
-                        if (data.imageUrl) content += `<img src="${data.imageUrl}" alt="Image">`;
-                        if (data.reactions) {
-                            content += `<div style="margin-top:5px;font-size:12px;">`;
-                            for (const [emoji, count] of Object.entries(data.reactions)) {
-                                content +=
-                                    `<span style="background:#2a2a2a;padding:2px 6px;border-radius:10px;margin-right:3px;">${emoji} ${count}</span>`;
+                            let content = '';
+                            if (data.text) content += `<div>${escapeHtml(data.text)}</div>`;
+                            if (data.imageUrl) content += `<img src="${data.imageUrl}" alt="Image">`;
+                            if (data.reactions) {
+                                content += `<div style="margin-top:5px;font-size:12px;">`;
+                                for (const [emoji, count] of Object.entries(data.reactions)) {
+                                    content +=
+                                        `<span style="background:#2a2a2a;padding:2px 6px;border-radius:10px;margin-right:3px;">${emoji} ${count}</span>`;
+                                }
+                                content += `</div>`;
                             }
-                            content += `</div>`;
+                            
+                            // Проверяем, является ли сообщение предложением о продаже
+                            if (data.isSellOffer && data.nftData) {
+                                div.classList.add('sell-offer');
+                                const nft = data.nftData;
+                                const statusText = data.sellStatus === 'accepted' ? '✅ ПРИНЯТО' : 
+                                                  data.sellStatus === 'rejected' ? '❌ ОТКЛОНЕНО' : '⏳ Ожидает ответа';
+                                const statusClass = data.sellStatus === 'accepted' ? 'accepted' : 
+                                                   data.sellStatus === 'rejected' ? 'rejected' : 'pending';
+                                
+                                let buttonsHtml = '';
+                                if (!data.sellStatus || data.sellStatus === 'pending') {
+                                    if (data.sender !== currentUser.phone) {
+                                        buttonsHtml = `
+                                            <div class="sell-offer-buttons">
+                                                <button class="btn-accept" onclick="acceptSellOffer('${doc.id}', '${id}')">Купить</button>
+                                                <button class="btn-reject" onclick="rejectSellOffer('${doc.id}', '${id}')">Отклонить</button>
+                                            </div>
+                                        `;
+                                    } else {
+                                        buttonsHtml = `
+                                            <div class="sell-offer-buttons">
+                                                <button class="btn-reject" onclick="cancelSellOffer('${doc.id}', '${id}')">Отменить предложение</button>
+                                            </div>
+                                        `;
+                                    }
+                                }
+                                
+                                content = `
+                                    <div class="sell-offer-title">💰 ПРЕДЛОЖЕНИЕ О ПОКУПКЕ</div>
+                                    <div style="margin:6px 0;">
+                                        <img src="${nft.img || ''}" style="width:60px;height:60px;border-radius:10px;object-fit:cover;">
+                                    </div>
+                                    <div style="font-weight:600;">${escapeHtml(nft.name)}</div>
+                                    <div style="color:#ffd700;font-size:13px;">#${nft.number || '?'}</div>
+                                    <div class="sell-offer-price">⭐ ${nft.price || 0}</div>
+                                    <div class="sell-offer-status ${statusClass}">${statusText}</div>
+                                    ${buttonsHtml}
+                                `;
+                            }
+                            div.innerHTML = content;
                         }
-                        div.innerHTML = content;
+                        
                         div.addEventListener('contextmenu', function(e) {
-                            e.preventDefault();
-                            showContextMenu(e.clientX, e.clientY, doc.id, this);
+                            if (!div.classList.contains('system')) {
+                                e.preventDefault();
+                                showContextMenu(e.clientX, e.clientY, doc.id, this);
+                            }
                         });
                         c.appendChild(div);
                     });
                     c.scrollTop = c.scrollHeight;
                 });
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
         }
 
         function closeChat() {
@@ -1409,6 +1927,162 @@
         }
 
         // ============================
+        // ОБРАБОТКА ПРЕДЛОЖЕНИЙ О ПОКУПКЕ
+        // ============================
+        async function acceptSellOffer(messageId, chatId) {
+            if (!confirm('Купить этот NFT за указанную цену?')) return;
+            
+            try {
+                const msgDoc = await db.collection('chats').doc(chatId).collection('messages').doc(messageId).get();
+                const data = msgDoc.data();
+                
+                if (!data.nftData) {
+                    alert('Ошибка: данные NFT не найдены');
+                    return;
+                }
+                
+                const price = data.nftData.price;
+                const nftDocId = data.nftData.nftDocId;
+                
+                // Проверяем баланс покупателя
+                const userDoc = await db.collection('users').doc(currentUser.id).get();
+                const userBalance = userDoc.data().balance || 0;
+                
+                if (userBalance < price) {
+                    alert(`Недостаточно звёзд! Нужно: ${price}, у вас: ${userBalance}`);
+                    return;
+                }
+                
+                // Получаем данные продавца
+                const sellerPhone = data.sender;
+                const sellerSnap = await db.collection('users').where('phone', '==', sellerPhone).get();
+                if (sellerSnap.empty) {
+                    alert('Продавец не найден');
+                    return;
+                }
+                const sellerData = sellerSnap.docs[0].data();
+                const sellerId = sellerSnap.docs[0].id;
+                
+                // Получаем NFT продавца
+                const nftQuery = await db.collection('users').doc(sellerId).collection('inventory')
+                    .where('nftId', '==', data.nftData.nftId)
+                    .where('number', '==', data.nftData.number)
+                    .get();
+                
+                if (nftQuery.empty) {
+                    alert('NFT уже продан или не найден');
+                    return;
+                }
+                
+                const nftDoc = nftQuery.docs[0];
+                const nftData = nftDoc.data();
+                
+                // Списываем звёзды у покупателя
+                await db.collection('users').doc(currentUser.id).update({
+                    balance: userBalance - price
+                });
+                
+                // Добавляем звёзды продавцу
+                await db.collection('users').doc(sellerId).update({
+                    balance: (sellerData.balance || 0) + price
+                });
+                
+                // Создаём NFT для покупателя
+                await db.collection('users').doc(currentUser.id).collection('inventory').add({
+                    nftId: nftData.nftId,
+                    name: nftData.name,
+                    price: nftData.price,
+                    img: nftData.img || '',
+                    isLottie: nftData.isLottie || false,
+                    lottieUrl: nftData.lottieUrl || null,
+                    number: nftData.number,
+                    purchasedAt: new Date(),
+                    fromUser: sellerPhone,
+                    fromUsername: sellerData.username || 'Пользователь'
+                });
+                
+                // Удаляем NFT у продавца
+                await db.collection('users').doc(sellerId).collection('inventory').doc(nftDoc.id).delete();
+                
+                // Обновляем статус сообщения
+                await db.collection('chats').doc(chatId).collection('messages').doc(messageId).update({
+                    sellStatus: 'accepted'
+                });
+                
+                // Обновляем баланс в интерфейсе
+                balance = userBalance - price;
+                updateBalance();
+                
+                // Отправляем уведомление
+                await db.collection('chats').doc(chatId).collection('messages').add({
+                    sender: 'system',
+                    text: `✅ ${currentUser.username} купил NFT "${nftData.name}" #${nftData.number} за ${price} ⭐`,
+                    timestamp: new Date(),
+                    isSystem: true
+                });
+                
+                alert(`✅ NFT "${nftData.name}" #${nftData.number} успешно куплен!`);
+                
+                // Обновляем страницы
+                await renderCollection();
+                await renderSellPage();
+                loadChats();
+                
+            } catch (e) {
+                console.error('Ошибка при покупке:', e);
+                alert('Ошибка при покупке NFT');
+            }
+        }
+
+        async function rejectSellOffer(messageId, chatId) {
+            if (!confirm('Отклонить предложение о покупке?')) return;
+            
+            try {
+                await db.collection('chats').doc(chatId).collection('messages').doc(messageId).update({
+                    sellStatus: 'rejected'
+                });
+                
+                alert('❌ Предложение отклонено');
+                loadChats();
+            } catch (e) {
+                console.error('Ошибка:', e);
+                alert('Ошибка при отклонении');
+            }
+        }
+
+        async function cancelSellOffer(messageId, chatId) {
+            if (!confirm('Отменить своё предложение о продаже?')) return;
+            
+            try {
+                const msgDoc = await db.collection('chats').doc(chatId).collection('messages').doc(messageId).get();
+                const data = msgDoc.data();
+                
+                if (data.nftData && data.nftData.nftDocId) {
+                    // Снимаем пометку о продаже с NFT
+                    await db.collection('users').doc(currentUser.id).collection('inventory').doc(data.nftData.nftDocId).update({
+                        forSale: false,
+                        sellPrice: null,
+                        sellTo: null,
+                        sellToName: null,
+                        sellDate: null
+                    });
+                }
+                
+                await db.collection('chats').doc(chatId).collection('messages').doc(messageId).update({
+                    sellStatus: 'rejected'
+                });
+                
+                await renderSellPage();
+                loadChats();
+                alert('❌ Предложение отменено');
+                
+            } catch (e) {
+                console.error('Ошибка:', e);
+                alert('Ошибка при отмене');
+            }
+        }
+
+        // ============================
         // PARTNER PROFILE
         // ============================
         async function openPartnerProfile() {
@@ -1451,6 +2125,18 @@
                 numberBadge.innerText = '#' + (item.number || '?');
                 itemDiv.appendChild(numberBadge);
 
+                const img = document.createElement('img');
+                img.src = item.img || '';
+                img.alt = item.name;
+                img.style.position = 'absolute';
+                img.style.top = '0';
+                img.style.left = '0';
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.zIndex = '1';
+                itemDiv.appendChild(img);
+
                 if (item.isLottie && item.lottieUrl) {
                     const itemData = {
                         element: itemDiv,
@@ -1458,26 +2144,6 @@
                         id: item.nftId + '_' + item.number
                     };
                     partnerAnimationItems.push(itemData);
-                    
-                    const bgImg = document.createElement('img');
-                    bgImg.src = item.img || '';
-                    bgImg.alt = item.name;
-                    bgImg.className = 'nft-background';
-                    bgImg.style.position = 'absolute';
-                    bgImg.style.top = '0';
-                    bgImg.style.left = '0';
-                    bgImg.style.width = '100%';
-                    bgImg.style.height = '100%';
-                    bgImg.style.objectFit = 'cover';
-                    bgImg.style.zIndex = '1';
-                    itemDiv.appendChild(bgImg);
-                } else if (item.img) {
-                    const img = document.createElement('img');
-                    img.src = item.img;
-                    img.alt = item.name;
-                    img.style.position = 'relative';
-                    img.style.zIndex = '1';
-                    itemDiv.appendChild(img);
                 }
                 container.appendChild(itemDiv);
             });
@@ -1487,7 +2153,6 @@
             }
         }
 
-        // Ротация для партнера
         function startPartnerRotation(container, items, watchedSet) {
             const shuffled = [...items];
             for (let i = shuffled.length - 1; i > 0; i--) {
@@ -1658,7 +2323,7 @@
         }
 
         // ============================
-        // ПОКУПКА
+        // ПОКУПКА В МАРКЕТЕ
         // ============================
         async function buyDetailNFT() {
             if (!currentNFT) return;
@@ -1682,6 +2347,7 @@
 
             await db.collection('users').doc(currentUser.id).update({ balance });
             await renderCollection();
+            await renderSellPage();
             closeDetail();
             alert(`🎉 Куплено! ${currentNFT.name} #${newNumber}`);
         }
@@ -1756,7 +2422,7 @@
         }
 
         // ============================
-        // РОТАЦИЯ АНИМАЦИЙ - БЕЗ НАДПИСЕЙ
+        // РОТАЦИЯ АНИМАЦИЙ
         // ============================
         function startRotation() {
             stopRotation();
@@ -1887,6 +2553,18 @@
                 numberBadge.innerText = '#' + (data.number || '?');
                 item.appendChild(numberBadge);
 
+                const img = document.createElement('img');
+                img.src = data.img || '';
+                img.alt = data.name;
+                img.style.position = 'absolute';
+                img.style.top = '0';
+                img.style.left = '0';
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.zIndex = '1';
+                item.appendChild(img);
+
                 if (data.isLottie && data.lottieUrl) {
                     const itemId = data.nftId + '_' + data.number;
                     
@@ -1895,26 +2573,6 @@
                         lottieUrl: data.lottieUrl,
                         id: itemId
                     });
-                    
-                    const bgImg = document.createElement('img');
-                    bgImg.src = data.img || '';
-                    bgImg.alt = data.name;
-                    bgImg.className = 'nft-background';
-                    bgImg.style.position = 'absolute';
-                    bgImg.style.top = '0';
-                    bgImg.style.left = '0';
-                    bgImg.style.width = '100%';
-                    bgImg.style.height = '100%';
-                    bgImg.style.objectFit = 'cover';
-                    bgImg.style.zIndex = '1';
-                    item.appendChild(bgImg);
-                } else if (data.img) {
-                    const img = document.createElement('img');
-                    img.src = data.img;
-                    img.alt = data.name;
-                    img.style.position = 'relative';
-                    img.style.zIndex = '1';
-                    item.appendChild(img);
                 }
                 container.appendChild(item);
             });
@@ -1922,6 +2580,462 @@
             if (animationItems.length > 0) {
                 startRotation();
             }
+        }
+
+        // ============================
+        // SELL PAGE - ПРОДАЖА NFT
+        // ============================
+        async function renderSellPage() {
+            const container = document.getElementById('sell-container');
+            
+            if (!currentUser) {
+                container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Войдите чтобы продавать NFT</div>';
+                return;
+            }
+
+            container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Загрузка...</div>';
+
+            try {
+                const snap = await db.collection('users').doc(currentUser.id).collection('inventory')
+                    .orderBy('number', 'asc')
+                    .get();
+
+                const offers = [];
+                const chatsSnap = await db.collection('chats')
+                    .where('participants', 'array-contains', currentUser.phone)
+                    .get();
+                
+                for (const chatDoc of chatsSnap.docs) {
+                    const msgsSnap = await chatDoc.ref.collection('messages')
+                        .where('isSellOffer', '==', true)
+                        .get();
+                    
+                    msgsSnap.forEach(msgDoc => {
+                        const data = msgDoc.data();
+                        if (data.nftData) {
+                            offers.push({
+                                ...data,
+                                chatId: chatDoc.id,
+                                messageId: msgDoc.id,
+                                fromMe: data.sender === currentUser.phone
+                            });
+                        }
+                    });
+                }
+
+                container.innerHTML = '';
+
+                let hasMyNFTs = false;
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    if (data.forSale) {
+                        hasMyNFTs = true;
+                    }
+                });
+
+                if (hasMyNFTs) {
+                    const title = document.createElement('div');
+                    title.className = 'sell-section-title';
+                    title.innerText = '📌 Мои NFT в продаже';
+                    container.appendChild(title);
+                    
+                    snap.forEach(doc => {
+                        const data = doc.data();
+                        if (!data.forSale) return;
+                        
+                        const div = createSellItem(doc.id, data);
+                        container.appendChild(div);
+                    });
+                }
+
+                let hasAvailableNFTs = false;
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    if (!data.forSale) {
+                        hasAvailableNFTs = true;
+                    }
+                });
+
+                if (hasAvailableNFTs) {
+                    const title = document.createElement('div');
+                    title.className = 'sell-section-title';
+                    title.innerText = '📦 Доступные для продажи';
+                    container.appendChild(title);
+                    
+                    snap.forEach(doc => {
+                        const data = doc.data();
+                        if (data.forSale) return;
+                        
+                        const div = createSellItem(doc.id, data);
+                        container.appendChild(div);
+                    });
+                }
+
+                const incomingOffers = offers.filter(o => !o.fromMe && (!o.sellStatus || o.sellStatus === 'pending'));
+                if (incomingOffers.length > 0) {
+                    const title = document.createElement('div');
+                    title.className = 'sell-section-title';
+                    title.innerText = '📩 Входящие предложения';
+                    container.appendChild(title);
+                    
+                    for (const offer of incomingOffers) {
+                        const div = document.createElement('div');
+                        div.className = 'sell-nft-item';
+                        div.style.borderColor = '#ffd700';
+                        
+                        const img = document.createElement('img');
+                        img.className = 'sell-nft-img';
+                        img.src = offer.nftData.img || '';
+                        img.alt = offer.nftData.name;
+                        
+                        const infoDiv = document.createElement('div');
+                        infoDiv.className = 'sell-nft-info';
+                        infoDiv.innerHTML = `
+                            <div class="sell-nft-name">${offer.nftData.name}</div>
+                            <div class="sell-nft-number">#${offer.nftData.number || '?'}</div>
+                            <div class="sell-nft-price" style="color:#ffd700;font-size:16px;font-weight:bold;">⭐ ${offer.nftData.price || 0}</div>
+                            <div class="sell-offer-from">От: ${offer.sender === currentUser.phone ? 'Вы' : offer.sender}</div>
+                            <div class="sell-status sell-status-pending">⏳ Ожидает ответа</div>
+                        `;
+                        
+                        const actionsDiv = document.createElement('div');
+                        actionsDiv.className = 'sell-nft-actions';
+                        actionsDiv.innerHTML = `
+                            <button class="btn-accept-offer" onclick="acceptSellFromOffer('${offer.messageId}', '${offer.chatId}')">Принять</button>
+                            <button class="btn-reject-offer" onclick="rejectSellOffer('${offer.messageId}', '${offer.chatId}')">Отклонить</button>
+                        `;
+                        
+                        div.appendChild(img);
+                        div.appendChild(infoDiv);
+                        div.appendChild(actionsDiv);
+                        container.appendChild(div);
+                    }
+                }
+
+                const outgoingOffers = offers.filter(o => o.fromMe && (!o.sellStatus || o.sellStatus === 'pending'));
+                if (outgoingOffers.length > 0) {
+                    const title = document.createElement('div');
+                    title.className = 'sell-section-title';
+                    title.innerText = '📤 Мои предложения';
+                    container.appendChild(title);
+                    
+                    for (const offer of outgoingOffers) {
+                        const div = document.createElement('div');
+                        div.className = 'sell-nft-item';
+                        
+                        const img = document.createElement('img');
+                        img.className = 'sell-nft-img';
+                        img.src = offer.nftData.img || '';
+                        img.alt = offer.nftData.name;
+                        
+                        const infoDiv = document.createElement('div');
+                        infoDiv.className = 'sell-nft-info';
+                        infoDiv.innerHTML = `
+                            <div class="sell-nft-name">${offer.nftData.name}</div>
+                            <div class="sell-nft-number">#${offer.nftData.number || '?'}</div>
+                            <div class="sell-nft-price" style="color:#ffd700;font-size:16px;font-weight:bold;">⭐ ${offer.nftData.price || 0}</div>
+                            <div class="sell-offer-from">Кому: ${offer.sellToName || offer.sellTo || 'Пользователь'}</div>
+                            <div class="sell-status sell-status-pending">⏳ Ожидает ответа</div>
+                        `;
+                        
+                        const actionsDiv = document.createElement('div');
+                        actionsDiv.className = 'sell-nft-actions';
+                        actionsDiv.innerHTML = `
+                            <button class="btn-reject-offer" onclick="cancelSellOffer('${offer.messageId}', '${offer.chatId}')">Отменить</button>
+                        `;
+                        
+                        div.appendChild(img);
+                        div.appendChild(infoDiv);
+                        div.appendChild(actionsDiv);
+                        container.appendChild(div);
+                    }
+                }
+
+                const completedOffers = offers.filter(o => o.sellStatus === 'accepted' || o.sellStatus === 'rejected');
+                if (completedOffers.length > 0) {
+                    const title = document.createElement('div');
+                    title.className = 'sell-section-title';
+                    title.innerText = '📋 История предложений';
+                    container.appendChild(title);
+                    
+                    for (const offer of completedOffers) {
+                        const div = document.createElement('div');
+                        div.className = 'sell-nft-item';
+                        div.style.opacity = '0.7';
+                        
+                        const img = document.createElement('img');
+                        img.className = 'sell-nft-img';
+                        img.src = offer.nftData.img || '';
+                        img.alt = offer.nftData.name;
+                        
+                        const statusText = offer.sellStatus === 'accepted' ? '✅ Принято' : '❌ Отклонено';
+                        const statusClass = offer.sellStatus === 'accepted' ? 'sell-status-accepted' : 'sell-status-rejected';
+                        
+                        const infoDiv = document.createElement('div');
+                        infoDiv.className = 'sell-nft-info';
+                        infoDiv.innerHTML = `
+                            <div class="sell-nft-name">${offer.nftData.name}</div>
+                            <div class="sell-nft-number">#${offer.nftData.number || '?'}</div>
+                            <div class="sell-nft-price">⭐ ${offer.nftData.price || 0}</div>
+                            <div class="sell-offer-from">${offer.fromMe ? 'Вы → ' + (offer.sellToName || offer.sellTo || '') : 'От ' + (offer.sender || '')}</div>
+                            <div class="sell-status ${statusClass}">${statusText}</div>
+                        `;
+                        
+                        div.appendChild(img);
+                        div.appendChild(infoDiv);
+                        container.appendChild(div);
+                    }
+                }
+
+                if (container.innerHTML === '') {
+                    container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Нет NFT для продажи и нет предложений</div>';
+                }
+
+            } catch (e) {
+                console.error('Ошибка загрузки:', e);
+                container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">Ошибка загрузки</div>';
+            }
+        }
+
+        function createSellItem(docId, data) {
+            const div = document.createElement('div');
+            div.className = 'sell-nft-item';
+            
+            const img = document.createElement('img');
+            img.className = 'sell-nft-img';
+            img.src = data.img || '';
+            img.alt = data.name;
+            
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'sell-nft-info';
+            
+            let statusHtml = '';
+            if (data.forSale) {
+                statusHtml = `
+                    <div class="sell-status sell-status-pending">📌 В продаже (${data.sellPrice || 0} ⭐)</div>
+                    <div class="sell-offer-from">Покупатель: ${data.sellToName || data.sellTo || '...'}</div>
+                `;
+            }
+            
+            infoDiv.innerHTML = `
+                <div class="sell-nft-name">${data.name}</div>
+                <div class="sell-nft-number">#${data.number || '?'}</div>
+                <div class="sell-nft-price">⭐ ${data.price || 0}</div>
+                ${statusHtml}
+            `;
+            
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'sell-nft-actions';
+            
+            if (data.forSale) {
+                actionsDiv.innerHTML = `
+                    <button class="btn-cancel-sell" onclick="cancelSell('${docId}')">Отменить</button>
+                `;
+            } else {
+                actionsDiv.innerHTML = `
+                    <button class="btn-sell" onclick="openSellModal('${docId}')">Продать</button>
+                `;
+            }
+            
+            div.appendChild(img);
+            div.appendChild(infoDiv);
+            div.appendChild(actionsDiv);
+            return div;
+        }
+
+        // ============================
+        // МОДАЛЬНОЕ ОКНО ПРОДАЖИ
+        // ============================
+        let selectedSellNFTId = null;
+        let selectedSellUserData = null;
+
+        async function openSellModal(nftDocId) {
+            selectedSellNFTId = nftDocId;
+            selectedSellUserData = null;
+            
+            const doc = await db.collection('users').doc(currentUser.id).collection('inventory').doc(nftDocId).get();
+            const data = doc.data();
+            
+            if (!data) {
+                alert('NFT не найден');
+                return;
+            }
+            
+            sellModalNFT = data;
+            
+            document.getElementById('modal-nft-img').src = data.img || '';
+            document.getElementById('modal-nft-name').innerText = data.name;
+            document.getElementById('modal-nft-number').innerText = '#' + (data.number || '?');
+            
+            document.getElementById('modal-selected-user').style.display = 'none';
+            document.getElementById('modal-user-results').innerHTML = '';
+            document.getElementById('modal-search-user').value = '';
+            document.getElementById('modal-sell-price').value = '';
+            
+            document.getElementById('sell-modal').classList.add('active');
+        }
+
+        function closeSellModal() {
+            document.getElementById('sell-modal').classList.remove('active');
+            selectedSellNFTId = null;
+            selectedSellUserData = null;
+            sellModalNFT = null;
+        }
+
+        async function searchUserForSell() {
+            const q = document.getElementById('modal-search-user').value.trim();
+            const container = document.getElementById('modal-user-results');
+            
+            if (q.length < 3) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            try {
+                const snap = await db.collection('users').where('phone', '==', q).get();
+                container.innerHTML = '';
+                
+                if (snap.empty) {
+                    container.innerHTML = '<div style="color:#aaa;font-size:12px;padding:8px;">Пользователь не найден</div>';
+                    return;
+                }
+                
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    if (data.phone === currentUser.phone) {
+                        container.innerHTML = '<div style="color:#aaa;font-size:12px;padding:8px;">Это вы</div>';
+                        return;
+                    }
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'search-result-item';
+                    resultDiv.innerHTML = `
+                        <div class="result-avatar">👤</div>
+                        <div>
+                            <div class="result-name">${data.username || 'Пользователь'}</div>
+                            <div class="result-phone">${data.phone}</div>
+                        </div>
+                    `;
+                    resultDiv.onclick = () => selectSellUser(data);
+                    container.appendChild(resultDiv);
+                });
+                
+            } catch (e) {
+                console.error('Ошибка поиска:', e);
+            }
+        }
+
+        function selectSellUser(userData) {
+            selectedSellUserData = userData;
+            
+            document.getElementById('modal-selected-user').style.display = 'flex';
+            document.getElementById('modal-selected-name').innerText = userData.username || 'Пользователь';
+            document.getElementById('modal-selected-phone').innerText = userData.phone || '---';
+            document.getElementById('modal-user-results').innerHTML = '';
+            document.getElementById('modal-search-user').value = '';
+        }
+
+        async function confirmSell() {
+            if (!selectedSellNFTId) {
+                alert('Выберите NFT');
+                return;
+            }
+            
+            if (!selectedSellUserData) {
+                alert('Выберите пользователя');
+                return;
+            }
+            
+            const priceInput = document.getElementById('modal-sell-price');
+            const price = parseInt(priceInput.value);
+            
+            if (!price || price < 1) {
+                alert('Введите корректную цену (минимум 1 звезда)');
+                return;
+            }
+            
+            try {
+                await db.collection('users').doc(currentUser.id).collection('inventory').doc(selectedSellNFTId).update({
+                    forSale: true,
+                    sellPrice: price,
+                    sellTo: selectedSellUserData.phone,
+                    sellToName: selectedSellUserData.username || 'Пользователь',
+                    sellDate: new Date()
+                });
+                
+                const chatSnap = await db.collection('chats')
+                    .where('participants', '==', [currentUser.phone, selectedSellUserData.phone])
+                    .get();
+                
+                let chatId;
+                if (chatSnap.empty) {
+                    const ref = await db.collection('chats').add({
+                        participants: [currentUser.phone, selectedSellUserData.phone],
+                        participantNames: { 
+                            [currentUser.phone]: currentUser.username, 
+                            [selectedSellUserData.phone]: selectedSellUserData.username || 'Пользователь' 
+                        }
+                    });
+                    chatId = ref.id;
+                } else {
+                    chatId = chatSnap.docs[0].id;
+                }
+                
+                await db.collection('chats').doc(chatId).collection('messages').add({
+                    sender: currentUser.phone,
+                    text: `💰 Предложение о покупке NFT "${sellModalNFT.name}" #${sellModalNFT.number} за ${price} ⭐`,
+                    timestamp: new Date(),
+                    isSellOffer: true,
+                    sellStatus: 'pending',
+                    nftData: {
+                        name: sellModalNFT.name,
+                        number: sellModalNFT.number,
+                        img: sellModalNFT.img,
+                        price: price,
+                        nftDocId: selectedSellNFTId,
+                        nftId: sellModalNFT.nftId
+                    },
+                    sellTo: selectedSellUserData.phone,
+                    sellToName: selectedSellUserData.username || 'Пользователь'
+                });
+                
+                alert(`✅ NFT "${sellModalNFT.name}" выставлен на продажу пользователю ${selectedSellUserData.username} за ${price} ⭐`);
+                
+                closeSellModal();
+                await renderSellPage();
+                loadChats();
+                
+            } catch (e) {
+                console.error('Ошибка продажи:', e);
+                alert('Ошибка при выставлении NFT на продажу');
+            }
+        }
+
+        async function cancelSell(nftDocId) {
+            if (!confirm('Отменить продажу этого NFT?')) return;
+            
+            try {
+                await db.collection('users').doc(currentUser.id).collection('inventory').doc(nftDocId).update({
+                    forSale: false,
+                    sellPrice: null,
+                    sellTo: null,
+                    sellToName: null,
+                    sellDate: null
+                });
+                
+                await renderSellPage();
+                alert('Продажа отменена');
+                
+            } catch (e) {
+                console.error('Ошибка отмены:', e);
+                alert('Ошибка при отмене продажи');
+            }
+        }
+
+        async function acceptSellFromOffer(messageId, chatId) {
+            await acceptSellOffer(messageId, chatId);
+            await renderSellPage();
+            loadChats();
         }
 
         // ============================
