@@ -382,7 +382,7 @@
             padding: 8px 0;
             z-index: 1000;
             display: none;
-            min-width: 180px;
+            min-width: 200px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
         #context-menu .menu-item {
@@ -402,6 +402,12 @@
         }
         #context-menu .menu-item .unpin-icon {
             color: #f44336;
+        }
+        #context-menu .menu-item .hide-icon {
+            color: #888;
+        }
+        #context-menu .menu-item .unhide-icon {
+            color: #6ab2e4;
         }
 
         #emoji-picker {
@@ -737,8 +743,25 @@
             font-weight: 600;
             border: 1px solid #1a1a1a;
         }
+        .collected-item .hidden-indicator {
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            background: rgba(0,0,0,0.8);
+            color: #888;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 8px;
+            z-index: 15;
+            font-weight: 600;
+            border: 1px solid #444;
+        }
         .collected-item.pinned-item {
             border: 2px solid #ffd700;
+        }
+        .collected-item.hidden-item {
+            opacity: 0.5;
+            border: 1px solid #444;
         }
 
         #partner-profile {
@@ -1406,6 +1429,12 @@
         <div class="menu-item" id="unpin-menu-item" onclick="unpinNFT()" style="display:none;">
             <i class="fas fa-thumbtack unpin-icon"></i> Открепить
         </div>
+        <div class="menu-item" id="hide-menu-item" onclick="hideNFT()">
+            <i class="fas fa-eye-slash hide-icon"></i> Скрыть
+        </div>
+        <div class="menu-item" id="unhide-menu-item" onclick="unhideNFT()" style="display:none;">
+            <i class="fas fa-eye unhide-icon"></i> Показать
+        </div>
         <div class="menu-item" onclick="editMessage()"><i class="fas fa-edit"></i> Редактировать</div>
         <div class="menu-item" onclick="deleteMessage()"><i class="fas fa-trash"></i> Удалить</div>
         <div class="menu-item" onclick="pinMessage()"><i class="fas fa-thumbtack"></i> Закрепить сообщение</div>
@@ -1467,7 +1496,7 @@
         let isLoadingCollection = false;
 
         // ============================
-        // ⭐ NFT DATA - ОБНОВЛЕННЫЙ КАТАЛОГ
+        // ⭐ NFT DATA
         // ============================
         const nftCatalog = [
             {
@@ -1483,7 +1512,7 @@
                 name: 'Low Rider',
                 price: 20000,
                 img: 'https://i.getgems.io/4GsJBBY_lnkL6gS1bj-iy-LkCesk0idWThI-mgger2w/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvYjE5ZjI3YTA1YTgzMzkzYQ.jpg',
-                lottieUrl: 'lottie/lowrider1.json',
+                lottieUrl: 'lottie/lowrider2.json',
                 isLottie: true
             },
             {
@@ -1491,7 +1520,7 @@
                 name: 'Low Rider',
                 price: 20000,
                 img: 'https://i.getgems.io/Hz9860DzuZHiqGlq8IMIJl2sfWeetRRaZ1mw_1nPfsA/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvNzAxM2E1YzE4MmMzMDAwZg.jpg',
-                lottieUrl: 'lottie/lowrider2.json',
+                lottieUrl: 'lottie/lowrider1.json',
                 isLottie: true
             },
             {
@@ -1993,6 +2022,8 @@
             selectedMessageElement = element;
             document.getElementById('pin-menu-item').style.display = 'none';
             document.getElementById('unpin-menu-item').style.display = 'none';
+            document.getElementById('hide-menu-item').style.display = 'none';
+            document.getElementById('unhide-menu-item').style.display = 'none';
         }
 
         document.addEventListener('click', function(e) {
@@ -2047,14 +2078,14 @@
         }
 
         // ============================
-        // ЗАКРЕПЛЕНИЕ NFT (МАКСИМУМ 7 - 1 ПОСЛЕ НИКА + 6 ВОКРУГ)
+        // ЗАКРЕПЛЕНИЕ И СКРЫТИЕ NFT
         // ============================
         function showNFTPinMenu(element, docId, nftData) {
             const menu = document.getElementById('context-menu');
             menu.style.display = 'block';
             const rect = element.getBoundingClientRect();
-            const x = Math.min(rect.right - 180, window.innerWidth - 190);
-            const y = Math.min(rect.top - 10, window.innerHeight - 200);
+            const x = Math.min(rect.right - 200, window.innerWidth - 210);
+            const y = Math.min(rect.top - 10, window.innerHeight - 250);
             menu.style.left = x + 'px';
             menu.style.top = y + 'px';
 
@@ -2063,7 +2094,6 @@
 
             const pinItem = document.getElementById('pin-menu-item');
             const unpinItem = document.getElementById('unpin-menu-item');
-
             if (nftData.pinned) {
                 pinItem.style.display = 'none';
                 unpinItem.style.display = 'flex';
@@ -2072,7 +2102,17 @@
                 unpinItem.style.display = 'none';
             }
 
-            document.querySelectorAll('#context-menu .menu-item:not(#pin-menu-item):not(#unpin-menu-item)').forEach(el => {
+            const hideItem = document.getElementById('hide-menu-item');
+            const unhideItem = document.getElementById('unhide-menu-item');
+            if (nftData.hidden) {
+                hideItem.style.display = 'none';
+                unhideItem.style.display = 'flex';
+            } else {
+                hideItem.style.display = 'flex';
+                unhideItem.style.display = 'none';
+            }
+
+            document.querySelectorAll('#context-menu .menu-item:not(#pin-menu-item):not(#unpin-menu-item):not(#hide-menu-item):not(#unhide-menu-item)').forEach(el => {
                 el.style.display = 'none';
             });
         }
@@ -2099,9 +2139,7 @@
                     }
                 });
 
-                // Максимум 7 закреплённых (1 после ника + 6 вокруг)
                 if (pinnedCount >= 7) {
-                    // Открепляем самый старый (первый в списке)
                     await db.collection('users').doc(currentUser.id).collection('inventory').doc(pinnedDocIds[0]).update({
                         pinned: false
                     });
@@ -2137,8 +2175,49 @@
             }
         }
 
+        async function hideNFT() {
+            if (!selectedNFTDocId) return;
+
+            try {
+                if (selectedNFTData.pinned) {
+                    await db.collection('users').doc(currentUser.id).collection('inventory').doc(selectedNFTDocId).update({
+                        pinned: false,
+                        hidden: true
+                    });
+                } else {
+                    await db.collection('users').doc(currentUser.id).collection('inventory').doc(selectedNFTDocId).update({
+                        hidden: true
+                    });
+                }
+
+                hideNFTPinMenu();
+                await renderCollection();
+
+            } catch (e) {
+                console.error('Ошибка скрытия:', e);
+                hideNFTPinMenu();
+            }
+        }
+
+        async function unhideNFT() {
+            if (!selectedNFTDocId) return;
+
+            try {
+                await db.collection('users').doc(currentUser.id).collection('inventory').doc(selectedNFTDocId).update({
+                    hidden: false
+                });
+
+                hideNFTPinMenu();
+                await renderCollection();
+
+            } catch (e) {
+                console.error('Ошибка показа:', e);
+                hideNFTPinMenu();
+            }
+        }
+
         // ============================
-        // ОТОБРАЖЕНИЕ ЗАКРЕПЛЁННЫХ NFT (1 ПОСЛЕ НИКА + 6 ВОКРУГ)
+        // ОТОБРАЖЕНИЕ ЗАКРЕПЛЁННЫХ NFT
         // ============================
         function renderPinnedNFTs() {
             const container = document.getElementById('profile-pinned-nfts');
@@ -2158,7 +2237,6 @@
 
                     pinnedNFTs.sort((a, b) => (a.number || 0) - (b.number || 0));
 
-                    // Первый NFT - после ника (без ободка)
                     if (pinnedNFTs.length > 0) {
                         const mainNft = pinnedNFTs[0];
                         mainNftEl.src = mainNft.img || '';
@@ -2169,16 +2247,11 @@
                         mainNftEl.style.display = 'none';
                     }
 
-                    // Остальные 6 NFT - вокруг аватарки (3 слева, 3 справа) - ДАЛЕКО И ХАОТИЧНО
                     const aroundNfts = pinnedNFTs.slice(1, 7);
-
-                    // Хаотичные позиции (с поворотами и разными отступами)
                     const positions = [
-                        // Слева (3 шт) - далеко и хаотично
                         { top: 2, left: -32, rotate: -12 },
                         { top: 34, left: -36, rotate: 8 },
                         { top: 66, left: -30, rotate: -18 },
-                        // Справа (3 шт) - далеко и хаотично
                         { top: 2, left: 86, rotate: 15 },
                         { top: 34, left: 90, rotate: -8 },
                         { top: 66, left: 84, rotate: 22 }
@@ -2201,6 +2274,9 @@
                 });
         }
 
+        // ============================
+        // ОТОБРАЖЕНИЕ ЗАКРЕПЛЁННЫХ NFT ДЛЯ ПАРТНЁРА
+        // ============================
         function renderPartnerPinnedNFTs(partnerId) {
             const container = document.getElementById('partner-pinned-nfts');
             container.innerHTML = '';
@@ -2212,6 +2288,7 @@
                 .then(snap => {
                     if (snap.empty) return;
                     const userId = snap.docs[0].id;
+                    // Загружаем ВСЕ закреплённые NFT, даже скрытые
                     return db.collection('users').doc(userId).collection('inventory')
                         .where('pinned', '==', true)
                         .get();
@@ -2229,6 +2306,7 @@
 
                     pinnedNFTs.sort((a, b) => (a.number || 0) - (b.number || 0));
 
+                    // Первый закреплённый NFT - показываем после ника (даже если скрыт)
                     if (pinnedNFTs.length > 0) {
                         const mainNft = pinnedNFTs[0];
                         mainNftEl.src = mainNft.img || '';
@@ -2239,9 +2317,8 @@
                         mainNftEl.style.display = 'none';
                     }
 
+                    // Остальные закреплённые NFT вокруг аватарки (тоже показываем)
                     const aroundNfts = pinnedNFTs.slice(1, 7);
-
-                    // Хаотичные позиции
                     const positions = [
                         { top: 2, left: -32, rotate: -12 },
                         { top: 34, left: -36, rotate: 8 },
@@ -2335,7 +2412,8 @@
                     purchasedAt: new Date(),
                     fromUser: sellerPhone,
                     fromUsername: sellerData.username || 'Пользователь',
-                    pinned: false
+                    pinned: false,
+                    hidden: false
                 });
 
                 await db.collection('users').doc(sellerId).collection('inventory').doc(nftDoc.id).delete();
@@ -2430,9 +2508,14 @@
             document.getElementById('partner-username').innerText = data.username || 'Пользователь';
             document.getElementById('partner-phone').innerText = data.phone || '---';
 
+            // Показываем закреплённые NFT партнёра (включая скрытые)
             renderPartnerPinnedNFTs(currentPartnerId);
 
-            const invSnap = await snap.docs[0].ref.collection('inventory').get();
+            // Загружаем только НЕ скрытые NFT партнёра для коллекции
+            const invSnap = await snap.docs[0].ref.collection('inventory')
+                .where('hidden', '==', false)
+                .get();
+
             if (invSnap.empty) {
                 container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">NFT отсутствуют</div>';
                 return;
@@ -2671,7 +2754,8 @@
                 lottieUrl: currentNFT.lottieUrl || null,
                 number: newNumber,
                 purchasedAt: new Date(),
-                pinned: false
+                pinned: false,
+                hidden: false
             });
 
             await db.collection('users').doc(currentUser.id).update({ balance });
@@ -2838,7 +2922,7 @@
         }
 
         // ============================
-        // COLLECTION
+        // COLLECTION - С ПОДДЕРЖКОЙ СКРЫТИЯ
         // ============================
         async function renderCollection() {
             if (isLoadingCollection) return;
@@ -2880,6 +2964,8 @@
                 nfts.sort((a, b) => {
                     if (a.pinned && !b.pinned) return -1;
                     if (!a.pinned && b.pinned) return 1;
+                    if (!a.hidden && b.hidden) return -1;
+                    if (a.hidden && !b.hidden) return 1;
                     return (a.number || 0) - (b.number || 0);
                 });
 
@@ -2887,6 +2973,7 @@
                     const item = document.createElement('div');
                     item.className = 'collected-item';
                     if (data.pinned) item.classList.add('pinned-item');
+                    if (data.hidden) item.classList.add('hidden-item');
                     item.style.backgroundColor = '#1a1a1a';
                     item.style.position = 'relative';
                     item.style.overflow = 'hidden';
@@ -2915,6 +3002,13 @@
                         pinIndicator.className = 'pin-indicator';
                         pinIndicator.textContent = '📌';
                         item.appendChild(pinIndicator);
+                    }
+
+                    if (data.hidden) {
+                        const hiddenIndicator = document.createElement('div');
+                        hiddenIndicator.className = 'hidden-indicator';
+                        hiddenIndicator.textContent = '👁️‍🗨️ Скрыт';
+                        item.appendChild(hiddenIndicator);
                     }
 
                     if (data.isLottie && data.lottieUrl) {
@@ -3180,6 +3274,9 @@
                     <div class="sell-status sell-status-pending">📌 В продаже (${data.sellPrice || 0} ⭐)</div>
                     <div class="sell-offer-from">Покупатель: ${data.sellToName || data.sellTo || '...'}</div>
                 `;
+            }
+            if (data.hidden) {
+                statusHtml += `<div class="sell-status" style="color:#888;">👁️‍🗨️ Скрыт</div>`;
             }
 
             infoDiv.innerHTML = `
