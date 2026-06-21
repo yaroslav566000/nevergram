@@ -423,18 +423,114 @@
         let isLoadingCollection = false;
 
         const nftCatalog = [
-            {id:'sunday_calendar_8589',name:'Desk Calendar (Sunday Monochrome)',price:10000,img:'https://i.getgems.io/83Khewm6LF1RB5vJkzBe9mSzTB0brBltnMfRZREY2gY/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUJNY2ZNQVpsTVVyMVczWDhrZEV3M2ZKTVVBYVdINC1YY21FNVI1UmZGSVkwRTIvYTgwN2RkNjY4YjdiMTQwZA.jpg',lottieUrl:'lottie/sunday_calendar.json',isLottie:true},
-            {id:'lowrider_9738',name:'Low Rider',price:20000,img:'https://i.getgems.io/4GsJBBY_lnkL6gS1bj-iy-LkCesk0idWThI-mgger2w/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvYjE5ZjI3YTA1YTgzMzkzYQ.jpg',lottieUrl:'lottie/lowrider1.json',isLottie:true},
-            {id:'lowrider_20764',name:'Low Rider',price:20000,img:'https://i.getgems.io/Hz9860DzuZHiqGlq8IMIJl2sfWeetRRaZ1mw_1nPfsA/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvNzAxM2E1YzE4MmMzMDAwZg.jpg',lottieUrl:'lottie/lowrider2.json',isLottie:true},
-            {id:'lowrider_16023',name:'Low Rider (LA Noir)',price:50000,img:'https://i.getgems.io/V_7pZVoj_JKltBw2_g8hr0ggFpuWXfiLbZiyjbrpvvM/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvMTNlMGZhMWY1ZmUzYjFiYw.jpg',lottieUrl:'lottie/blacklowrider.json',isLottie:true},
-            {id:'swiss_watch_15507',name:'Swiss Watch (Full Tint)',price:50000,img:'https://i.getgems.io/54zOgq_vDTOAHisi7zts8QrNtYVYuTsiLKgcLVy1GeI/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUJJMDdQWGV3OTRZUXo3R3dONzJuUE5HRjZodFNUT0prdVU0S3hfYmpUWnYzMlUvMmJmYjhiMzg2OTk2MjM5Ng.jpg',lottieUrl:'lottie/watch.json',isLottie:true},
-            {id:'low_rider_samolet',name:'Low Rider (Airplane Black)',price:100000,img:'https://i.getgems.io/Ay0CLib1FDIllMaH4vNCkBbutADDTCAuWnZ5q9mPHss/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvN2FmZTc4NWVkY2M0MWVjMw.jpg',lottieUrl:'lottie/samolet.json',isLottie:true},
-            {id:'low_rider_8808',name:'Low Rider',price:1000,img:'https://i.getgems.io/vnamktaD8dh0HiWt13p1NVE8JrIiuo6sGrsEUMsV-Mk/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvNzcyYWNjYTQ5NzBjY2E2ZA.jpg',lottieUrl:'lottie/lowridermoney.json',isLottie:true},
-            {id:'pepe_animated',name:'Plush Pepe (Unical Black)',price:30000000,img:'https://i.getgems.io/Ms7WU-h18ys6IR2vgnodlddEDOwaDIKoe3JjAsUYSCQ/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUJHLWc2YWhrQVVHV3BlZldieC1EXzlzUThvV2J2eTZwdXVxNzhVMmM0TlVERlMvYTk2YmNjYjgzYjA2ZjAyMA.jpg',lottieUrl:'lottie/pepe.json',isLottie:true},
-            {id:'peach_2863',name:'Previous Peach',price:25000,img:'https://i.getgems.io/qumTivy-U9nhrWnNMtf7hq0kNNIzpu429SY1hhBexi8/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUE0aTU4aXVTOURVWVJ0VVo5N3NabzVtbmtiaVlVQnBXWFFPZTNkRVVDY1AxVzgvMTc5NDY3ODI5NTdhNjE5Zg.jpg',lottieUrl:'lottie/peach_2863.json',isLottie:true},
-            {id:'peach_1649',name:'Previous Peach',price:25000,img:'https://i.getgems.io/xYZKHO0pveIHznWmsrnOjxADFdpS5P0JaCIAHwGGxNY/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUE0aTU4aXVTOURVWVJ0VVo5N3NabzVtbmtiaVlVQnBXWFFPZTNkRVVDY1AxVzgvYjQwOGYyMGY2ZWY1MDVhNw.jpg',lottieUrl:'lottie/peach_1649.json',isLottie:true},
-            {id:'Snoop_539952',name:'Snoop Dogg',price:1000,img:'https://i.getgems.io/wTIZloN7ibEUvKTQHr2oQS7wpyH_IC1G_OecNEX9NPU/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUFvSnc3QnBPY0JEM3k5dm9NdUVRLXFoUzNLNGd0TS02RWVQTHhrems4aVNpZlgvOTg5MGY2NzkzNGY0MmY1NA.jpg',lottieUrl:'lottie/snoop_539952.json',isLottie:true},
-            {id:'Cigar_19963',name:'Snoop Cigar',price:5000,img:'https://i.getgems.io/Ccx7zx7OMeg1Cy6nk2na4plkEZqN85S97Q99AZ5RIUA/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUE3MlVldnJfTUh2ell3U0NISlVLLXVDNmtkLXc4a2J4emhKNDlXSWlHLW82Q0QvMjg0OGE4YTgzYTE3NjhmZA.jpg',lottieUrl:'lottie/cigar_19963.json',isLottie:true}
+                {
+                        id: 'sunday_calendar_8589',
+                        name: 'Desk Calendar (Sunday Monochrome)',
+                        price: 10000,
+                        img: 'https://i.getgems.io/83Khewm6LF1RB5vJkzBe9mSzTB0brBltnMfRZREY2gY/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUJNY2ZNQVpsTVVyMVczWDhrZEV3M2ZKTVVBYVdINC1YY21FNVI1UmZGSVkwRTIvYTgwN2RkNjY4YjdiMTQwZA.jpg',
+                        image0: 'https://i.oneme.ru/i?r=BTE2sh_eZW7g8kugOdIm2NotEQyX2DiIg7h6vhs5TqdLDdWmeoDbaewXa-qa1ynK1UU',
+                        lottieUrl: 'lottie/sunday_calendar.json',
+                        isLottie: true
+                },
+                {
+                        id: 'lowrider_9738',
+                        name: 'Low Rider',
+                        price: 20000,
+                        img: 'https://i.getgems.io/4GsJBBY_lnkL6gS1bj-iy-LkCesk0idWThI-mgger2w/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvYjE5ZjI3YTA1YTgzMzkzYQ.jpg',
+                        image0: 'https://i.oneme.ru/i?r=BTE2sh_eZW7g8kugOdIm2Note7rJyCOuM8FfICnvAZwobdWmeoDbaewXa-qa1ynK1UU',
+                        lottieUrl: 'lottie/lowrider1.json',
+                        isLottie: true
+                },
+                {
+                        id: 'lowrider_20764',
+                        name: 'Low Rider',
+                        price: 20000,
+                        img: 'https://i.getgems.io/Hz9860DzuZHiqGlq8IMIJl2sfWeetRRaZ1mw_1nPfsA/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvNzAxM2E1YzE4MmMzMDAwZg.jpg',
+                        image0: 'https://i.oneme.ru/i?r=BTE2sh_eZW7g8kugOdIm2NotcN2IkOw2P6rVDeVaqbyZVdWmeoDbaewXa-qa1ynK1UU',
+                        lottieUrl: 'lottie/lowrider2.json',
+                        isLottie: true
+                },
+                {
+                        id: 'lowrider_16023',
+                        name: 'Low Rider (LA Noir)',
+                        price: 50000,
+                        img: 'https://i.getgems.io/V_7pZVoj_JKltBw2_g8hr0ggFpuWXfiLbZiyjbrpvvM/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvMTNlMGZhMWY1ZmUzYjFiYw.jpg',
+                        image0: '',
+                        lottieUrl: 'lottie/blacklowrider.json',
+                        isLottie: true
+                },
+                {
+                        id: 'swiss_watch_15507',
+                        name: 'Swiss Watch (Full Tint)',
+                        price: 50000,
+                        img: 'https://i.getgems.io/54zOgq_vDTOAHisi7zts8QrNtYVYuTsiLKgcLVy1GeI/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUJJMDdQWGV3OTRZUXo3R3dONzJuUE5HRjZodFNUT0prdVU0S3hfYmpUWnYzMlUvMmJmYjhiMzg2OTk2MjM5Ng.jpg',
+                        image0: '',
+                        lottieUrl: 'lottie/watch.json',
+                        isLottie: true
+                },
+                {
+                        id: 'low_rider_samolet',
+                        name: 'Low Rider (Airplane Black)',
+                        price: 100000,
+                        img: 'https://i.getgems.io/Ay0CLib1FDIllMaH4vNCkBbutADDTCAuWnZ5q9mPHss/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvN2FmZTc4NWVkY2M0MWVjMw.jpg',
+                        image0: '',
+                        lottieUrl: 'lottie/samolet.json',
+                        isLottie: true
+                },
+                {
+                        id: 'low_rider_8808',
+                        name: 'Low Rider',
+                        price: 1000,
+                        img: 'https://i.getgems.io/vnamktaD8dh0HiWt13p1NVE8JrIiuo6sGrsEUMsV-Mk/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUURDUHE3UVNVdkNtcTdrQmhtRHVseFZkZUZIS0ZjMXdUOU1ReG5lc2FubDFIcWwvNzcyYWNjYTQ5NzBjY2E2ZA.jpg',
+                        image0: '',
+                        lottieUrl: 'lottie/lowridermoney.json',
+                        isLottie: true
+                },
+                {
+                        id: 'pepe_animated',
+                        name: 'Plush Pepe (Unical Black)',
+                        price: 30000000,
+                        img: 'https://i.getgems.io/Ms7WU-h18ys6IR2vgnodlddEDOwaDIKoe3JjAsUYSCQ/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUJHLWc2YWhrQVVHV3BlZldieC1EXzlzUThvV2J2eTZwdXVxNzhVMmM0TlVERlMvYTk2YmNjYjgzYjA2ZjAyMA.jpg',
+                        image0: '',
+                        lottieUrl: 'lottie/pepe.json',
+                        isLottie: true
+                },
+                {
+                        id: 'peach_2863',
+                        name: 'Previous Peach',
+                        price: 25000,
+                        img: 'https://i.getgems.io/qumTivy-U9nhrWnNMtf7hq0kNNIzpu429SY1hhBexi8/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUE0aTU4aXVTOURVWVJ0VVo5N3NabzVtbmtiaVlVQnBXWFFPZTNkRVVDY1AxVzgvMTc5NDY3ODI5NTdhNjE5Zg.jpg',
+                        image0: '',
+                        lottieUrl: 'lottie/peach_2863.json',
+                        isLottie: true
+                },
+                {
+                        id: 'peach_1649',
+                        name: 'Previous Peach',
+                        price: 25000,
+                        img: 'https://i.getgems.io/xYZKHO0pveIHznWmsrnOjxADFdpS5P0JaCIAHwGGxNY/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUE0aTU4aXVTOURVWVJ0VVo5N3NabzVtbmtiaVlVQnBXWFFPZTNkRVVDY1AxVzgvYjQwOGYyMGY2ZWY1MDVhNw.jpg',
+                        image0: '',
+                        lottieUrl: 'lottie/peach_1649.json',
+                        isLottie: true
+                },
+                {
+                        id: 'Snoop_539952',
+                        name: 'Snoop Dogg',
+                        price: 1000,
+                        img: 'https://i.getgems.io/wTIZloN7ibEUvKTQHr2oQS7wpyH_IC1G_OecNEX9NPU/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUFvSnc3QnBPY0JEM3k5dm9NdUVRLXFoUzNLNGd0TS02RWVQTHhrems4aVNpZlgvOTg5MGY2NzkzNGY0MmY1NA.jpg',
+                        image0: '',
+                        lottieUrl: 'lottie/snoop_539952.json',
+                        isLottie: true
+                },
+                {
+                        id: 'Cigar_19963',
+                        name: 'Snoop Cigar',
+                        price: 5000,
+                        img: 'https://i.getgems.io/Ccx7zx7OMeg1Cy6nk2na4plkEZqN85S97Q99AZ5RIUA/rs:fill:300:300:1/g:ce/czM6Ly9nZXRnZW1zLXMzL25mdC1jb250ZW50LWNhY2hlL2ltYWdlcy9FUUE3MlVldnJfTUh2ell3U0NISlVLLXVDNmtkLXc4a2J4emhKNDlXSWlHLW82Q0QvMjg0OGE4YTgzYTE3NjhmZA.jpg',
+                        image0: '',
+                        lottieUrl: 'lottie/cigar_19963.json',
+                        isLottie: true
+                }
         ];
 
         function destroyLottiePlayersInContainer(container) {
@@ -851,6 +947,12 @@
         // ============================
         // ОТОБРАЖЕНИЕ ЗАКРЕПЛЁННЫХ NFT
         // ============================
+        function getPinnedImage(nftData) {
+            if (nftData.image0) return nftData.image0;
+            if (nftData.img) return nftData.img;
+            return '';
+        }
+
         function renderPinnedNFTs() {
             const container = document.getElementById('profile-pinned-nfts');
             container.innerHTML = '';
@@ -862,7 +964,7 @@
                 pinnedNFTs.sort((a, b) => (a.number || 0) - (b.number || 0));
                 if (pinnedNFTs.length > 0) {
                     const mainNft = pinnedNFTs[0];
-                    mainNftEl.src = mainNft.img || '';
+                    mainNftEl.src = getPinnedImage(mainNft);
                     mainNftEl.style.display = 'block';
                     mainNftEl.title = `${mainNft.name} #${mainNft.number}`;
                     mainNftEl.onclick = () => openCollectionDetail(mainNft);
@@ -874,7 +976,7 @@
                     const pos = positions[index];
                     const img = document.createElement('img');
                     img.className = 'pinned-nft';
-                    img.src = nft.img || '';
+                    img.src = getPinnedImage(nft);
                     img.alt = nft.name;
                     img.title = `${nft.name} #${nft.number}`;
                     img.style.top = pos.top + 'px';
@@ -905,7 +1007,7 @@
                 pinnedNFTs.sort((a, b) => (a.number || 0) - (b.number || 0));
                 if (pinnedNFTs.length > 0) {
                     const mainNft = pinnedNFTs[0];
-                    mainNftEl.src = mainNft.img || '';
+                    mainNftEl.src = getPinnedImage(mainNft);
                     mainNftEl.style.display = 'block';
                     mainNftEl.title = `${mainNft.name} #${mainNft.number}`;
                     mainNftEl.onclick = () => openCollectionDetail(mainNft);
@@ -917,7 +1019,7 @@
                     const pos = positions[index];
                     const img = document.createElement('img');
                     img.className = 'pinned-nft';
-                    img.src = nft.img || '';
+                    img.src = getPinnedImage(nft);
                     img.alt = nft.name;
                     img.title = `${nft.name} #${nft.number}`;
                     img.style.top = pos.top + 'px';
@@ -954,7 +1056,7 @@
                 const nftData = nftDoc.data();
                 await db.collection('users').doc(currentUser.id).update({ balance: userBalance - price });
                 await db.collection('users').doc(sellerId).update({ balance: (sellerData.balance || 0) + price });
-                await db.collection('users').doc(currentUser.id).collection('inventory').add({ nftId: nftData.nftId, name: nftData.name, price: nftData.price, img: nftData.img || '', isLottie: nftData.isLottie || false, lottieUrl: nftData.lottieUrl || null, number: nftData.number, purchasedAt: new Date(), fromUser: sellerPhone, fromUsername: sellerData.username || 'Пользователь', pinned: false, hidden: false });
+                await db.collection('users').doc(currentUser.id).collection('inventory').add({ nftId: nftData.nftId, name: nftData.name, price: nftData.price, img: nftData.img || '', image0: nftData.image0 || '', isLottie: nftData.isLottie || false, lottieUrl: nftData.lottieUrl || null, number: nftData.number, purchasedAt: new Date(), fromUser: sellerPhone, fromUsername: sellerData.username || 'Пользователь', pinned: false, hidden: false });
                 await db.collection('users').doc(sellerId).collection('inventory').doc(nftDoc.id).delete();
                 await db.collection('chats').doc(chatId).collection('messages').doc(messageId).update({ sellStatus: 'accepted' });
                 balance = userBalance - price;
@@ -992,7 +1094,7 @@
         }
 
         // ============================
-        // PARTNER PROFILE - НЕ ПОКАЗЫВАЕМ СКРЫТЫЕ NFT
+        // PARTNER PROFILE
         // ============================
         async function openPartnerProfile() {
             if (!currentPartnerId) return;
@@ -1014,7 +1116,6 @@
                 container.innerHTML = '<div style="color:#aaa;text-align:center;padding:20px;">NFT отсутствуют</div>';
                 return;
             }
-            // Фильтруем: НЕ показываем скрытые NFT партнёра
             const visibleNfts = [];
             invSnap.forEach(doc => {
                 const item = doc.data();
@@ -1174,7 +1275,19 @@
             balance -= currentNFT.price;
             updateBalance();
             const newNumber = await getNextNumber(currentNFT.id);
-            await db.collection('users').doc(currentUser.id).collection('inventory').add({ nftId: currentNFT.id, name: currentNFT.name, price: currentNFT.price, img: currentNFT.img || '', isLottie: currentNFT.isLottie || false, lottieUrl: currentNFT.lottieUrl || null, number: newNumber, purchasedAt: new Date(), pinned: false, hidden: false });
+            await db.collection('users').doc(currentUser.id).collection('inventory').add({ 
+                nftId: currentNFT.id, 
+                name: currentNFT.name, 
+                price: currentNFT.price, 
+                img: currentNFT.img || '', 
+                image0: currentNFT.image0 || '', 
+                isLottie: currentNFT.isLottie || false, 
+                lottieUrl: currentNFT.lottieUrl || null, 
+                number: newNumber, 
+                purchasedAt: new Date(), 
+                pinned: false, 
+                hidden: false 
+            });
             await db.collection('users').doc(currentUser.id).update({ balance });
             await renderCollection();
             await renderSellPage();
@@ -1272,7 +1385,7 @@
         function stopRotation() { if (rotationInterval) { clearTimeout(rotationInterval); rotationInterval = null; } }
 
         // ============================
-        // COLLECTION - ПОКАЗЫВАЕМ ВСЕ NFT, СКРЫТЫЕ С ПОМЕТКОЙ
+        // COLLECTION
         // ============================
         async function renderCollection() {
             if (isLoadingCollection) return;
