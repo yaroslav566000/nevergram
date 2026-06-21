@@ -947,9 +947,20 @@
         // ============================
         // ОТОБРАЖЕНИЕ ЗАКРЕПЛЁННЫХ NFT
         // ============================
+        // ============================
+// ПОЛУЧЕНИЕ ИЗОБРАЖЕНИЯ ДЛЯ ЗАКРЕПЛЕНИЯ
+// ============================
         function getPinnedImage(nftData) {
+        // 1. Сначала проверяем image0 в данных инвентаря
             if (nftData.image0) return nftData.image0;
+    
+    // 2. Если нет, ищем в каталоге по nftId
+            const catalogItem = nftCatalog.find(n => n.id === nftData.nftId);
+            if (catalogItem && catalogItem.image0) return catalogItem.image0;
+    
+    // 3. Иначе используем img
             if (nftData.img) return nftData.img;
+    
             return '';
         }
 
@@ -1270,30 +1281,30 @@
         }
 
         async function buyDetailNFT() {
-            if (!currentNFT) return;
-            if (balance < currentNFT.price) return alert('Недостаточно звёзд!');
-            balance -= currentNFT.price;
-            updateBalance();
-            const newNumber = await getNextNumber(currentNFT.id);
-            await db.collection('users').doc(currentUser.id).collection('inventory').add({ 
-                nftId: currentNFT.id, 
-                name: currentNFT.name, 
-                price: currentNFT.price, 
-                img: currentNFT.img || '', 
-                image0: currentNFT.image0 || '', 
-                isLottie: currentNFT.isLottie || false, 
-                lottieUrl: currentNFT.lottieUrl || null, 
-                number: newNumber, 
-                purchasedAt: new Date(), 
-                pinned: false, 
-                hidden: false 
-            });
-            await db.collection('users').doc(currentUser.id).update({ balance });
-            await renderCollection();
-            await renderSellPage();
-            closeDetail();
-            alert(`🎉 Куплено! ${currentNFT.name} #${newNumber}`);
-        }
+        if (!currentNFT) return;
+        if (balance < currentNFT.price) return alert('Недостаточно звёзд!');
+        balance -= currentNFT.price;
+        updateBalance();
+        const newNumber = await getNextNumber(currentNFT.id);
+        await db.collection('users').doc(currentUser.id).collection('inventory').add({ 
+            nftId: currentNFT.id, 
+            name: currentNFT.name, 
+            price: currentNFT.price, 
+            img: currentNFT.img || '', 
+            image0: currentNFT.image0 || '',  // ← СОХРАНЯЕМ image0
+            isLottie: currentNFT.isLottie || false, 
+            lottieUrl: currentNFT.lottieUrl || null, 
+            number: newNumber, 
+            purchasedAt: new Date(), 
+            pinned: false, 
+            hidden: false 
+        });
+    await db.collection('users').doc(currentUser.id).update({ balance });
+    await renderCollection();
+    await renderSellPage();
+    closeDetail();
+    alert(`🎉 Куплено! ${currentNFT.name} #${newNumber}`);
+}
 
         function openCollectionDetail(nftData, ownerName, ownerPhone) {
             const screen = document.getElementById('collection-detail-screen');
